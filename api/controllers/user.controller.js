@@ -1,5 +1,6 @@
 export const test = (req, res) => {
   res.json({
-    message: "aa World",
+    message: "user.controller: World",
   });
 };
+ 

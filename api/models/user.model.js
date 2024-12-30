@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import { type } from "os";
-import { use } from "react";
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -9,6 +8,11 @@ const userSchema = new mongoose.Schema({
     unique: true,
   },
   email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  password: {
     type: String,
     required: true,
   },
