@@ -23,7 +23,7 @@ export default function Header() {
                 <Link to="/profile">Profile</Link>
               </li>
               <li>
-                <Link to="/signin">Sign In</Link>
+                <Link to="/SignUp">Sign Up</Link>
               </li>
               <li>
                 <Link to="/signout">Sign Out</Link>
