@@ -6,6 +6,7 @@ import {
   signInSuccess,
   signInFailure,
 } from "../redux/user/userSlice.js";
+import OAuth from "../components/OAuth.jsx";
 
 export default function SignIn() {
   const [signUpData, setSignUpData] = useState({
@@ -78,6 +79,7 @@ export default function SignIn() {
           />
         </div>
         <button disabled={loading}>{loading ? "Loading..." : "SignIn"}</button>
+        <OAuth />
       </form>
       <div className="kh-signin__gotacc">
         <p>

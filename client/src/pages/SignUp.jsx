@@ -1,6 +1,7 @@
 import { set } from "mongoose";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import OAuth from "../components/OAuth.jsx";
 
 export default function SignUp() {
   const [signUpData, setSignUpData] = useState({});
@@ -82,6 +83,7 @@ export default function SignUp() {
           Already have an account?
           <Link to="/SignIn">Sign In</Link>
         </p>
+        <OAuth />
       </div>
       {error && <p className="">{error}</p>}
     </section>
