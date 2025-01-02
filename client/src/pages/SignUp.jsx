@@ -33,7 +33,7 @@ export default function SignUp() {
       }
       setLoading(false);
       setError(null);
-      navigate("/SignIn");
+      navigate("/signIn");
     } catch (error) {
       setLoading(false);
       setError(error.message);
@@ -41,12 +41,12 @@ export default function SignUp() {
   };
   console.log(signUpData);
   return (
-    <section className="kh-signin">
+    <section className="kh-signup">
       <form
         onSubmit={handleSubmit} // Ensure the form is making a POST request
-        className="kh-signin__form kh-form flex gap-5 p-12 border"
+        className="kh-signup__form kh-form flex gap-5 p-12 border"
       >
-        <div className="kh-signin__input-wrapper">
+        <div className="kh-signup__input-wrapper">
           <label htmlFor="username">UserName</label>
           <input
             type="text"
@@ -55,7 +55,7 @@ export default function SignUp() {
             onChange={handleChange}
           />
         </div>
-        <div className="kh-signin__input-wrapper">
+        <div className="kh-signup__input-wrapper">
           <label htmlFor="email">Email</label>
           <input
             type="email"
@@ -65,7 +65,7 @@ export default function SignUp() {
             onChange={handleChange}
           />
         </div>
-        <div className="kh-signin__input-wrapper">
+        <div className="kh-signup__input-wrapper">
           <label htmlFor="password">Password</label>
           <input
             type="password"
@@ -77,10 +77,10 @@ export default function SignUp() {
         </div>
         <button disabled={loading}>{loading ? "Loading..." : "SignUp"}</button>
       </form>
-      <div className="kh-signin__gotacc">
+      <div className="kh-signup__gotacc">
         <p>
           Already have an account?
-          <Link to="/signin">Sign In</Link>
+          <Link to="/SignIn">Sign In</Link>
         </p>
       </div>
       {error && <p className="">{error}</p>}

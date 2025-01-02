@@ -13,11 +13,11 @@ export default function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/About" element={<About />} />
+        <Route path="/Profile" element={<Profile />} />
         <Route path="/SignUp" element={<SignUp />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signout" element={<SignOut />} />
+        <Route path="/Signin" element={<SignIn />} />
+        <Route path="/Signout" element={<SignOut />} />
       </Routes>
     </BrowserRouter>
   );
