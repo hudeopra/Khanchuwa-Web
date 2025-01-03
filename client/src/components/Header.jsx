@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { FaSearch, FaShoppingCart, FaClipboardList } from "react-icons/fa";
+import { useSelector } from "react-redux";
 
 export default function Header() {
+  const { currentUser } = useSelector((state) => state.user);
+  console.log(currentUser);
   return (
     <header className="kh-header bg-slate-200">
       <div className="container flex justify-between">
@@ -23,10 +26,29 @@ export default function Header() {
                 <Link to="/profile">Profile</Link>
               </li>
               <li>
-                <Link to="/SignUp">Sign Up</Link>
-              </li>
-              <li>
-                <Link to="/signout">Sign Out</Link>
+                <Link to="/signin">
+                  {currentUser ? (
+                    <div className="kh-header__user__logged-in">
+                      <img src={currentUser.user.avatar} alt="User Profile Pic" />
+                      <span> {
+                        currentUser
+                          .user.
+                            username
+                            .split(" ")[0]
+                            .charAt(0)
+                            .toUpperCase() + 
+                          currentUser
+                            .user
+                            .username
+                            .split(" ")[0]
+                            .slice(1)
+                          }
+                      </span>
+                    </div>
+                  ) : (
+                    "Sign In"
+                  )}
+                </Link>
               </li>
             </ul>
           </nav>

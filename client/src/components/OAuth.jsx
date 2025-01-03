@@ -7,9 +7,9 @@ import { useNavigate } from "react-router-dom";
 
 // Google User Authentication
 export default function OAuth() {
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const handleGoogleClick = async () => {
     try {
       const provider = new GoogleAuthProvider();
@@ -21,14 +21,24 @@ export default function OAuth() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          name: authResult.user.displayName, 
-          email: authResult.user.email, 
-          photo: authResult.user.photoURL }),
-      })
+        body: JSON.stringify({
+          name: authResult.user.displayName,
+          email: authResult.user.email,
+          photo: authResult.user.photoURL,
+        }),
+      });
+
+      // dubbging the OAuth process res 
+      // console.log("OAuth: authResult:", authResult);
+      // console.log("OAuth: authGres:", authGres);
+
+      if (!authGres.ok) {
+        throw new Error(`Server error: ${authGres.status} ${authGres.statusText}`);
+      }
+
       const authGData = await authGres.json();
-      dispatch(signInSuccess(authGData))
-      // console.log(authResult); // authResult for verfifcation
+      dispatch(signInSuccess(authGData));
+      // console.log(authResult); // authResult for verification
 
       navigate("/");
     } catch (error) {
