@@ -23,32 +23,26 @@ export default function Header() {
                 <Link to="/about">About</Link>
               </li>
               <li>
-                <Link to="/profile">Profile</Link>
-              </li>
-              <li>
-                <Link to="/signin">
-                  {currentUser ? (
-                    <div className="kh-header__user__logged-in">
-                      <img src={currentUser.user.avatar} alt="User Profile Pic" />
-                      <span> {
-                        currentUser
-                          .user.
-                            username
-                            .split(" ")[0]
-                            .charAt(0)
-                            .toUpperCase() + 
-                          currentUser
-                            .user
-                            .username
-                            .split(" ")[0]
-                            .slice(1)
-                          }
+                {currentUser ? (
+                  <div className="kh-header__user__logged-in">
+                    <Link to="/profile">
+                      <img
+                        src={currentUser.user.avatar}
+                        alt="User Profile Pic"
+                      />
+                      <span>
+                        {" "}
+                        {currentUser.user.username
+                          .split(" ")[0]
+                          .charAt(0)
+                          .toUpperCase() +
+                          currentUser.user.username.split(" ")[0].slice(1)}
                       </span>
-                    </div>
-                  ) : (
-                    "Sign In"
-                  )}
-                </Link>
+                    </Link>
+                  </div>
+                ) : (
+                  <Link to="/signin">SignIn</Link>
+                )}
               </li>
             </ul>
           </nav>

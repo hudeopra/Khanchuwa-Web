@@ -1,0 +1,42 @@
+.kh-input-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  input,
+  button {
+    width: 100%;
+  }
+}
+.kh-profile {
+  max-width: 600px;
+  margin: auto;
+  h1 {
+    text-align: center;
+  }
+  &__user {
+    display: flex;
+    justify-content: center;
+    padding: 100px;
+    img {
+      height: 100px;
+      width: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: top center;
+    }
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px 0;
+    }
+    &--img-error {
+      width: auto;
+      display: inline-block;
+    }
+    &--action-links {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+  }
+}
