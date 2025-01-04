@@ -9,10 +9,7 @@ import {
 import OAuth from "../components/OAuth.jsx";
 
 export default function SignIn() {
-  const [signUpData, setSignUpData] = useState({
-    username: "",
-    password: "",
-  });
+  const [signUpData, setSignUpData] = useState({});
   // name of the userslice is user
   const { loading, error } = useSelector((state) => state.user);
 
@@ -38,17 +35,20 @@ export default function SignIn() {
         },
         body: JSON.stringify(signUpData),
       });
-      const data = await res.json();
 
       if (!res.ok) {
-        dispatch(signInFailure(data.message)); // setLoading(false); // setError(data.message);
+        const errorData = await res.json();
+        dispatch(signInFailure(errorData.message)); // setLoading(false); // setError(data.message);
+        console.error("SignIn.jsx: Error response", errorData); // Log error response
         return;
       }
-      dispatch(signInSuccess(data.user)); // setLoading(false); // setError(null);
 
+      const data = await res.json();
+      dispatch(signInSuccess(data.user)); // setLoading(false); // setError(null);
       navigate("/");
     } catch (error) {
       dispatch(signInFailure(error.message)); // setLoading(false); setError(error.message);
+      console.error("SignIn.jsx: Fetch error", error); // Log fetch error
     }
   };
   console.log(signUpData);
@@ -60,11 +60,12 @@ export default function SignIn() {
         className="kh-signin__form kh-form flex gap-5 p-12 border"
       >
         <div className="kh-signin__input-wrapper">
-          <label htmlFor="username">UserName</label>
+          <label htmlFor="email">Email</label>
           <input
-            type="text"
-            id="username"
-            name="username" // Corrected name
+            type="email"
+            placeholder="Email"
+            id="email"
+            name="email" // Corrected name
             onChange={handleChange}
           />
         </div>
@@ -84,7 +85,7 @@ export default function SignIn() {
       <div className="kh-signin__gotacc">
         <p>
           Dont have an account?
-          <Link to="/SignUp">Sign Up</Link>
+          <Link to="/signup">Sign Up</Link>
         </p>
       </div>
       {error && <p className="">{error}</p>}

@@ -2,6 +2,8 @@ import { errorHandler } from '../utils/error.js';
 import User from '../models/user.model.js';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Signup function
 export const signup = async (req, res, next) => {
@@ -27,54 +29,62 @@ export const signup = async (req, res, next) => {
 
 // Signin function
 export const signin = async (req, res, next) => {
-  const { username, password } = req.body;
   try {
-    const validUser = await User.findOne({ username });  
-    if (!validUser) {
-      return next(errorHandler(404, "auth.controller: User not found"));
-    }
-    const validpass =  bcryptjs.compareSync(password, validUser.password);
-    if (!validpass) {
-      return next(errorHandler(401, "auth.controller: Incorrect password"));
-    }
-    const jwtToken = jwt.sign({id: validUser._id}, process.env.JWT_SECRET, {expiresIn: '1h'});
-    const { password: pass, ...restUserInfo } = validUser._doc;
-    res.cookie('jwtAccessToken', jwtToken, {httpOnly: true, secure: true, sameSite: 'none'}).status(200).json({message: "auth.controller: User signed in successfully", user: restUserInfo});
+    const { email, password } = req.body;
+    console.log('auth.controller: Signin request', { email, password }); // Log request data
+
+    const validUser = await User.findOne({ email });
+    console.log('auth.controller: User found', email);
+    if (!validUser) return next(errorHandler(404, 'auth.controller: User not found'));
+
+    const validPassword = await bcryptjs.compareSync(password, validUser.password);
+    if (!validPassword) return next(errorHandler(400, 'auth.controller: Invalid credentials'));
+    console.log('auth.controller: Password is correct', validPassword);
+
+    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
+
+    console.log('auth.controller: Generated token', token);
+    const { password: pass, ...rest } = validUser._doc;
+    res
+      .cookie('access_token', token, { httpOnly: true })
+      .status(200)
+      .json({ rest });
   } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
     next(error);
   }
 }
 
 // google Signin
 export const google = async (req, res, next) => {
-  try{
-    const user= await User.findOne({email: req.body.email});
-    if (user){
-      const jwtToken = jwt.sign({id: user._id}, process.env.JWT_SECRET);
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (user) {
+      const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
       const { password: pass, ...restUserInfo } = user._doc;
       res
-        .cookie('jwtAccessToken', jwtToken, {httpOnly: true})
+        .cookie('jwtAccessToken', jwtToken, { httpOnly: true })
         .status(200)
-        .json({message: "auth.controller: User signed in successfully", user: restUserInfo});
+        .json({ message: "auth.controller: User signed in successfully", user: restUserInfo });
     } else {
       const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8); // 16 digit pass    }
       const hashedPassword = await bcryptjs.hash(generatedPassword, 12);
       const newUser = new User({
-        username: req.body.name.split("").join("").toLowerCase() + Math.random().toString(36).slice(-8), 
-        email: req.body.email, 
+        username: req.body.name.split("").join("").toLowerCase() + Math.random().toString(36).slice(-8),
+        email: req.body.email,
         password: hashedPassword,
         avatar: req.body.photo, // Save the Google profile image URL
       });
 
       await newUser.save();
-      const jwtToken = jwt.sign({id: newUser._id}, process.env.JWT_SECRET);
+      const jwtToken = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
       const { password: pass, ...restUserInfo } = newUser._doc;
       res
-        .cookie('jwtAccessToken', jwtToken, {httpOnly: true})
+        .cookie('jwtAccessToken', jwtToken, { httpOnly: true })
         .status(201)
-        .json({message: "auth.controller: User signed in successfully", user: restUserInfo});
+        .json({ message: "auth.controller: User signed in successfully", user: restUserInfo });
     }
-  } catch (error){
+  } catch (error) {
     next(error);
   }
 };
