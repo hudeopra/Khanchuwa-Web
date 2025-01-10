@@ -10,7 +10,7 @@ export const verifyToken = (req, res, next) => {  // middleware to verify token
 
   const SECRET_OR_PRIVATE_KEY = process.env.JWT_SECRET;
   if (!SECRET_OR_PRIVATE_KEY) return next(errorHandler(500, 'api/verifyUser: Internal Server Error'));
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+  jwt.verify(tokenCookie, process.env.JWT_SECRET, (err, user) => {
     if (err) return next(errorHandler(403, 'api/verifyUser: Forbidden'));
     req.user = user; //saving the id of the user
     next(); //update user in user.route.js

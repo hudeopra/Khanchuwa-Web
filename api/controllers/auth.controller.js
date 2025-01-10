@@ -44,11 +44,11 @@ export const signin = async (req, res, next) => {
     const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
 
     console.log('auth.controller: Generated token', token);
-    const { password: pass, ...rest } = validUser._doc;
+    const { password: pass, ...user } = validUser._doc;
     res
       .cookie('access_token', token, { httpOnly: true })
       .status(200)
-      .json({ rest });
+      .json({ user });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
     next(error);
@@ -88,3 +88,5 @@ export const google = async (req, res, next) => {
     next(error);
   }
 };
+
+

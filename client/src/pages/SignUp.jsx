@@ -1,25 +1,25 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  signUpStart,
-  signUpSuccess,
-  signUpFailure,
-} from "../redux/user/userSlice.js";
+import OAuth from "../components/OAuth";
+import { set } from "mongoose";
 
 export default function SignUp() {
-  const [signUpData, setSignUpData] = useState({
-    username: "",
-    email: "",
-    password: "",
+  const [userData, setUserData] = useState({
+    // username: "",
+    // email: "",
+    // password: "",
   });
-  const { loading, error } = useSelector((state) => state.user);
+
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  // const { loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleChange = (e) => {
-    setSignUpData({
-      ...signUpData,
+    setUserData({
+      ...userData,
       [e.target.id]: e.target.value,
     });
   };
@@ -27,28 +27,41 @@ export default function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true);
       dispatch(signUpStart());
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(signUpData),
+        body: JSON.stringify(userData),
       });
       const data = await res.json();
-
-      if (!res.ok) {
-        dispatch(signUpFailure(data.message));
-        console.error("SignUp.jsx: Error response", data);
+      console.log("SignUp: ", data);
+      if (data.success === false) {
+        setLoading(false);
+        setError(data.message);
         return;
       }
-
-      dispatch(signUpSuccess(data.user));
-      navigate("/signin");
+      setLoading(false);
+      setError(null);
+      navigate("/sign-in");
     } catch (error) {
-      dispatch(signUpFailure(error.message));
-      console.error("SignUp.jsx: Fetch error", error);
+      setLoading(false);
+      setError(error.message);
     }
+    //   if (!res.ok) {
+    //     dispatch(signUpFailure(data.message));
+    //     console.error("SignUp.jsx: Error response", data);
+    //     return;
+    //   }
+
+    //   dispatch(signUpSuccess(data.user));
+    //   navigate("/signin");
+    // } catch (error) {
+    //   dispatch(signUpFailure(error.message));
+    //   console.error("SignUp.jsx: Fetch error", error);
+    // }
   };
 
   return (

@@ -1,10 +1,35 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaSearch, FaShoppingCart, FaClipboardList } from "react-icons/fa";
 import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
 
 export default function Header() {
   const { currentUser } = useSelector((state) => state.user);
-  console.log(currentUser);
+  useEffect(() => {
+    console.log("Current User Data:", currentUser);
+  }, [currentUser]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set("searchTerm", searchTerm);
+    const searchQuery = urlParams.toString();
+    navigate(`/search?${searchQuery}`);
+  };
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const searchTermFromUrl = urlParams.get("searchTerm");
+    if (searchTermFromUrl) {
+      setSearchTerm(searchTermFromUrl);
+    }
+  }, [location.search]);
+
+  const user = currentUser?.user || currentUser;
+  const avatar = user?.avatar;
+  const username = user?.username;
+
   return (
     <header className="kh-header bg-slate-200">
       <div className="container flex justify-between">
@@ -23,26 +48,22 @@ export default function Header() {
                 <Link to="/about">About</Link>
               </li>
               <li>
-                {currentUser ? (
-                  <div className="kh-header__user__logged-in">
-                    <Link to="/profile">
+                <Link to="/profile">
+                  {user ? (
+                    <div>
                       <img
-                        src={currentUser.user.avatar}
-                        alt="User Profile Pic"
+                        className="rounded-full h-7 w-7 object-cover"
+                        src={avatar}
+                        alt="profile"
                       />
-                      <span>
-                        {" "}
-                        {currentUser.user.username
-                          .split(" ")[0]
-                          .charAt(0)
-                          .toUpperCase() +
-                          currentUser.user.username.split(" ")[0].slice(1)}
-                      </span>
-                    </Link>
-                  </div>
-                ) : (
-                  <Link to="/signin">SignIn</Link>
-                )}
+                      <span>{username}</span>
+                    </div>
+                  ) : (
+                    <span className="text-slate-700 hover:underline">
+                      Sign in
+                    </span>
+                  )}
+                </Link>
               </li>
             </ul>
           </nav>

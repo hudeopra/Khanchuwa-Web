@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import User from '../models/user.model.js';
 
+
 export const test = (req, res) => {
   res.json({
     message: "api/user.controller: user.controller: World",
@@ -9,7 +10,7 @@ export const test = (req, res) => {
 
 // exporting to user.route.js
 export const updateUserInfo = async (req, res, next) => {
-  if (req.user.id !== req.params.id) return next(errorHandler(403, 'api/user.controller: Forbidden')); // you can only update your own account
+  if (req.user.id !== req.params.id) return next(errorHandler(401, 'api/user.controller: you can only update your own account'));
   try {
     if (req.body.password) {
       req.body.password = await bcrypt.hash(req.body.password, 12);

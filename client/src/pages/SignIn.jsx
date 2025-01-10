@@ -9,7 +9,7 @@ import {
 import OAuth from "../components/OAuth.jsx";
 
 export default function SignIn() {
-  const [signUpData, setSignUpData] = useState({});
+  const [userData, setUserData] = useState({});
   // name of the userslice is user
   const { loading, error } = useSelector((state) => state.user);
 
@@ -18,9 +18,10 @@ export default function SignIn() {
 
   // initialize userDispatch
   const dispatch = useDispatch();
+
   const handleChange = (e) => {
-    setSignUpData({
-      ...signUpData, // Spread Operator: Copies the existing form data (signUpData) into a new object
+    setUserData({
+      ...userData, // Spread Operator: Copies the existing form data (userData) into a new object
       [e.target.id]: e.target.value,
     });
   };
@@ -33,25 +34,38 @@ export default function SignIn() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(signUpData),
+        body: JSON.stringify(userData),
       });
+      const signinResData = await res.json();
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        dispatch(signInFailure(errorData.message)); // setLoading(false); // setError(data.message);
-        console.error("SignIn.jsx: Error response", errorData); // Log error response
+      console.log("SignIn: ", signinResData);
+
+      if (signinResData.success === false) {
+        dispatch(signInFailure(signinResData.message));
         return;
       }
-
-      const data = await res.json();
-      dispatch(signInSuccess(data.user)); // setLoading(false); // setError(null);
+      dispatch(signInSuccess(signinResData));
       navigate("/");
     } catch (error) {
-      dispatch(signInFailure(error.message)); // setLoading(false); setError(error.message);
-      console.error("SignIn.jsx: Fetch error", error); // Log fetch error
+      dispatch(signInFailure(error.message));
     }
+
+    //   if (!res.ok) {
+    //     const errorData = await res.json();
+    //     dispatch(signInFailure(errorData.message)); // setLoading(false); // setError(data.message);
+    //     console.error("SignIn.jsx: Error response", errorData); // Log error response
+    //     return;
+    //   }
+
+    //   const data = await res.json();
+    //   dispatch(signInSuccess(data.user)); // setLoading(false); // setError(null);
+    //   navigate("/");
+    // } catch (error) {
+    //   dispatch(signInFailure(error.message)); // setLoading(false); setError(error.message);
+    //   console.error("SignIn.jsx: Fetch error", error); // Log fetch error
+    // }
   };
-  console.log(signUpData);
+  console.log("SignIn: ", userData);
   return (
     <section className="kh-signin">
       <h1>Sign In</h1>
@@ -85,7 +99,7 @@ export default function SignIn() {
       <div className="kh-signin__gotacc">
         <p>
           Dont have an account?
-          <Link to="/signup">Sign Up</Link>
+          <Link to="/signIn">Sign Up</Link>
         </p>
       </div>
       {error && <p className="">{error}</p>}

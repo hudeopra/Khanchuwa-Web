@@ -18,7 +18,7 @@ export default function Profile() {
   const [error, setError] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
-  const [formData, setFormData] = useState({});
+  const [userData, setUserData] = useState({});
 
   useEffect(() => {
     const auth = getAuth();
@@ -59,7 +59,7 @@ export default function Profile() {
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            setFormData({ ...formData, avatar: downloadURL });
+            setUserData({ ...userData, avatar: downloadURL });
           });
         }
       );
@@ -69,10 +69,10 @@ export default function Profile() {
   };
 
   useEffect(() => {
-    console.log("Profile Upload Url: ", formData); //upload data url
+    console.log("Profile Upload Url: ", userData); //upload data url
     console.log("Profile upload Perc: ", filePerc); //file upload percentage
     console.log("Profile Upload Error: ", fileUploadError); //file upload error
-  }, [formData, filePerc, fileUploadError]);
+  }, [userData, filePerc, fileUploadError]);
 
   return (
     <section className="kh-profile">
@@ -89,7 +89,10 @@ export default function Profile() {
             />
             <img
               onClick={() => fileRef.current.click()}
-              src={formData.avatar || currentUser.user.avatar}
+              src={
+                userData.avatar ||
+                (currentUser && currentUser.user && currentUser.user.avatar)
+              }
               alt="User Profile Img"
             />
             <p className="self-center">
