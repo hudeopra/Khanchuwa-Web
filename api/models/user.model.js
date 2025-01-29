@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    default: "https://cdn-icons-png.flaticon.com/512/3177/3177440.png",
+    default: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAwJZPmxYUUhKB3eYQ-Ta2S_FmRUNOZBabQw&s",
 
   },
 }, {

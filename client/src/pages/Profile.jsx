@@ -94,6 +94,7 @@ export default function Profile() {
                 (currentUser && currentUser.user && currentUser.user.avatar)
               }
               alt="User Profile Img"
+              accept="image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
             />
             <p className="self-center">
               {fileUploadError ? (

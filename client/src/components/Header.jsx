@@ -55,13 +55,12 @@ export default function Header() {
                         className="rounded-full h-7 w-7 object-cover"
                         src={avatar}
                         alt="profile"
+                        accept="image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
                       />
                       <span>{username}</span>
                     </div>
                   ) : (
-                    <span className="text-slate-700 hover:underline">
-                      Sign in
-                    </span>
+                    <span className="">Sign In</span>
                   )}
                 </Link>
               </li>
