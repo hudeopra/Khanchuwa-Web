@@ -1,18 +1,23 @@
-import { errorHandler } from "../utils/error.js"; // Corrected import path
-import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
+import { errorHandler } from './error.js';
 
-export const verifyToken = (req, res, next) => {  // middleware to verify token
-  const tokenCookie = req.cookies.access_token; // get token from headers
-  console.log("verifyUser.js: tokenCookie", tokenCookie);
-
-  if (!tokenCookie) return next(errorHandler(401, 'api/verifyUser: Unauthorized'));
+export const verifyToken = (req, res, next) => {
+  const token = req.cookies.access_token;
+  console.log("verifyUser.js: token", token); // Debugging statement
+  if (!token) {
+    console.log("No token provided"); // Debugging statement
+    return next(errorHandler(401, 'api/verifyUser: Unauthorized'));
+  }
 
   const SECRET_OR_PRIVATE_KEY = process.env.JWT_SECRET;
-  if (!SECRET_OR_PRIVATE_KEY) return next(errorHandler(500, 'api/verifyUser: Internal Server Error'));
-  jwt.verify(tokenCookie, process.env.JWT_SECRET, (err, user) => {
-    if (err) return next(errorHandler(403, 'api/verifyUser: Forbidden'));
-    req.user = user; //saving the id of the user
-    next(); //update user in user.route.js
+  if (!SECRET_OR_PRIVATE_KEY) return next(errorHandler(500, 'api/verifyUser: JWT_key_not_found'));
+  jwt.verify(token, SECRET_OR_PRIVATE_KEY, (err, user) => {
+    if (err) {
+      console.log("Token verification failed:", err); // Debugging statement
+      return next(errorHandler(403, 'api/verifyUser: Forbidden'));
+    }
+    console.log("Token verified successfully:", user); // Debugging statement
+    req.user = user;
+    next();
   });
 };

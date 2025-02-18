@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
 import "./index.css";
 import "./custom.css"; // Import custom CSS
+import "./assets/css/bannerSlider.css"; // Import custom CSS
+import "./assets/js/bannerContent.js"; // Import custom CSS
 
 // redux-persist library
 import { presistor, store } from "./redux/store.js";

@@ -5,9 +5,12 @@ import { useEffect, useState } from "react";
 
 export default function Header() {
   const { currentUser } = useSelector((state) => state.user);
-  useEffect(() => {
-    console.log("Current User Data:", currentUser);
-  }, [currentUser]);
+
+  // //Checking the current user data
+  // useEffect(() => {
+  //   console.log("Current User Data:", currentUser);
+  // }, [currentUser]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const handleSubmit = (e) => {

@@ -16,10 +16,10 @@ export default function OAuth() {
       const auth = getAuth(app);
 
       const authResult = await signInWithPopup(auth, provider);
-      const authGres = await fetch('/api/auth/google', {
-        method: 'POST',
+      const authGres = await fetch("/api/auth/google", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: authResult.user.displayName,
@@ -28,12 +28,14 @@ export default function OAuth() {
         }),
       });
 
-      // dubbging the OAuth process res 
+      // dubbging the OAuth process res
       // console.log("OAuth: authResult:", authResult);
       // console.log("OAuth: authGres:", authGres);
 
       if (!authGres.ok) {
-        throw new Error(`Server error: ${authGres.status} ${authGres.statusText}`);
+        throw new Error(
+          `Server error: ${authGres.status} ${authGres.statusText}`
+        );
       }
 
       const authGData = await authGres.json();

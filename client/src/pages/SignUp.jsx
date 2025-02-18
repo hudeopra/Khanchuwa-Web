@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+
 import OAuth from "../components/OAuth";
-import { set } from "mongoose";
 
 export default function SignUp() {
   const [userData, setUserData] = useState({
@@ -13,9 +12,7 @@ export default function SignUp() {
 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  // const { loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const handleChange = (e) => {
     setUserData({
@@ -28,7 +25,6 @@ export default function SignUp() {
     e.preventDefault();
     try {
       setLoading(true);
-      dispatch(signUpStart());
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {

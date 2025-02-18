@@ -65,7 +65,7 @@ export default function SignIn() {
     //   console.error("SignIn.jsx: Fetch error", error); // Log fetch error
     // }
   };
-  console.log("SignIn: ", userData);
+  console.log("SignIn: ", userData); // SignIn form data
   return (
     <section className="kh-signin">
       <h1>Sign In</h1>
@@ -99,7 +99,7 @@ export default function SignIn() {
       <div className="kh-signin__gotacc">
         <p>
           Dont have an account?
-          <Link to="/signIn">Sign Up</Link>
+          <Link to="/SignUp">Sign Up</Link>
         </p>
       </div>
       {error && <p className="">{error}</p>}

@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Signup function
-export const signup = async (req, res, next) => {
+export const signUp = async (req, res, next) => {
   // console.log("auth.controller: SIGNUP REQUEST DATA", req.body);
 
   const { username, email, password } = req.body;
@@ -28,10 +28,10 @@ export const signup = async (req, res, next) => {
 };
 
 // Signin function
-export const signin = async (req, res, next) => {
+export const signIn = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    console.log('auth.controller: Signin request', { email, password }); // Log request data
+    // console.log('auth.controller: Signin request', { email, password }); // Log request data
 
     const validUser = await User.findOne({ email });
     console.log('auth.controller: User found', email);
@@ -50,6 +50,7 @@ export const signin = async (req, res, next) => {
       .status(200)
       .json({ user });
   } catch (error) {
+    console.error('auth.controller: Signin error', error);
     res.status(500).json({ success: false, message: error.message });
     next(error);
   }
@@ -67,10 +68,11 @@ export const google = async (req, res, next) => {
         .status(200)
         .json({ message: "auth.controller: User signed in successfully", user: restUserInfo });
     } else {
-      const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8); // 16 digit pass    }
+      const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8); // 16 digit pass
       const hashedPassword = await bcryptjs.hash(generatedPassword, 12);
+      const username = req.body.name ? req.body.name.split("").join("").toLowerCase() + Math.random().toString(36).slice(-8) : Math.random().toString(36).slice(-16);
       const newUser = new User({
-        username: req.body.name.split("").join("").toLowerCase() + Math.random().toString(36).slice(-8),
+        username,
         email: req.body.email,
         password: hashedPassword,
         avatar: req.body.photo, // Save the Google profile image URL
@@ -89,4 +91,11 @@ export const google = async (req, res, next) => {
   }
 };
 
-
+export const signOut = async (req, res, next) => {
+  try {
+    res.clearCookie('access_token');
+    res.status(200).json('User has been logged out!');
+  } catch (error) {
+    next(error);
+  }
+};
