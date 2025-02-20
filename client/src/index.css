@@ -267,7 +267,8 @@ button:focus-visible {
 
 .kh-recipe-block__info span {
   padding: 0 10px;
-  background-color: ;
+  font-size: 14px;
+  font-weight: 500;
 }
 .kh-recipe-block__info span:not(:last-child) {
   border-right: 1px solid var(--dark-charcol);
@@ -297,6 +298,7 @@ button:focus-visible {
   padding: 10px 15px;
   width: max-content;
   cursor: pointer;
+  text-transform: capitalize;
 }
 .kh-flavor-tag:hover {
   background-color: var(--primary-color);
@@ -308,23 +310,23 @@ button:focus-visible {
   margin-left: 20px;
 }
 .left.kh-scrolling-image1 {
-  animation: leftmarquee1 100s linear infinite;
+  animation: leftmarquee1 150s linear infinite;
 }
 .left.kh-scrolling-image2 {
-  animation: leftmarquee2 100s linear infinite;
+  animation: leftmarquee2 150s linear infinite;
 }
 .right.kh-scrolling-image1 {
-  animation: rightmarquee1 100s linear infinite;
+  animation: rightmarquee1 150s linear infinite;
 }
 .right.kh-scrolling-image2 {
-  animation: rightmarquee2 100s linear infinite;
+  animation: rightmarquee2 150s linear infinite;
 }
 
 @keyframes leftmarquee1 {
   0% {
     transform: translateX(-200%);
   }
-  1% {
+  0.3% {
     transform: translateX(-180%);
   }
   100% {
@@ -336,7 +338,7 @@ button:focus-visible {
   0% {
     transform: translateX(-200%);
   }
-  1% {
+  0.3% {
     transform: translateX(-150%);
   }
   100% {

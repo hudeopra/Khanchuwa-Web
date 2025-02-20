@@ -41,7 +41,7 @@ export default function SignUp() {
       }
       setLoading(false);
       setError(null);
-      navigate("/sign-in");
+      navigate("/signin");
     } catch (error) {
       setLoading(false);
       setError(error.message);
@@ -61,7 +61,7 @@ export default function SignUp() {
   };
 
   return (
-    <section className="kh-signup">
+    <main className="kh-signup">
       <h1>Sign Up</h1>
       <form
         onSubmit={handleSubmit}
@@ -98,6 +98,6 @@ export default function SignUp() {
         </p>
       </div>
       {error && <p className="">{error}</p>}
-    </section>
+    </main>
   );
 }

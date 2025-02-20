@@ -133,8 +133,11 @@ export default function CreateRecipe() {
       setLoading(false);
       if (data.success === false) {
         setError(data.message);
+      } else if (data._id) {
+        navigate(`/recipes/${data._id}`);
+      } else {
+        setError("Recipe creation failed. Please try again.");
       }
-      navigate(`/recipe/${data._id}`);
     } catch (error) {
       setError(error.message);
       setLoading(false);
@@ -150,6 +153,7 @@ export default function CreateRecipe() {
         onSubmit={handleSubmit}
         className="flex flex-wrap sm:flex-row gap-4"
       >
+        <input type="hidden" id="userRef" value={currentUser._id} />
         <div className="flex flex-wrap gap-4 flex-1">
           <input
             type="text"

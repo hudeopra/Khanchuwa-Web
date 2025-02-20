@@ -9,6 +9,7 @@ import SignUp from "./pages/SignUp";
 import PrivateRoute from "./components/PrivateRoute";
 import CreateRecipe from "./pages/CreateRecipe";
 import RecipeList from "./pages/RecipeList"; // Import RecipeList component
+import RecipeDetail from "./pages/RecipeDetail"; // Import RecipeDetail component
 
 export default function App() {
   return (
@@ -24,7 +25,7 @@ export default function App() {
           <Route path="/create-recipe" element={<CreateRecipe />} />
         </Route>
         <Route path="/recipes" element={<RecipeList />} />{" "}
-        {/* Add RecipeList route */}
+        <Route path="/recipes/:id" element={<RecipeDetail />} />
       </Routes>
       <Footer />
     </Router>

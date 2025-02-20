@@ -1,6 +1,5 @@
 import React from "react";
 import { flavorTags } from "../assets/js/dummyContent";
-import "../styles/FlavorTagSlider.css";
 
 // Function to divide tags into 6 parts
 const divideTags = (tags, parts) => {

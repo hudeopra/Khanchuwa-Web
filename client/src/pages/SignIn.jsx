@@ -67,7 +67,7 @@ export default function SignIn() {
   };
   console.log("SignIn: ", userData); // SignIn form data
   return (
-    <section className="kh-signin">
+    <main className="kh-signin">
       <h1>Sign In</h1>
       <form
         onSubmit={handleSubmit} // Ensure the form is making a POST request
@@ -103,6 +103,6 @@ export default function SignIn() {
         </p>
       </div>
       {error && <p className="">{error}</p>}
-    </section>
+    </main>
   );
 }

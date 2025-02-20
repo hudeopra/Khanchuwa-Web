@@ -33,7 +33,7 @@ export default function Home() {
   return (
     <main className="kh-homepage">
       <HomeBanner />
-      <div className="container">
+      <div className="container py-5 mt-5">
         <div className="kh-recipeList">
           <h2>Food. Where Happiness Begins</h2>
           <CategoryList />
@@ -41,9 +41,9 @@ export default function Home() {
         <div className="kh-recipeBlock">
           <RecipeCardBig />
         </div>
-        <div className="kh-tag">
-          <FlavorTagSlider />
-        </div>
+      </div>
+      <div className="kh-tag  py-5 mt-5">
+        <FlavorTagSlider />
       </div>
     </main>
   );

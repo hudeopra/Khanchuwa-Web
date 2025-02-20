@@ -8,8 +8,6 @@ import recipeRouter from './routes/recipe.route.js';
 import cookieParser from 'cookie-parser';
 dotenv.config();
 
-
-
 mongoose.connect(process.env.MONGODB_AUTH_URI).then(() => {
   console.log('api/index: Connected to MongoDB');
 }).catch((error) => {
@@ -27,8 +25,7 @@ app.listen(3000, () => {
 
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter); // Ensure this route is correct
-app.use('/api/recipe', recipeRouter);
-
+app.use('/api/recipe', recipeRouter); // Ensure this route is correct
 
 app.use((err, req, res, next) => { // Error handling middleware
   const statusCode = err.statusCode || 500;

@@ -1,13 +1,20 @@
 import { Link, useNavigate } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux"; // Import useDispatch
 import { useEffect, useState } from "react";
+import {
+  signOutUserStart,
+  signOutUserSuccess,
+  signOutUserFailure,
+} from "../redux/user/userSlice";
 
 export default function Header() {
   const { currentUser } = useSelector((state) => state.user);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const [isMenuActive, setIsMenuActive] = useState(false);
+  const [randomRecipeId, setRandomRecipeId] = useState(null);
+  const dispatch = useDispatch(); // Use useDispatch
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -25,8 +32,48 @@ export default function Header() {
     }
   }, [window.location.search]);
 
+  const fetchRandomRecipeId = async () => {
+    try {
+      const response = await fetch("/api/recipe/all");
+      const data = await response.json();
+      const randomIndex = Math.floor(Math.random() * data.length);
+      setRandomRecipeId(data[randomIndex]._id);
+    } catch (error) {
+      console.error("Error fetching recipes:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRandomRecipeId();
+    setIsMenuActive(false);
+  }, []);
+
+  const handleRandomRecipeClick = () => {
+    fetchRandomRecipeId();
+  };
+
   const toggleMenu = () => {
     setIsMenuActive(!isMenuActive);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      dispatch(signOutUserStart());
+      const res = await fetch("/api/auth/signout");
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(signOutUserFailure(data.message));
+        return;
+      }
+      dispatch(signOutUserSuccess(data));
+      navigate("/signin");
+    } catch (error) {
+      dispatch(signOutUserFailure(error.message));
+    }
+  };
+
+  const handleLinkClick = () => {
+    setIsMenuActive(false);
   };
 
   return (
@@ -46,47 +93,60 @@ export default function Header() {
                 <div className="kh-header__head--menu-block">
                   <p></p>
                   <ul>
-                    <li>
-                      <img
-                        src="../src/assets/img/search/chefLogo.png"
-                        alt="Khanchuwa Logo"
-                      />
-                      <span>Home</span>
+                    <li onClick={handleLinkClick}>
+                      <Link to={"/"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>Home</span>
+                      </Link>
                     </li>
-                    <li>
-                      <img
-                        src="../src/assets/img/search/chefLogo.png"
-                        alt="Khanchuwa Logo"
-                      />
-                      <span>Recipes</span>
+                    <li onClick={handleLinkClick}>
+                      <Link to={"/recipes"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>Recipes</span>
+                      </Link>
                     </li>
-                    <li>
+                    <li onClick={handleLinkClick}>
                       <img
                         src="../src/assets/img/search/chefLogo.png"
                         alt="Khanchuwa Logo"
                       />
                       <span>Trending</span>
                     </li>
-                    <li>
-                      <img
-                        src="../src/assets/img/search/chefLogo.png"
-                        alt="Khanchuwa Logo"
-                      />
-                      <span>Random</span>
+                    <li onClick={handleLinkClick}>
+                      {randomRecipeId && (
+                        <Link
+                          to={`/recipes/${randomRecipeId}`}
+                          onClick={handleRandomRecipeClick}
+                        >
+                          <img
+                            src="../src/assets/img/search/chefLogo.png"
+                            alt="Khanchuwa Logo"
+                          />
+                          <span>Random</span>
+                        </Link>
+                      )}
                     </li>
-                    <li>
+                    <li onClick={handleLinkClick}>
                       <img
                         src="../src/assets/img/search/chefLogo.png"
                         alt="Khanchuwa Logo"
                       />
                       <span>Search</span>
                     </li>
-                    <li>
-                      <img
-                        src="../src/assets/img/search/chefLogo.png"
-                        alt="Khanchuwa Logo"
-                      />
-                      <span>About Khanchuwa</span>
+                    <li onClick={handleLinkClick}>
+                      <Link to={"/about"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>About Khanchuwa</span>
+                      </Link>
                     </li>
                   </ul>
                 </div>
@@ -94,43 +154,53 @@ export default function Header() {
                   <p>Account</p>
                   {currentUser ? (
                     <ul>
-                      <li>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>My Profile</span>
+                      <li onClick={handleLinkClick}>
+                        <Link to="/profile">
+                          <img
+                            src="../src/assets/img/search/chefLogo.png"
+                            alt="Khanchuwa Logo"
+                          />
+                          <span>My Profile</span>
+                        </Link>
                       </li>
-                      <li>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>My Recipe</span>
+                      <li onClick={handleLinkClick}>
+                        <Link to={"/create-recipe"}>
+                          <img
+                            src="../src/assets/img/search/chefLogo.png"
+                            alt="Khanchuwa Logo"
+                          />
+                          <span>Create Recipe</span>
+                        </Link>
                       </li>
-                      <li>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Sign Out</span>
+                      <li onClick={handleLinkClick}>
+                        <span onClick={handleSignOut}>
+                          <img
+                            src="../src/assets/img/search/chefLogo.png"
+                            alt="Khanchuwa Logo"
+                          />
+                          <span>Sign Out</span>
+                        </span>
                       </li>
                     </ul>
                   ) : (
                     <ul>
-                      <li>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Create Account</span>
+                      <li onClick={handleLinkClick}>
+                        <Link to={"/signup"}>
+                          <img
+                            src="../src/assets/img/search/chefLogo.png"
+                            alt="Khanchuwa Logo"
+                          />
+                          <span>Create Account</span>
+                        </Link>
                       </li>
-                      <li>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Sign In</span>
+                      <li onClick={handleLinkClick}>
+                        <Link to={"/signin"}>
+                          <img
+                            src="../src/assets/img/search/chefLogo.png"
+                            alt="Khanchuwa Logo"
+                          />
+                          <span>Sign In</span>
+                        </Link>
                       </li>
                     </ul>
                   )}
@@ -138,14 +208,14 @@ export default function Header() {
                 <div className="kh-header__head--menu-block">
                   <p>Connect</p>
                   <ul>
-                    <li>
+                    <li onClick={handleLinkClick}>
                       <img
                         src="../src/assets/img/search/chefLogo.png"
                         alt="Khanchuwa Logo"
                       />
                       <span>What’s New</span>
                     </li>
-                    <li>
+                    <li onClick={handleLinkClick}>
                       <img
                         src="../src/assets/img/search/chefLogo.png"
                         alt="Khanchuwa Logo"
@@ -157,14 +227,14 @@ export default function Header() {
                 <div className="kh-header__head--menu-block">
                   <p>Resources</p>
                   <ul>
-                    <li>
+                    <li onClick={handleLinkClick}>
                       <img
                         src="../src/assets/img/search/chefLogo.png"
                         alt="Khanchuwa Logo"
                       />
                       <span>FAQ</span>
                     </li>
-                    <li>
+                    <li onClick={handleLinkClick}>
                       <img
                         src="../src/assets/img/search/chefLogo.png"
                         alt="Khanchuwa Logo"
@@ -176,7 +246,7 @@ export default function Header() {
               </nav>
             </div>
             <div className="kh-header__head--main-logo">
-              <Link to="/">
+              <Link to="/" onClick={handleLinkClick}>
                 <img
                   src="../src/assets/img/logoKhanchuwa.png"
                   alt="Khanchuwa Logo"
@@ -204,7 +274,7 @@ export default function Header() {
           </div>
           <div className="kh-header__account">
             {currentUser ? (
-              <Link to="/profile">
+              <Link to="/profile" onClick={handleLinkClick}>
                 <img
                   className="rounded-full h-7 w-7 object-cover"
                   src={currentUser.avatar}
@@ -213,12 +283,17 @@ export default function Header() {
               </Link>
             ) : (
               <>
-                <Link to="/signin" className="text-slate-700 hover:underline">
+                <Link
+                  to="/signin"
+                  className="text-slate-700 hover:underline"
+                  onClick={handleLinkClick}
+                >
                   Sign In
                 </Link>
                 <Link
                   to="/signup"
                   className="text-slate-700 hover:underline ml-4"
+                  onClick={handleLinkClick}
                 >
                   Sign Up
                 </Link>

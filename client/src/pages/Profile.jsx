@@ -150,7 +150,7 @@ export default function Profile() {
   };
 
   return (
-    <section className="kh-profile">
+    <main className="kh-profile">
       <h1>Profile Page</h1>
       <div className="kh-profile__user">
         <form onSubmit={handleSubmit} className="">
@@ -275,6 +275,6 @@ export default function Profile() {
           </button>
         </div>
       )}
-    </section>
+    </main>
   );
 }
