@@ -7,8 +7,11 @@ import {
   bannerFive,
   bannerSix,
 } from "../assets/js/images.js";
-import { homeBannerData } from "../assets/js/bannerContent.js";
+import { homeBannerData } from "../assets/js/dummyContent.js";
 import HomeBanner from "../components/HomeBanner.jsx";
+import CategoryList from "../components/categoryList.jsx";
+import RecipeCardBig from "../components/RecipeCardBig.jsx";
+import FlavorTagSlider from "../components/FlavorTagSlider.jsx";
 import Header from "../components/Header";
 
 export default function Home() {
@@ -28,36 +31,20 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="kh-homepage">
+    <main className="kh-homepage">
       <HomeBanner />
-      <Header />
-      <div className="containerCOmponent">
+      <div className="container">
         <div className="kh-recipeList">
           <h2>Food. Where Happiness Begins</h2>
-          <div className="kh-recipeList__wrapper">
-            <div className="kh-recipeList__item">
-              <img src="" alt="" />
-              <h3>Recipe Name</h3>
-            </div>
-          </div>
+          <CategoryList />
         </div>
         <div className="kh-recipeBlock">
-          <div className="kh-recipeBlock__item">
-            <div className="kh-recipeBlock__item--btns">
-              <button className="kh-recipeBlock__item--btn-more">M</button>
-              <button className="kh-recipeBlock__item--btn-fav">W</button>
-            </div>
-            <img src="" alt="" />
-            <div className="kh-recipeBlock__item--content">
-              <h3>Recipe Name</h3>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod
-              </p>
-            </div>
-          </div>
+          <RecipeCardBig />
+        </div>
+        <div className="kh-tag">
+          <FlavorTagSlider />
         </div>
       </div>
-    </div>
+    </main>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { homeBannerData } from "../assets/js/bannerContent.js";
+import { homeBannerData } from "../assets/js/dummyContent.js";
 
 const HomeBanner = () => {
   const [activeIndex, setActiveIndex] = useState(null);

@@ -63,14 +63,13 @@
   text-decoration: none;
   line-height: 1.5;
   font-family: "Josefin Sans", serif;
-  font-size: 18px;
+  font-size: 16px;
   transition: all 0.5s;
-  background-color: #303030;
   color: #fff;
 }
 
-.kh-homepage {
-  margin-top: -52px;
+main {
+  background-color: #303030;
 }
 
 .kh-slide {
@@ -291,11 +290,14 @@
   color: #fff;
 }
 
+.kh-header {
+  background-color: #303030;
+}
 .kh-header__wrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 30px;
+  padding: 20px 30px;
   position: relative;
 }
 .kh-header__head {
@@ -320,7 +322,6 @@
 }
 .kh-header__head--main-logo img {
   width: 100px;
-  height: 100px;
   -o-object-fit: contain;
      object-fit: contain;
 }

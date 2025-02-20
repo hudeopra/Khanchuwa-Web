@@ -65,16 +65,14 @@ $hover-color: #595959;
   text-decoration: none;
   line-height: 1.5;
   font-family: "Josefin Sans", serif;
-  font-size: 18px;
+  font-size: 16px;
   transition: all 0.5s;
-  background-color: #303030;
   color: $white;
 }
-
-// Homepage starts
-.kh-homepage {
-  margin-top: -52px;
+main {
+  background-color: #303030;
 }
+// Homepage starts
 
 // homepage Banner starts
 
@@ -319,11 +317,12 @@ $hover-color: #595959;
 // homepage ends
 // header start
 .kh-header {
+  background-color: #303030;
   &__wrapper {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 30px;
+    padding: 20px 30px;
     position: relative;
   }
   &__head {
@@ -346,7 +345,7 @@ $hover-color: #595959;
       }
       img {
         width: 100px;
-        height: 100px;
+
         object-fit: contain;
       }
     }
