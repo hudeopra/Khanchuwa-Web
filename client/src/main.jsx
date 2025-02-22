@@ -1,9 +1,9 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
+import "./assets/library/bootstrap/bootstrap.css"; // Import Bootstrap CSS
 import "./index.css";
 import "./custom.css"; // Import custom CSS
-import "./assets/library/bootstrap/bootstrap.css"; // Import Bootstrap CSS
 
 // redux-persist library
 import { presistor, store } from "./redux/store.js";

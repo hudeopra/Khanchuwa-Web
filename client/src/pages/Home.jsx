@@ -1,18 +1,12 @@
 import React, { useEffect } from "react";
-import {
-  bannerOne,
-  bannerTwo,
-  bannerThree,
-  bannerFour,
-  bannerFive,
-  bannerSix,
-} from "../assets/js/images.js";
-import { homeBannerData } from "../assets/js/dummyContent.js";
 import HomeBanner from "../components/HomeBanner.jsx";
-import CategoryList from "../components/categoryList.jsx";
+import CategoryList from "../components/CategoryList.jsx";
 import RecipeCardBig from "../components/RecipeCardBig.jsx";
 import FlavorTagSlider from "../components/FlavorTagSlider.jsx";
-import Header from "../components/Header";
+import CategorySlider from "../components/CategorySlider.jsx";
+
+import FavRecipeBlock from "../components/FavRecipeBlock.jsx";
+import { Collection } from "mongoose";
 
 export default function Home() {
   useEffect(() => {
@@ -42,8 +36,14 @@ export default function Home() {
           <RecipeCardBig />
         </div>
       </div>
-      <div className="kh-tag  py-5 mt-5">
+      <div className="kh-tag py-5 mt-5">
         <FlavorTagSlider />
+      </div>
+      <div className="kh-recipe-fav py-5">
+        <FavRecipeBlock />
+      </div>
+      <div className="kh-slider py-5">
+        <CategorySlider />
       </div>
     </main>
   );

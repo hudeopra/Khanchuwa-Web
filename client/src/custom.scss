@@ -63,12 +63,75 @@ $hover-color: #595959;
   box-sizing: border-box;
   list-style: none;
   text-decoration: none;
-  line-height: 1.5;
-  font-family: "Josefin Sans", serif;
-  font-size: 16px;
   transition: all 0.5s;
   color: $white;
 }
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  font-family: "Josefin Sans", serif;
+  font-size: 16px;
+}
+html {
+  scroll-behavior: smooth;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 500;
+}
+h1 {
+  font-size: 48px;
+  font-weight: 700;
+}
+h2 {
+  font-size: 40px;
+  margin-bottom: 30px;
+}
+h3 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+h4 {
+  font-size: 24px;
+}
+h5 {
+  font-size: 20px;
+}
+ul,
+ol,
+ul li,
+figure {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+a {
+  text-decoration: none;
+}
+a:focus,
+a:hover {
+  text-decoration: none;
+  transition: 1s ease all;
+  color: $primary-color;
+}
+a:focus,
+button:focus {
+  outline: none;
+}
+nav ol,
+nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 main {
   background-color: #303030;
 }
@@ -82,8 +145,8 @@ main {
   width: 100%;
 
   .kh-item {
-    width: 300px;
-    height: 400px;
+    width: clamp(150px, 10vw, 300px);
+    height: 300px;
     position: absolute;
     top: 75%;
     transform: translate(0, -50%);
@@ -112,11 +175,11 @@ main {
     }
 
     &:nth-child(3) {
-      left: calc(50% - 200px);
+      left: calc(74% - 200px);
     }
 
     &:nth-child(4) {
-      left: calc(50% + 120px);
+      left: calc(62% + 120px);
     }
 
     &:nth-child(5) {
@@ -331,6 +394,18 @@ main {
     align-items: center;
     gap: 30px;
     z-index: 2;
+    &--overlay {
+      position: relative;
+      top: 100px;
+      left: 0;
+      height: 100vh;
+      width: 100vw;
+      background-color: rgba(48, 48, 48, 0.644);
+      z-index: -1;
+      &.active {
+        position: fixed;
+      }
+    }
     &--main-logo {
       position: relative;
       padding-right: 30px;
@@ -351,30 +426,49 @@ main {
     }
     &--menu-wrapper {
       position: absolute;
-      top: 0;
-      left: -360px;
+      top: 97px;
+      left: -500px;
       background-color: $dark-charcol;
       color: $white;
       max-width: 360px;
-      height: 100vh;
-      padding-top: 100px;
-      z-index: -1;
+      height: calc(100vh - 117px);
+      padding: 10px;
+      z-index: 0;
+      overflow-y: scroll;
+      &::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+        background-color: #f5f5f5;
+      }
+
+      &::-webkit-scrollbar {
+        width: 4px;
+        background-color: #f5f5f5;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: #000000;
+        border: 1px solid #555555;
+      }
+
       &.active {
         left: -45px;
       }
     }
     &--menu-block {
-      p,
-      li {
-        padding: 15px 30px;
-      }
+      margin-bottom: 20px;
       p {
         color: $gray;
         font-weight: 500;
+        padding: 15px 15px 8px;
+        font-size: 20px;
       }
       li {
-        display: flex;
-        gap: 30px;
+        a {
+          display: flex;
+          align-items: flex-end;
+          gap: 20px;
+          padding: 15px 30px;
+        }
         &:hover {
           color: $primary-color;
           background-color: $hover-color;
@@ -408,3 +502,43 @@ main {
   }
 }
 // Header ends
+
+/* flabor tag start */
+
+.kh-flavor-tag-slider {
+  position: relative;
+  &:before,
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 150px;
+    height: 100%;
+    background: rgb(48, 48, 48);
+    background: -moz-linear-gradient(
+      90deg,
+      rgba(48, 48, 48, 1) 10%,
+      rgba(48, 48, 48, 0) 100%
+    );
+    background: -webkit-linear-gradient(
+      90deg,
+      rgba(48, 48, 48, 1) 10%,
+      rgba(48, 48, 48, 0) 100%
+    );
+    background: linear-gradient(
+      90deg,
+      rgba(48, 48, 48, 1) 10%,
+      rgba(48, 48, 48, 0) 100%
+    );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#303030",endColorstr="#303030",GradientType=1);
+    z-index: 1;
+  }
+  &:before {
+    left: 0;
+  }
+  &::after {
+    right: 0;
+    transform: rotate(180deg);
+  }
+}
+/* flabor tag end*/

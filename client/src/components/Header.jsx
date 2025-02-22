@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
-import { FaSearch } from "react-icons/fa";
-import { useSelector, useDispatch } from "react-redux"; // Import useDispatch
+import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
+import $ from "jquery"; // Import jQuery
 import {
   signOutUserStart,
   signOutUserSuccess,
@@ -76,8 +76,26 @@ export default function Header() {
     setIsMenuActive(false);
   };
 
+  useEffect(() => {
+    const navOffsetTop = $("header").height() + 120;
+
+    function navbarFixed() {
+      if ($(".header").length) {
+        $(window).scroll(function () {
+          const scroll = $(window).scrollTop();
+          if (scroll >= navOffsetTop) {
+            $(".header").addClass("header_fixed");
+          } else {
+            $(".header").removeClass("header_fixed");
+          }
+        });
+      }
+    }
+    navbarFixed();
+  }, []);
+
   return (
-    <header className="kh-header">
+    <header className="kh-header header">
       <div className="container-fluid">
         <div className="kh-header__wrapper">
           <div className="kh-header__head">
@@ -91,7 +109,6 @@ export default function Header() {
                 }`}
               >
                 <div className="kh-header__head--menu-block">
-                  <p></p>
                   <ul>
                     <li onClick={handleLinkClick}>
                       <Link to={"/"}>
@@ -112,11 +129,13 @@ export default function Header() {
                       </Link>
                     </li>
                     <li onClick={handleLinkClick}>
-                      <img
-                        src="../src/assets/img/search/chefLogo.png"
-                        alt="Khanchuwa Logo"
-                      />
-                      <span>Trending</span>
+                      <Link to={"/trending"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>Trending</span>
+                      </Link>
                     </li>
                     <li onClick={handleLinkClick}>
                       {randomRecipeId && (
@@ -133,11 +152,13 @@ export default function Header() {
                       )}
                     </li>
                     <li onClick={handleLinkClick}>
-                      <img
-                        src="../src/assets/img/search/chefLogo.png"
-                        alt="Khanchuwa Logo"
-                      />
-                      <span>Search</span>
+                      <Link to={"/search"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>Search</span>
+                      </Link>
                     </li>
                     <li onClick={handleLinkClick}>
                       <Link to={"/about"}>
@@ -209,18 +230,22 @@ export default function Header() {
                   <p>Connect</p>
                   <ul>
                     <li onClick={handleLinkClick}>
-                      <img
-                        src="../src/assets/img/search/chefLogo.png"
-                        alt="Khanchuwa Logo"
-                      />
-                      <span>What’s New</span>
+                      <Link to={"/whats-new"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>What’s New</span>
+                      </Link>
                     </li>
                     <li onClick={handleLinkClick}>
-                      <img
-                        src="../src/assets/img/search/chefLogo.png"
-                        alt="Khanchuwa Logo"
-                      />
-                      <span>Contact Us</span>
+                      <Link to={"/contact"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>Contact Us</span>
+                      </Link>
                     </li>
                   </ul>
                 </div>
@@ -228,21 +253,31 @@ export default function Header() {
                   <p>Resources</p>
                   <ul>
                     <li onClick={handleLinkClick}>
-                      <img
-                        src="../src/assets/img/search/chefLogo.png"
-                        alt="Khanchuwa Logo"
-                      />
-                      <span>FAQ</span>
+                      <Link to={"/faq"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>FAQ</span>
+                      </Link>
                     </li>
                     <li onClick={handleLinkClick}>
-                      <img
-                        src="../src/assets/img/search/chefLogo.png"
-                        alt="Khanchuwa Logo"
-                      />
-                      <span>Site Map</span>
+                      <Link to={"/site-map"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>Site Map</span>
+                      </Link>
                     </li>
                   </ul>
                 </div>
+                <div
+                  className={`kh-header__head--overlay  ${
+                    isMenuActive ? "active" : ""
+                  }`}
+                  onClick={toggleMenu}
+                ></div>
               </nav>
             </div>
             <div className="kh-header__head--main-logo">
@@ -267,9 +302,7 @@ export default function Header() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <button>
-                <FaSearch className="text-slate-600" />
-              </button>
+              <button></button>
             </form>
           </div>
           <div className="kh-header__account">

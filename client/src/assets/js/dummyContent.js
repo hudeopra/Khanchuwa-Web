@@ -152,6 +152,90 @@ const recipeCardBig = [
   },
 ];
 
+const categorySliderData = [
+  {
+    name: "Shrimp Scampi",
+    description: "Succulent shrimp in garlic butter, perfect over pasta.",
+    cookTime: "25 mins",
+    portion: "2 servings",
+    difficulty: "Medium",
+    image: "",
+  },
+  {
+    name: "Mushroom Risotto",
+    description: "Creamy risotto with sautéed mushrooms and cheese.",
+    cookTime: "35 mins",
+    portion: "3 servings",
+    difficulty: "Hard",
+    image: "",
+  },
+  {
+    name: "Grilled Cheese Sandwich",
+    description: "Melted cheese on crispy toasted bread.",
+    cookTime: "10 mins",
+    portion: "1 serving",
+    difficulty: "Easy",
+    image: "",
+  },
+  {
+    name: "Spaghetti Carbonara",
+    description: "Classic pasta dish with egg, cheese, and pancetta.",
+    cookTime: "20 mins",
+    portion: "2 servings",
+    difficulty: "Medium",
+    image: "",
+  },
+  {
+    name: "Chicken Tikka Masala",
+    description: "Tender chicken in a spiced creamy tomato sauce.",
+    cookTime: "30 mins",
+    portion: "4 servings",
+    difficulty: "Hard",
+    image: "",
+  },
+  // Additional items to reach 10
+  {
+    name: "Beef Bourguignon",
+    description: "A hearty French stew with tender beef simmered in red wine.",
+    cookTime: "2 hrs",
+    portion: "4 servings",
+    difficulty: "Hard",
+    image: "",
+  },
+  {
+    name: "Caesar Salad",
+    description: "Crisp romaine with creamy Caesar dressing and croutons.",
+    cookTime: "15 mins",
+    portion: "2 servings",
+    difficulty: "Easy",
+    image: "",
+  },
+  {
+    name: "Veggie Burger",
+    description: "A delicious alternative to beef burgers with a blend of vegetables.",
+    cookTime: "20 mins",
+    portion: "1 serving",
+    difficulty: "Medium",
+    image: "",
+  },
+  {
+    name: "Pad Thai",
+    description: "Traditional Thai stir-fried noodles with shrimp, tofu, and peanuts.",
+    cookTime: "30 mins",
+    portion: "2 servings",
+    difficulty: "Medium",
+    image: "",
+  },
+  {
+    name: "Chocolate Lava Cake",
+    description: "A warm cake with a gooey, melted chocolate center.",
+    cookTime: "25 mins",
+    portion: "1 serving",
+    difficulty: "Hard",
+    image: "",
+  },
+];
+
 const flavorTags = [
 
   // Basic tastes
@@ -283,4 +367,4 @@ const flavorTags = [
 ];
 
 
-export { homeBannerData, cuisineCategoryData, recipeCardBig, flavorTags };
+export { homeBannerData, cuisineCategoryData, recipeCardBig, categorySliderData, flavorTags };
