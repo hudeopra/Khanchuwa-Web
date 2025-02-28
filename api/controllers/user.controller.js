@@ -10,24 +10,43 @@ export const test = (req, res) => {
 
 // exporting to user.route.js
 export const updateUserInfo = async (req, res, next) => {
-  if (req.user.id !== req.params.id) return next(errorHandler(401, 'api/user.controller: you can only update your own account'));
+  if (req.user.id !== req.params.id)
+    return next(errorHandler(401, 'api/user.controller: you can only update your own account'));
+
   try {
     if (req.body.password) {
       req.body.password = await bcrypt.hash(req.body.password, 12);
     }
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, {
-      $set: {
-        // ...req.body is not used as there may be individual fields to update
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password,
-        avatar: req.body.avatar,
-      }
-    }, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          username: req.body.username,
+          email: req.body.email,
+          password: req.body.password,
+          avatar: req.body.avatar,
+          fullname: req.body.fullname,
+          dateOfBirth: req.body.dateOfBirth,
+          gender: req.body.gender,
+          emails: req.body.emails,
+          phoneNumbers: req.body.phoneNumbers,
+          addresses: req.body.addresses,
+          socialMedia: req.body.socialMedia,
+          preferences: {
+            notifications: req.body.preferences.notifications,
+            dietaryRestrictions: req.body.preferences.dietaryRestrictions,
+            allergies: req.body.preferences.allergies,
+            tastePreferences: req.body.preferences.tastePreferences,
+            theme: req.body.preferences.theme,
+            language: req.body.preferences.language,
+          },
+        },
+      },
+      { new: true }
+    );
 
     const { password, ...rest } = updatedUser._doc; // remove password from the response
     res.status(200).json(rest);
-
   } catch (error) {
     next(errorHandler(500, 'api/user.controller: Internal Server Error'));
   }

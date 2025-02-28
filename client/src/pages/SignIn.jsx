@@ -68,41 +68,49 @@ export default function SignIn() {
   console.log("SignIn: ", userData); // SignIn form data
   return (
     <main className="kh-signin">
-      <h1>Sign In</h1>
-      <form
-        onSubmit={handleSubmit} // Ensure the form is making a POST request
-        className="kh-signin__form kh-form flex gap-5 p-12 border"
-      >
-        <div className="kh-signin__input-wrapper">
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            placeholder="Email"
-            id="email"
-            name="email" // Corrected name
-            onChange={handleChange}
-          />
+      <div className="container">
+        <div className="col-12">
+          <h1>Sign In</h1>
+          <form
+            onSubmit={handleSubmit} // Ensure the form is making a POST request
+            className="kh-signin__form kh-form flex gap-5 p-12 "
+          >
+            <div className="kh-signin__input-wrapper">
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                placeholder="Email"
+                id="email"
+                name="email" // Corrected name
+                onChange={handleChange}
+              />
+            </div>
+            <div className="kh-signin__input-wrapper">
+              <label htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password" // Corrected name
+                placeholder="Password"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="kh-sigin__half">
+              <button disabled={loading}>
+                {loading ? "Loading..." : "SignIn"}
+              </button>
+              <OAuth />
+            </div>
+          </form>
+          <div className="kh-signin__gotacc">
+            <p>
+              Dont have an account?
+              <Link to="/SignUp">Sign Up</Link>
+            </p>
+          </div>
+          {error && <p className="">{error}</p>}
         </div>
-        <div className="kh-signin__input-wrapper">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password" // Corrected name
-            placeholder="Password"
-            onChange={handleChange}
-          />
-        </div>
-        <button disabled={loading}>{loading ? "Loading..." : "SignIn"}</button>
-        <OAuth />
-      </form>
-      <div className="kh-signin__gotacc">
-        <p>
-          Dont have an account?
-          <Link to="/SignUp">Sign Up</Link>
-        </p>
       </div>
-      {error && <p className="">{error}</p>}
     </main>
   );
 }

@@ -26,25 +26,39 @@ export default function RecipeList() {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <main className="p-3 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-semibold text-center my-7">All Recipes</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {recipes.map((recipe) => (
-          <Link
-            key={recipe._id}
-            to={`/recipes/${recipe._id}`}
-            className="border p-3 rounded-lg"
-          >
-            <img
-              src={recipe.imageUrls[0]}
-              alt={recipe.recipeName}
-              className="w-full h-40 object-cover rounded-lg"
-            />
-            <h2 className="text-xl font-semibold mt-2">{recipe.recipeName}</h2>
-            <p className="text-gray-700">{recipe.description}</p>
-            <p className="text-gray-500">By {recipe.chefName}</p>
-          </Link>
-        ))}
+    <main className="kh-recipe-list">
+      <div className="container">
+        <div className="row">
+          <div className="col-12">
+            <h1 className="text-3xl font-semibold text-center my-7">
+              All Recipes
+            </h1>
+          </div>
+          {recipes.map((recipe) => (
+            <div className="col-12 col-lg-3 col-md-4 col-sm-6 mb-3">
+              <div className="kh-recipe-block__item mb-3">
+                <Link
+                  key={recipe._id}
+                  to={`/recipes/${recipe._id}`}
+                  className=""
+                >
+                  <div className="kh-recipe-block__content">
+                    <h3 className="">{recipe.recipeName}</h3>
+                    <p className="">{recipe.description}</p>
+                    <span className="">By {recipe.chefName}</span>
+                  </div>
+                  <div className="kh-recipe-block__item--img">
+                    <img
+                      src={recipe.imageUrls[0]}
+                      alt={recipe.recipeName}
+                      className=""
+                    />
+                  </div>
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </main>
   );

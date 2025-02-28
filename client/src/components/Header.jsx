@@ -316,18 +316,10 @@ export default function Header() {
               </Link>
             ) : (
               <>
-                <Link
-                  to="/signin"
-                  className="text-slate-700 hover:underline"
-                  onClick={handleLinkClick}
-                >
+                <Link to="/signin" className="" onClick={handleLinkClick}>
                   Sign In
                 </Link>
-                <Link
-                  to="/signup"
-                  className="text-slate-700 hover:underline ml-4"
-                  onClick={handleLinkClick}
-                >
+                <Link to="/signup" className="ml-4 " onClick={handleLinkClick}>
                   Sign Up
                 </Link>
               </>

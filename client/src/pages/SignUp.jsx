@@ -62,42 +62,53 @@ export default function SignUp() {
 
   return (
     <main className="kh-signup">
-      <h1>Sign Up</h1>
-      <form
-        onSubmit={handleSubmit}
-        className="kh-signup__form kh-form flex gap-5 p-12 border"
-      >
-        <div className="kh-signup__input-wrapper">
-          <label htmlFor="username">Username</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            onChange={handleChange}
-          />
+      <div className="container">
+        <div className="col-12 ">
+          <h1>Sign Up</h1>
+          <form
+            onSubmit={handleSubmit}
+            className="kh-signup__form kh-form flex gap-5 p-12 "
+          >
+            <div className="kh-signup__input-wrapper">
+              <label htmlFor="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="kh-signup__input-wrapper">
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="kh-signup__input-wrapper">
+              <label htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                onChange={handleChange}
+              />
+            </div>
+            <button disabled={loading}>
+              {loading ? "Loading..." : "Sign Up"}
+            </button>
+          </form>
+          <div className="kh-signup__gotacc">
+            <p>
+              Already have an account?
+              <Link to="/signin">Sign In</Link>
+            </p>
+          </div>
+          {error && <p className="">{error}</p>}
         </div>
-        <div className="kh-signup__input-wrapper">
-          <label htmlFor="email">Email</label>
-          <input type="email" id="email" name="email" onChange={handleChange} />
-        </div>
-        <div className="kh-signup__input-wrapper">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            onChange={handleChange}
-          />
-        </div>
-        <button disabled={loading}>{loading ? "Loading..." : "Sign Up"}</button>
-      </form>
-      <div className="kh-signup__gotacc">
-        <p>
-          Already have an account?
-          <Link to="/signin">Sign In</Link>
-        </p>
       </div>
-      {error && <p className="">{error}</p>}
     </main>
   );
 }

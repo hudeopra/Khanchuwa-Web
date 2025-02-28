@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="kh-footer py-5">
+    <footer className="kh-footer pt-5">
       <div className="container">
-        <div className="kh-footer__wrapper pt-5">
+        <div className="kh-footer__wrapper pt-5 ">
           <nav className="kh-footer__nav-wrapper">
             <h4>Recipe Courses</h4>
             <ul>
@@ -175,6 +175,31 @@ const Footer = () => {
               </li>
             </ul>
           </nav>
+        </div>
+        <div className="kh-footer__foot">
+          <div className="kh-footer__foot--copyright">
+            <p>Copyright © 2025 Khanchuwa. All rights reserved.</p>
+          </div>
+          <div className="kh-footer__foot--menu">
+            <ul>
+              <li>
+                <Link to="/quick-easy">About Khanchuwa</Link>
+              </li>
+              <li>
+                <Link to="/quick-easy">Terms of Use</Link>
+              </li>
+              <li>
+                <Link to="/quick-easy">FAQ</Link>
+              </li>
+              <li>
+                <Link to="/quick-easy">Contact Us</Link>
+              </li>
+              <li>
+                <Link to="/quick-easy">Site Map</Link>
+              </li>
+            </ul>
+          </div>
+          <div className="kh-footer__foot--nation">Nepal</div>
         </div>
       </div>
     </footer>

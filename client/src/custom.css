@@ -18,11 +18,10 @@
 .kh-input-wrapper button {
   width: 100%;
 }
-
-.kh-profile {
-  max-width: 600px;
-  margin: auto;
+.kh-input-wrapper input {
+  background-color: transparent;
 }
+
 .kh-profile h1 {
   text-align: center;
 }

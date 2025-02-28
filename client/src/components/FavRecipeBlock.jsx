@@ -1,9 +1,15 @@
 import React from "react";
 
-export const FavRecipeBlock = () => {
+export const FavRecipeBlock = ({ variant }) => {
+  // Optionally use "variant" prop to conditionally add a class
+  const wrapperClass =
+    variant === "inverted"
+      ? "kh-recipe-fav__wrapper inverted"
+      : "kh-recipe-fav__wrapper";
+
   return (
     <div className="container">
-      <div className="kh-recipe-fav__wrapper">
+      <div className={wrapperClass}>
         <div className="kh-recipe-fav__content">
           <div className="kh-recipe-fav__img">
             <img src="" alt="Recipe image" />

@@ -6,7 +6,7 @@ import FlavorTagSlider from "../components/FlavorTagSlider.jsx";
 import CategorySlider from "../components/CategorySlider.jsx";
 
 import FavRecipeBlock from "../components/FavRecipeBlock.jsx";
-import { Collection } from "mongoose";
+import CustomSelect from "../components/CustomSelect.jsx";
 
 export default function Home() {
   useEffect(() => {
@@ -41,6 +41,21 @@ export default function Home() {
       </div>
       <div className="kh-recipe-fav py-5">
         <FavRecipeBlock />
+      </div>
+      <div className="kh-slider py-5">
+        <CategorySlider />
+      </div>
+      <div className="kh-slider py-5">
+        <CategorySlider />
+      </div>
+      {/* <div className="test">
+        <CustomSelect />
+      </div> */}
+      <div className="kh-recipe-fav py-5">
+        <FavRecipeBlock variant="inverted" />
+      </div>
+      <div className="kh-slider py-5">
+        <CategorySlider />
       </div>
       <div className="kh-slider py-5">
         <CategorySlider />

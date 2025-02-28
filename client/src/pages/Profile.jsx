@@ -19,6 +19,7 @@ import {
   signOutUserFailure,
 } from "../redux/user/userSlice";
 import { Link } from "react-router-dom";
+import BootstrapAlert from "../components/BootstrapAlert";
 
 // import { getAuth } from "firebase/auth";
 
@@ -28,6 +29,7 @@ export default function Profile() {
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
+  // userData now tracks additional fields
   const [userData, setUserData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -44,10 +46,45 @@ export default function Profile() {
       const user = currentUser.user || currentUser;
       console.log("Current User Data:", user);
       setUserData({
+        // retained fields
         username: user.username,
         email: user.email,
         avatar: user.avatar,
         password: user.password,
+        // new fields:
+        fillname: user.fillname || "",
+        dateOfBirth: user.dateOfBirth || "",
+        gender: user.gender || "",
+        emails: user.emails || "",
+        phoneNumbers:
+          user.phoneNumbers && user.phoneNumbers.length > 0
+            ? user.phoneNumbers
+            : [{ number: "", isPrimary: false }],
+        addresses:
+          user.addresses && user.addresses.length > 0
+            ? user.addresses
+            : [
+                {
+                  type: "",
+                  street: "",
+                  city: "",
+                  state: "",
+                  zip: "",
+                  country: "",
+                },
+              ],
+        socialMedia:
+          user.socialMedia && user.socialMedia.length > 0
+            ? user.socialMedia
+            : [{ platform: "", url: "" }],
+        preferences: user.preferences || {
+          dietaryRestrictions: [],
+          allergies: [],
+          tastePreferences: [],
+          theme: "",
+          language: "",
+          notifications: { email: false, push: false },
+        },
       });
     }
   }, [currentUser]);
@@ -82,6 +119,20 @@ export default function Profile() {
     setUserData({ ...userData, [e.target.id]: e.target.value });
   };
 
+  // Helper for updating array fields
+  const handleArrayChange = (e, field, index, key, inputType = "text") => {
+    const value = inputType === "checkbox" ? e.target.checked : e.target.value;
+    const items = userData[field] ? [...userData[field]] : [];
+    items[index] = { ...items[index], [key]: value };
+    setUserData({ ...userData, [field]: items });
+  };
+
+  const addArrayItem = (field, newItem) => {
+    const items = userData[field] ? [...userData[field]] : [];
+    items.push(newItem);
+    setUserData({ ...userData, [field]: items });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -90,7 +141,7 @@ export default function Profile() {
       console.log("User ID: ", userId); // verify user id is available and accurate
       console.log("User Data: ", userData);
       if (userId) {
-        const res = await fetch(` /api/user/update/${userId}`, {
+        const res = await fetch(`/api/user/update/${userId}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -227,6 +278,475 @@ export default function Profile() {
               onChange={handelChange}
             />
           </div>
+          {/* New single fields */}
+          <div className="kh-input-wrapper">
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={userData.fullname || ""}
+              id="fullnamelanguage"
+              className="border p-3 rounded-lg"
+              onChange={handelChange}
+            />
+          </div>
+          <div className="kh-input-wrapper">
+            <input
+              type="date"
+              placeholder="Date of Birth"
+              value={
+                userData.dateOfBirth ? userData.dateOfBirth.split("T")[0] : ""
+              }
+              id="dateOfBirth"
+              className="border p-3 rounded-lg"
+              onChange={handelChange}
+            />
+          </div>
+          <div className="kh-input-wrapper">
+            <label>Gender:</label>
+            <div className="flex space-x-4">
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  id="gender"
+                  value="male"
+                  checked={userData.gender === "male"}
+                  onChange={handelChange}
+                />
+                Male
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  id="gender"
+                  value="Female"
+                  checked={userData.gender === "Female"}
+                  onChange={handelChange}
+                />
+                Female
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  id="gender"
+                  value="other"
+                  checked={userData.gender === "other"}
+                  onChange={handelChange}
+                />
+                Other
+              </label>
+            </div>
+          </div>
+          <div className="kh-input-wrapper">
+            <input
+              type="text"
+              placeholder="Alternative Emails"
+              value={userData.emails || ""}
+              id="emails"
+              className="border p-3 rounded-lg"
+              onChange={handelChange}
+            />
+          </div>
+          {/* Dynamic array field for Phone Numbers */}
+          <div className="kh-input-wrapper">
+            <label>Phone Numbers:</label>
+            {userData.phoneNumbers &&
+              userData.phoneNumbers.map((phone, index) => (
+                <div key={index} className="flex space-x-2">
+                  <input
+                    type="text"
+                    placeholder="Phone Number"
+                    value={phone.number || ""}
+                    onChange={(e) =>
+                      handleArrayChange(e, "phoneNumbers", index, "number")
+                    }
+                    className="border p-2 rounded"
+                  />
+                  <label>
+                    Primary
+                    <input
+                      type="checkbox"
+                      checked={phone.isPrimary || false}
+                      onChange={(e) =>
+                        handleArrayChange(
+                          e,
+                          "phoneNumbers",
+                          index,
+                          "isPrimary",
+                          "checkbox"
+                        )
+                      }
+                    />
+                  </label>
+                </div>
+              ))}
+            <button
+              type="button"
+              onClick={() => {
+                if ((userData.phoneNumbers?.length || 0) < 2) {
+                  addArrayItem("phoneNumbers", {
+                    number: "",
+                    isPrimary: false,
+                  });
+                }
+              }}
+              disabled={(userData.phoneNumbers?.length || 0) >= 2}
+            >
+              +
+            </button>
+          </div>
+          {/* Dynamic array field for Addresses */}
+          <div className="kh-input-wrapper">
+            <label>Addresses:</label>
+            {userData.addresses &&
+              userData.addresses.map((addr, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col space-y-1 border p-2 mb-2"
+                >
+                  <input
+                    type="text"
+                    placeholder="Type"
+                    value={addr.type || ""}
+                    onChange={(e) =>
+                      handleArrayChange(e, "addresses", index, "type")
+                    }
+                    className="border p-2 rounded"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Street"
+                    value={addr.street || ""}
+                    onChange={(e) =>
+                      handleArrayChange(e, "addresses", index, "street")
+                    }
+                    className="border p-2 rounded"
+                  />
+                  <input
+                    type="text"
+                    placeholder="City"
+                    value={addr.city || ""}
+                    onChange={(e) =>
+                      handleArrayChange(e, "addresses", index, "city")
+                    }
+                    className="border p-2 rounded"
+                  />
+                  <input
+                    type="text"
+                    placeholder="State"
+                    value={addr.state || ""}
+                    onChange={(e) =>
+                      handleArrayChange(e, "addresses", index, "state")
+                    }
+                    className="border p-2 rounded"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Zip"
+                    value={addr.zip || ""}
+                    onChange={(e) =>
+                      handleArrayChange(e, "addresses", index, "zip")
+                    }
+                    className="border p-2 rounded"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Country"
+                    value={addr.country || ""}
+                    onChange={(e) =>
+                      handleArrayChange(e, "addresses", index, "country")
+                    }
+                    className="border p-2 rounded"
+                  />
+                </div>
+              ))}
+            <button
+              type="button"
+              onClick={() => {
+                if ((userData.addresses?.length || 0) < 2) {
+                  addArrayItem("addresses", {
+                    type: "",
+                    street: "",
+                    city: "",
+                    state: "",
+                    zip: "",
+                    country: "",
+                  });
+                }
+              }}
+              disabled={(userData.addresses?.length || 0) >= 2}
+            >
+              +
+            </button>
+          </div>
+          {/* Dynamic array field for Social Media */}
+          <div className="kh-input-wrapper">
+            <label>Social Media:</label>
+            {userData.socialMedia &&
+              userData.socialMedia.map((sm, index) => (
+                <div key={index} className="flex space-x-2">
+                  <input
+                    type="text"
+                    placeholder="Platform"
+                    value={sm.platform || ""}
+                    onChange={(e) =>
+                      handleArrayChange(e, "socialMedia", index, "platform")
+                    }
+                    className="border p-2 rounded"
+                  />
+                  <input
+                    type="text"
+                    placeholder="URL"
+                    value={sm.url || ""}
+                    onChange={(e) =>
+                      handleArrayChange(e, "socialMedia", index, "url")
+                    }
+                    className="border p-2 rounded"
+                  />
+                </div>
+              ))}
+            <button
+              type="button"
+              onClick={() => {
+                if ((userData.socialMedia?.length || 0) < 5) {
+                  addArrayItem("socialMedia", { platform: "", url: "" });
+                }
+              }}
+              disabled={(userData.socialMedia?.length || 0) >= 5}
+            >
+              +
+            </button>
+          </div>
+          {/* Preferences section */}
+          <div className="kh-input-wrapper">
+            <label>Preferences:</label>
+            <input
+              type="text"
+              placeholder="Theme"
+              value={userData.preferences?.theme || ""}
+              id="preferences.theme"
+              className="border p-3 rounded-lg"
+              onChange={(e) =>
+                setUserData({
+                  ...userData,
+                  preferences: {
+                    ...userData.preferences,
+                    theme: e.target.value,
+                  },
+                })
+              }
+            />
+            <input
+              type="text"
+              placeholder="Language"
+              value={userData.preferences?.language || ""}
+              id="preferences.language"
+              className="border p-3 rounded-lg"
+              onChange={(e) =>
+                setUserData({
+                  ...userData,
+                  preferences: {
+                    ...userData.preferences,
+                    language: e.target.value,
+                  },
+                })
+              }
+            />
+            <div className="kh-input-wrapper">
+              <label>Dietary Restrictions:</label>
+              {userData.preferences?.dietaryRestrictions &&
+                userData.preferences.dietaryRestrictions.map((item, index) => (
+                  <div key={index}>
+                    <input
+                      type="text"
+                      placeholder="Restriction"
+                      value={item || ""}
+                      onChange={(e) => {
+                        const restrictions = [
+                          ...userData.preferences.dietaryRestrictions,
+                        ];
+                        restrictions[index] = e.target.value;
+                        setUserData({
+                          ...userData,
+                          preferences: {
+                            ...userData.preferences,
+                            dietaryRestrictions: restrictions,
+                          },
+                        });
+                      }}
+                      className="border p-2 rounded"
+                    />
+                  </div>
+                ))}
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    (userData.preferences?.dietaryRestrictions?.length || 0) < 5
+                  ) {
+                    const restrictions = userData.preferences
+                      ?.dietaryRestrictions
+                      ? [...userData.preferences.dietaryRestrictions]
+                      : [];
+                    restrictions.push("");
+                    setUserData({
+                      ...userData,
+                      preferences: {
+                        ...userData.preferences,
+                        dietaryRestrictions: restrictions,
+                      },
+                    });
+                  }
+                }}
+                disabled={
+                  (userData.preferences?.dietaryRestrictions?.length || 0) >= 5
+                }
+              >
+                +
+              </button>
+            </div>
+            <div className="kh-input-wrapper">
+              <label>Allergies:</label>
+              {userData.preferences?.allergies &&
+                userData.preferences.allergies.map((item, index) => (
+                  <div key={index}>
+                    <input
+                      type="text"
+                      placeholder="Allergy"
+                      value={item || ""}
+                      onChange={(e) => {
+                        const allergies = [...userData.preferences.allergies];
+                        allergies[index] = e.target.value;
+                        setUserData({
+                          ...userData,
+                          preferences: {
+                            ...userData.preferences,
+                            allergies: allergies,
+                          },
+                        });
+                      }}
+                      className="border p-2 rounded"
+                    />
+                  </div>
+                ))}
+              <button
+                type="button"
+                onClick={() => {
+                  if ((userData.preferences?.allergies?.length || 0) < 5) {
+                    const allergies = userData.preferences?.allergies
+                      ? [...userData.preferences.allergies]
+                      : [];
+                    allergies.push("");
+                    setUserData({
+                      ...userData,
+                      preferences: {
+                        ...userData.preferences,
+                        allergies: allergies,
+                      },
+                    });
+                  }
+                }}
+                disabled={(userData.preferences?.allergies?.length || 0) >= 5}
+              >
+                +
+              </button>
+            </div>
+            <div className="kh-input-wrapper">
+              <label>Taste Preferences:</label>
+              {userData.preferences?.tastePreferences &&
+                userData.preferences.tastePreferences.map((item, index) => (
+                  <div key={index}>
+                    <input
+                      type="text"
+                      placeholder="Preference"
+                      value={item || ""}
+                      onChange={(e) => {
+                        const tastes = [
+                          ...userData.preferences.tastePreferences,
+                        ];
+                        tastes[index] = e.target.value;
+                        setUserData({
+                          ...userData,
+                          preferences: {
+                            ...userData.preferences,
+                            tastePreferences: tastes,
+                          },
+                        });
+                      }}
+                      className="border p-2 rounded"
+                    />
+                  </div>
+                ))}
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    (userData.preferences?.tastePreferences?.length || 0) < 5
+                  ) {
+                    const tastes = userData.preferences?.tastePreferences
+                      ? [...userData.preferences.tastePreferences]
+                      : [];
+                    tastes.push("");
+                    setUserData({
+                      ...userData,
+                      preferences: {
+                        ...userData.preferences,
+                        tastePreferences: tastes,
+                      },
+                    });
+                  }
+                }}
+                disabled={
+                  (userData.preferences?.tastePreferences?.length || 0) >= 5
+                }
+              >
+                +
+              </button>
+            </div>
+            <div className="kh-input-wrapper">
+              <label>
+                Notifications Email:
+                <input
+                  type="checkbox"
+                  checked={userData.preferences?.notifications?.email || false}
+                  onChange={(e) =>
+                    setUserData({
+                      ...userData,
+                      preferences: {
+                        ...userData.preferences,
+                        notifications: {
+                          ...userData.preferences.notifications,
+                          email: e.target.checked,
+                        },
+                      },
+                    })
+                  }
+                />
+              </label>
+              <label>
+                Notifications Push:
+                <input
+                  type="checkbox"
+                  checked={userData.preferences?.notifications?.push || false}
+                  onChange={(e) =>
+                    setUserData({
+                      ...userData,
+                      preferences: {
+                        ...userData.preferences,
+                        notifications: {
+                          ...userData.preferences.notifications,
+                          push: e.target.checked,
+                        },
+                      },
+                    })
+                  }
+                />
+              </label>
+            </div>
+          </div>
+          {/* ...existing submit button and action links... */}
           <div className="kh-input-wrapper">
             <button
               disabled={loading}
@@ -255,10 +775,16 @@ export default function Profile() {
               Sign out
             </span>
           </div>
-          <p className="text-red-700 mt-5">{error ? error : ""}</p>
-          <p className="text-green-700 mt-5">
-            {updateSuccess ? "User is updated successfully!" : ""}
-          </p>
+          {error && (
+            <BootstrapAlert type="error" message={error} duration={5000} />
+          )}
+          {updateSuccess && (
+            <BootstrapAlert
+              type="success"
+              message="User is updated successfully!"
+              duration={5000}
+            />
+          )}
         </form>
       </div>
       {showDeleteConfirmation && (
