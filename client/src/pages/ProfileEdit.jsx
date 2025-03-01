@@ -53,10 +53,10 @@ export default function Profile() {
         avatar: user.avatar,
         password: user.password,
         // new fields:
-        fullname: user.fullname,
-        dateOfBirth: user.dateOfBirth,
-        gender: user.gender,
-        emails: user.emails,
+        fullname: user.fullname || "",
+        dateOfBirth: user.dateOfBirth || "",
+        gender: user.gender || "",
+        emails: user.emails || "",
         phoneNumbers:
           user.phoneNumbers && user.phoneNumbers.length > 0
             ? user.phoneNumbers
@@ -302,7 +302,7 @@ export default function Profile() {
               type="text"
               placeholder="Full Name"
               value={userData.fullname || ""}
-              id="fullname"
+              id="fullnamelanguage"
               className="border p-3 rounded-lg"
               onChange={handelChange}
             />
@@ -806,10 +806,10 @@ export default function Profile() {
         </div>
       )}
 
-      <ul className="nav nav-tabs" id="myTab" role="tablist">
-        <li className="nav-item" role="presentation">
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
           <button
-            className="nav-link active"
+            class="nav-link active"
             id="home-tab"
             data-toggle="tab"
             data-target="#home"
@@ -818,12 +818,12 @@ export default function Profile() {
             aria-controls="home"
             aria-selected="true"
           >
-            Profile
+            Home
           </button>
         </li>
-        <li className="nav-item" role="presentation">
+        <li class="nav-item" role="presentation">
           <button
-            className="nav-link"
+            class="nav-link"
             id="profile-tab"
             data-toggle="tab"
             data-target="#profile"
@@ -832,12 +832,12 @@ export default function Profile() {
             aria-controls="profile"
             aria-selected="false"
           >
-            Profile edit
+            Profile
           </button>
         </li>
-        <li className="nav-item" role="presentation">
+        <li class="nav-item" role="presentation">
           <button
-            className="nav-link"
+            class="nav-link"
             id="contact-tab"
             data-toggle="tab"
             data-target="#contact"
@@ -850,17 +850,24 @@ export default function Profile() {
           </button>
         </li>
       </ul>
-      <div className="tab-content" id="myTabContent">
+      <div class="tab-content" id="myTabContent">
         <div
-          className="tab-pane fade show active"
+          class="tab-pane fade show active"
           id="home"
           role="tabpanel"
           aria-labelledby="home-tab"
         >
-          show all user information
+          Placeholder content for the tab panel. This one relates to the home
+          tab. Takes you miles high, so high, 'cause she’s got that one
+          international smile. There's a stranger in my bed, there's a pounding
+          in my head. Oh, no. In another life I would make you stay. ‘Cause I,
+          I’m capable of anything. Suiting up for my crowning battle. Used to
+          steal your parents' liquor and climb to the roof. Tone, tan fit and
+          ready, turn it up cause its gettin' heavy. Her love is like a drug. I
+          guess that I forgot I had a choice.
         </div>
         <div
-          className="tab-pane fade"
+          class="tab-pane fade"
           id="profile"
           role="tabpanel"
           aria-labelledby="profile-tab"
@@ -874,7 +881,7 @@ export default function Profile() {
           like the 4th of July! But you'd rather get wasted.
         </div>
         <div
-          className="tab-pane fade"
+          class="tab-pane fade"
           id="contact"
           role="tabpanel"
           aria-labelledby="contact-tab"

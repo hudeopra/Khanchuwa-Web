@@ -37,7 +37,6 @@ export const updateUserInfo = async (req, res, next) => {
             dietaryRestrictions: req.body.preferences.dietaryRestrictions,
             allergies: req.body.preferences.allergies,
             tastePreferences: req.body.preferences.tastePreferences,
-            theme: req.body.preferences.theme,
             language: req.body.preferences.language,
           },
         },

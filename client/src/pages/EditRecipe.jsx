@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   getDownloadURL,
   getStorage,
@@ -6,51 +8,69 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { app } from "../firebase";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
-export default function CreateRecipe() {
-  const { currentUser } = useSelector((state) => state.user);
+export default function EditRecipe() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    imageUrls: [],
-    recipeName: "",
-    description: "",
-    diet: "",
-    ingredients: [
-      { name: "", quantity: "" },
-      { name: "", quantity: "" },
-    ], // default to 2 ingredients
-    prepTime: "",
-    cookTime: "",
-    servings: "",
-    difficulty: "",
-    chefName: "",
-    videoUrl: "",
-    flavourTags: [""],
-    cuisines: [""], // renamed field
-    bannerImgUrl: "", // Banner image URL
-    favImgUrl: "", // Favorite image URL
-    shortDescription: "",
-    nutritionalInfo: [
-      { name: "", value: "" },
-      { name: "", value: "" },
-    ], // default to 2 items
-    cookInstructions: [], // renamed from steps
-    prepInstructions: [], // renamed from prepNotes
-    tags: [],
-  });
-  const [imageUploadError, setImageUploadError] = useState(false);
+  const { currentUser } = useSelector((state) => state.user);
+  const [recipe, setRecipe] = useState(null);
+  const [formData, setFormData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [imageUploadError, setImageUploadError] = useState(false);
 
-  // Set chefName from currentUser’s username
   useEffect(() => {
-    if (currentUser && currentUser.username) {
-      setFormData((prev) => ({ ...prev, chefName: currentUser.username }));
+    async function fetchRecipe() {
+      try {
+        const res = await fetch(`/api/recipe/${id}`);
+        const data = await res.json();
+        if (!data || data.userRef !== currentUser._id) {
+          setError("You are not authorized to edit this recipe.");
+          return;
+        }
+        setRecipe(data);
+        // Initialize formData with fetched recipe data including new attributes.
+        setFormData({
+          imageUrls: data.imageUrls || [],
+          recipeName: data.recipeName || "",
+          description: data.description || "",
+          diet: data.diet || "",
+          ingredients:
+            data.ingredients && data.ingredients.length > 0
+              ? data.ingredients
+              : [{ name: "", quantity: "" }], // default to 2 ingredients if empty
+          prepTime: data.prepTime || "",
+          cookTime: data.cookTime || "",
+          servings: data.servings || "",
+          difficulty: data.difficulty || "",
+          chefName: data.chefName || "",
+          videoUrl: data.videoUrl || "",
+          flavourTags: data.flavourTags || [""],
+          cuisines: data.cuisines || [""],
+          bannerImgUrl: data.bannerImgUrl || "",
+          favImgUrl: data.favImgUrl || "",
+          // new keys:
+          shortDescription: data.shortDescription || "",
+          nutritionalInfo:
+            data.nutritionalInfo && Array.isArray(data.nutritionalInfo)
+              ? data.nutritionalInfo
+              : [
+                  { name: "", value: "" },
+                  { name: "", value: "" },
+                ],
+          cookInstructions: data.cookInstructions || [], // updated from steps
+          prepInstructions: data.prepInstructions || [], // updated from prepNotes
+          tags: data.tags || [],
+        });
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     }
-  }, [currentUser]);
+    if (currentUser) fetchRecipe();
+  }, [id, currentUser]);
 
   const handleArrayChange = (field, index, value) => {
     const newArr = [...formData[field]];
@@ -62,9 +82,23 @@ export default function CreateRecipe() {
     setFormData({ ...formData, [field]: [...formData[field], ""] });
   };
 
-  // Modified: Update handleImageSubmit to accept filesToUpload parameter
+  const removeField = (field, index) => {
+    if (formData[field].length >= 3) {
+      const newArr = formData[field].filter((_, i) => i !== index);
+      setFormData({ ...formData, [field]: newArr });
+    }
+  };
+
+  const handleChange = (e) => {
+    const { id, value, type, name } = e.target;
+    if (type === "radio") {
+      setFormData({ ...formData, [name]: value });
+    } else {
+      setFormData({ ...formData, [id]: value });
+    }
+  };
+
   const handleImageSubmit = (filesToUpload) => {
-    // Allow upload if at least 1 and (existing + new) images are <= 6
     if (
       filesToUpload.length > 0 &&
       filesToUpload.length + formData.imageUrls.length <= 6
@@ -85,24 +119,22 @@ export default function CreateRecipe() {
           setUploading(false);
         })
         .catch((err) => {
-          setImageUploadError("CreateRecipe.jsx: Error uploading images");
+          setImageUploadError("Error uploading images");
           setUploading(false);
         });
     } else {
-      setImageUploadError("CreateRecipe.jsx: Upload between 1 to 6 images");
+      setImageUploadError("Upload between 1 to 6 images");
       setUploading(false);
     }
   };
 
-  // New function: Handle file selection and trigger image upload if within limit
   const handleFileSelect = (e) => {
-    const newFiles = Array.from(e.target.files); // convert FileList to Array
+    const newFiles = Array.from(e.target.files);
     const totalImages = formData.imageUrls.length + newFiles.length;
     if (totalImages <= 6) {
-      // Upload new selection immediately
       handleImageSubmit(newFiles);
     } else {
-      setImageUploadError("CreateRecipe.jsx: Upload between 1 to 6 images");
+      setImageUploadError("Upload between 1 to 6 images");
     }
   };
 
@@ -131,81 +163,6 @@ export default function CreateRecipe() {
     });
   };
 
-  const handleRemoveImage = (index) => {
-    setFormData({
-      ...formData,
-      imageUrls: formData.imageUrls.filter((_, i) => i !== index),
-    });
-  };
-
-  const handleChange = (e) => {
-    const { id, value, type, name } = e.target;
-    if (type === "radio") {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [id]: value,
-      });
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log(formData);
-    try {
-      if (formData.imageUrls.length < 1)
-        return setError("You must upload at least one image");
-      setLoading(true);
-      setError(false);
-
-      // Process cuisines input
-      const processedCuisines = formData.cuisines.reduce((acc, item) => {
-        const trimmed = item.trim();
-        if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-          const items = trimmed
-            .slice(1, -1)
-            .split(",")
-            .map((x) => x.trim().replace(/^['"]|['"]$/g, ""))
-            .filter((x) => x);
-          return acc.concat(items);
-        } else {
-          if (trimmed) acc.push(trimmed);
-          return acc;
-        }
-      }, []);
-
-      const bodyData = {
-        ...formData,
-        cuisines: processedCuisines, // now directly send cuisine names as strings
-        userRef: currentUser._id,
-      };
-
-      const res = await fetch(`/api/recipe/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bodyData),
-      });
-      const data = await res.json();
-      console.log("Response data:", data);
-
-      setLoading(false);
-      if (data.success === false) {
-        setError(data.message);
-      } else if (data._id) {
-        navigate(`/recipes/${data._id}`);
-      } else {
-        setError("Recipe creation failed. Please try again.");
-      }
-    } catch (error) {
-      setError(error.message);
-      setLoading(false);
-    }
-  };
-
   const handleBannerSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -224,26 +181,31 @@ export default function CreateRecipe() {
     }
   };
 
-  // Add helper function to remove a field:
-  const removeField = (field, index) => {
-    // For nutritionalInfo, ensure at least 2 remain; for instructions, allow removal if length >= 3.
-    if (
-      (field === "nutritionalInfo" && formData.nutritionalInfo.length >= 3) ||
-      ((field === "cookInstructions" || field === "prepInstructions") &&
-        formData[field].length >= 3)
-    ) {
-      const newArr = formData[field].filter((_, i) => i !== index);
-      setFormData({ ...formData, [field]: newArr });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`/api/recipe/update/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        setError(data.message);
+      } else {
+        navigate(`/recipes/${id}`);
+      }
+    } catch (err) {
+      setError(err.message);
     }
   };
 
+  if (loading) return <p>Loading recipe data...</p>;
+  if (error) return <p>Error: {error}</p>;
+
   return (
     <main className="p-3 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-semibold text-center my-7">
-        Create a Recipe
-      </h1>
-
-      <p>Author: {formData.chefName}</p>
+      <h1 className="text-3xl font-semibold text-center my-7">Edit Recipe</h1>
       <form
         onSubmit={handleSubmit}
         className="flex flex-wrap sm:flex-row gap-4"
@@ -254,18 +216,16 @@ export default function CreateRecipe() {
           <input
             type="text"
             placeholder="Name"
-            className="border p-3 rounded-lg"
             id="recipeName"
-            maxLength="62"
-            minLength="10"
+            className="border p-3 rounded-lg"
             required
             onChange={handleChange}
             value={formData.recipeName}
           />
           <label htmlFor="description">Description</label>
           <textarea
-            id="description"
             placeholder="Description"
+            id="description"
             className="border p-3 rounded-lg"
             required
             onChange={handleChange}
@@ -274,15 +234,15 @@ export default function CreateRecipe() {
           <label htmlFor="diet">Diet</label>
           <input
             type="text"
-            placeholder="Diet (e.g., vegetarian, non-vegetarian, vegan)"
-            className="border p-3 rounded-lg"
+            placeholder="Diet"
             id="diet"
+            className="border p-3 rounded-lg"
             required
             onChange={handleChange}
             value={formData.diet}
           />
           <div>
-            <label>Ingredients:</label>
+            <p>Ingredients:</p>
             {formData.ingredients.map((ingredient, index) => (
               <div key={index} className="flex items-center gap-2">
                 <div>
@@ -363,8 +323,8 @@ export default function CreateRecipe() {
           <input
             type="number"
             placeholder="Prep Time"
-            className="border p-3 rounded-lg"
             id="prepTime"
+            className="border p-3 rounded-lg"
             required
             onChange={handleChange}
             value={formData.prepTime}
@@ -373,8 +333,8 @@ export default function CreateRecipe() {
           <input
             type="number"
             placeholder="Cook Time"
-            className="border p-3 rounded-lg"
             id="cookTime"
+            className="border p-3 rounded-lg"
             required
             onChange={handleChange}
             value={formData.cookTime}
@@ -446,7 +406,7 @@ export default function CreateRecipe() {
             </label>
           </div>
           <div>
-            <label>Cuisines:</label>
+            <p>Cuisines:</p>
             {formData.cuisines.map((cuisine, index) => (
               <div key={index} className="flex items-center gap-2">
                 <label htmlFor={`cuisine-${index}`}>Cuisine {index + 1}</label>
@@ -458,7 +418,7 @@ export default function CreateRecipe() {
                   value={cuisine}
                   onChange={(e) =>
                     handleArrayChange("cuisines", index, e.target.value)
-                  } // updated field name
+                  }
                   required
                 />
                 {formData.cuisines.length > 1 && (
@@ -481,14 +441,14 @@ export default function CreateRecipe() {
             ))}
             <button
               type="button"
-              onClick={() => addArrayField("cuisines")} // updated field name
+              onClick={() => addArrayField("cuisines")}
               className="p-2 border rounded my-1"
             >
               Add Cuisine
             </button>
           </div>
           <div>
-            <label>Flavour Tags:</label>
+            <p>Flavour Tags:</p>
             {formData.flavourTags.map((tag, index) => (
               <div key={index} className="flex items-center gap-2">
                 <label htmlFor={`flavortag-${index}`}>
@@ -535,8 +495,8 @@ export default function CreateRecipe() {
           <input
             type="text"
             placeholder="Video URL"
-            className="border p-3 rounded-lg"
             id="videoUrl"
+            className="border p-3 rounded-lg"
             onChange={handleChange}
             value={formData.videoUrl}
           />
@@ -606,12 +566,19 @@ export default function CreateRecipe() {
               >
                 <img
                   src={url}
-                  alt="recipe image"
+                  alt="recipe"
                   className="w-20 h-20 object-contain rounded-lg"
                 />
                 <button
                   type="button"
-                  onClick={() => handleRemoveImage(index)}
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      imageUrls: formData.imageUrls.filter(
+                        (_, i) => i !== index
+                      ),
+                    })
+                  }
                   className="p-3 text-red-700 rounded-lg uppercase hover:opacity-75"
                 >
                   Delete
@@ -806,7 +773,7 @@ export default function CreateRecipe() {
             disabled={loading || uploading}
             className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
           >
-            {loading ? "Creating..." : "Create Recipe"}
+            {loading ? "Updating..." : "Update Recipe"}
           </button>
           {error && <p className="text-red-700 text-sm">{error}</p>}
         </div>

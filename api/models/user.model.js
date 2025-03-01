@@ -48,7 +48,6 @@ const userSchema = new mongoose.Schema({
     dietaryRestrictions: [{ type: String, required: false }],
     allergies: [{ type: String, required: false }],
     tastePreferences: [{ type: String, required: false }],
-    theme: { type: String, required: false },
     language: { type: String, required: false },
     notifications: {
       email: { type: Boolean, required: false },

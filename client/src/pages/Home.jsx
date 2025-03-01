@@ -7,26 +7,28 @@ import CategorySlider from "../components/CategorySlider.jsx";
 
 import FavRecipeBlock from "../components/FavRecipeBlock.jsx";
 import CustomSelect from "../components/CustomSelect.jsx";
+import TestingComponent from "../components/TestingComponent.jsx";
 
 export default function Home() {
-  useEffect(() => {
-    let next = document.querySelector(".next");
-    let prev = document.querySelector(".prev");
+  // useEffect(() => {
+  //   let next = document.querySelector(".next");
+  //   let prev = document.querySelector(".prev");
 
-    next.addEventListener("click", function () {
-      let items = document.querySelectorAll(".kh-item");
-      document.querySelector(".kh-slide").appendChild(items[0]);
-    });
+  //   next.addEventListener("click", function () {
+  //     let items = document.querySelectorAll(".kh-item");
+  //     document.querySelector(".kh-slide").appendChild(items[0]);
+  //   });
 
-    prev.addEventListener("click", function () {
-      let items = document.querySelectorAll(".kh-item");
-      document.querySelector(".kh-slide").prepend(items[items.length - 1]);
-    });
-  }, []);
+  //   prev.addEventListener("click", function () {
+  //     let items = document.querySelectorAll(".kh-item");
+  //     document.querySelector(".kh-slide").prepend(items[items.length - 1]);
+  //   });
+  // }, []);
 
   return (
     <main className="kh-homepage">
-      <HomeBanner />
+      <TestingComponent />
+      {/* <HomeBanner /> */}
       <div className="container py-5 mt-5">
         <div className="kh-recipeList">
           <h2>Food. Where Happiness Begins</h2>
