@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Profile from "./pages/Profile";
+import ProfileEdit from "./pages/ProfileEdit";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import CreateRecipe from "./pages/CreateRecipe";
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/SignUp" element={<SignUp />} />
         <Route element={<PrivateRoute />}>
           <Route path="/Profile" element={<Profile />} />
+          <Route path="/profile-edit" element={<ProfileEdit />} />
           <Route path="/create-recipe" element={<CreateRecipe />} />
           <Route path="/user-recipe" element={<UserRecipie />} />
           <Route path="/recipes/edit/:id" element={<EditRecipe />} />{" "}

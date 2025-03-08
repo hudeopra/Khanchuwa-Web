@@ -8,6 +8,7 @@ import CategorySlider from "../components/CategorySlider.jsx";
 import FavRecipeBlock from "../components/FavRecipeBlock.jsx";
 import CustomSelect from "../components/CustomSelect.jsx";
 import TestingComponent from "../components/TestingComponent.jsx";
+import TagSelector from "../components/TagSelector.jsx";
 
 export default function Home() {
   // useEffect(() => {
@@ -28,6 +29,7 @@ export default function Home() {
   return (
     <main className="kh-homepage">
       <TestingComponent />
+      {/* <TagSelector /> */}
       {/* <HomeBanner /> */}
       <div className="container py-5 mt-5">
         <div className="kh-recipeList">

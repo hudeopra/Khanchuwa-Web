@@ -35,13 +35,12 @@ export default function RecipeList() {
             </h1>
           </div>
           {recipes.map((recipe) => (
-            <div className="col-12 col-lg-3 col-md-4 col-sm-6 mb-3">
+            <div
+              key={recipe._id}
+              className="col-12 col-lg-3 col-md-4 col-sm-6 mb-3"
+            >
               <div className="kh-recipe-block__item mb-3">
-                <Link
-                  key={recipe._id}
-                  to={`/recipes/${recipe._id}`}
-                  className=""
-                >
+                <Link to={`/recipes/${recipe._id}`} className="">
                   <div className="kh-recipe-block__content">
                     <h3 className="">{recipe.recipeName}</h3>
                     <p className="">{recipe.description}</p>

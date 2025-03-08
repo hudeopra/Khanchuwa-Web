@@ -21,7 +21,7 @@ export default function RecipeDetail() {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { currentUser } = useSelector((state) => state.user);
+  const userData = useSelector((state) => state.user);
   const navigate = useNavigate();
   const [commentRating, setCommentRating] = useState("");
   const [commentText, setCommentText] = useState("");
@@ -61,7 +61,7 @@ export default function RecipeDetail() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: currentUser._id,
+          userId: userData.currentUser._id,
           rating: commentRating,
           comment: commentText,
         }),
@@ -106,7 +106,14 @@ export default function RecipeDetail() {
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
+  // console.log("User state:", userData);
 
+  // console.log(
+  //   "Current User ID:",
+  //   userData.currentUser.user._id,
+  //   typeof userData.currentUser.user._id
+  // );
+  // console.log("Recipe User Ref:", recipe.userRef, typeof recipe.userRef);
   return (
     <main className="p-3 max-w-4xl mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">
@@ -118,20 +125,20 @@ export default function RecipeDetail() {
       </p>
       <p>
         <strong>Nutritional Info:</strong>
-        {recipe.nutritionalInfo &&
-        Array.isArray(recipe.nutritionalInfo) &&
-        recipe.nutritionalInfo.length > 0 ? (
-          <ul className="list-disc ml-6">
-            {recipe.nutritionalInfo.map((item, idx) => (
-              <li key={idx}>
-                <span className="font-semibold">{item.name}:</span> {item.value}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          "N/A"
-        )}
       </p>
+      {recipe.nutritionalInfo &&
+      Array.isArray(recipe.nutritionalInfo) &&
+      recipe.nutritionalInfo.length > 0 ? (
+        <ul className="list-disc ml-6">
+          {recipe.nutritionalInfo.map((item, idx) => (
+            <li key={idx}>
+              <span className="font-semibold">{item.name}:</span> {item.value}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>N/A</p>
+      )}
       <div>
         <strong>Cook Instructions:</strong>
         <ol>
@@ -182,17 +189,47 @@ export default function RecipeDetail() {
         <strong>Chef:</strong> {recipe.chefName || "N/A"}
       </p>
       <p>
-        <strong>Cuisine:</strong>{" "}
-        {recipe.cuisines && recipe.cuisines.length > 0
-          ? recipe.cuisines.join(", ")
-          : "N/A"}
+        <strong>Cuisine:</strong>
       </p>
+      <ul>
+        {recipe.cuisineTag && recipe.cuisineTag.length > 0 ? (
+          recipe.cuisineTag.map((tag) => (
+            <li key={typeof tag === "object" ? tag._id : tag}>
+              {typeof tag === "object" ? tag.name : tag}
+            </li>
+          ))
+        ) : (
+          <li>N/A</li>
+        )}
+      </ul>
       <p>
-        <strong>Flavour Tags:</strong>{" "}
-        {recipe.flavourTags && recipe.flavourTags.length > 0
-          ? recipe.flavourTags.join(", ")
-          : "N/A"}
+        <strong>Flavour Tags:</strong>
       </p>
+      <ul>
+        {recipe.flavourTag && recipe.flavourTag.length > 0 ? (
+          recipe.flavourTag.map((tag) => (
+            <li key={typeof tag === "object" ? tag._id : tag}>
+              {typeof tag === "object" ? tag.name : tag}
+            </li>
+          ))
+        ) : (
+          <li>N/A</li>
+        )}
+      </ul>
+      <p>
+        <strong>Ingredient Tags:</strong>
+      </p>
+      <ul>
+        {recipe.ingredientTag && recipe.ingredientTag.length > 0 ? (
+          recipe.ingredientTag.map((tag) => (
+            <li key={typeof tag === "object" ? tag._id : tag}>
+              {typeof tag === "object" ? tag.name : tag}
+            </li>
+          ))
+        ) : (
+          <li>N/A</li>
+        )}
+      </ul>
       <p>
         <strong>Tags:</strong>{" "}
         {recipe.tags && recipe.tags.length > 0 ? recipe.tags.join(", ") : "N/A"}
@@ -271,7 +308,7 @@ export default function RecipeDetail() {
           <p>No comments yet.</p>
         )}
       </div>
-      {currentUser && (
+      {userData.currentUser && (
         <form onSubmit={handleCommentSubmit} className="border p-4 my-4">
           <h3 className="text-xl font-semibold">Add a Comment</h3>
           <label htmlFor="commentRating">Rating:</label>
@@ -302,26 +339,28 @@ export default function RecipeDetail() {
           </button>
         </form>
       )}
-      {currentUser && recipe.userRef === currentUser._id && (
-        <div className="my-4">
-          <button
-            onClick={() => navigate(`/recipes/edit/${id}`)}
-            className="p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
-          >
-            Edit Recipe
-          </button>
-        </div>
-      )}
-      {currentUser && recipe.userRef === currentUser._id && (
-        <div className="my-4">
-          <button
-            onClick={() => setShowDeleteConfirmation(true)}
-            className="p-3 bg-red-600 text-white rounded-lg hover:opacity-90"
-          >
-            Delete Recipe
-          </button>
-        </div>
-      )}
+      {userData.currentUser &&
+        recipe.userRef === userData.currentUser.user._id && (
+          <div className="my-4">
+            <button
+              onClick={() => navigate(`/recipes/edit/${id}`)}
+              className="p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
+            >
+              Edit Recipe
+            </button>
+          </div>
+        )}
+      {userData.currentUser &&
+        recipe.userRef === userData.currentUser.user._id && (
+          <div className="my-4">
+            <button
+              onClick={() => setShowDeleteConfirmation(true)}
+              className="p-3 bg-red-600 text-white rounded-lg hover:opacity-90"
+            >
+              Delete Recipe
+            </button>
+          </div>
+        )}
       {showDeleteConfirmation && (
         <form onSubmit={handleDeleteRecipe} className="border p-4 my-4">
           <h3 className="text-xl font-semibold">Confirm Deletion</h3>

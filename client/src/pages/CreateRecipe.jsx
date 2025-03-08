@@ -8,6 +8,8 @@ import {
 import { app } from "../firebase";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import TagSelector from "../components/TagSelector.jsx";
+import AccordionItem from "../components/AccordionItem.jsx";
 
 export default function CreateRecipe() {
   const { currentUser } = useSelector((state) => state.user);
@@ -27,8 +29,9 @@ export default function CreateRecipe() {
     difficulty: "",
     chefName: "",
     videoUrl: "",
-    flavourTags: [""],
-    cuisines: [""], // renamed field
+    flavourTag: [],
+    cuisineTag: [],
+    ingredientTag: [],
     bannerImgUrl: "", // Banner image URL
     favImgUrl: "", // Favorite image URL
     shortDescription: "",
@@ -47,8 +50,10 @@ export default function CreateRecipe() {
 
   // Set chefName from currentUser’s username
   useEffect(() => {
-    if (currentUser && currentUser.username) {
-      setFormData((prev) => ({ ...prev, chefName: currentUser.username }));
+    // Use nested user object if available.
+    const username = currentUser?.user?.username || currentUser?.username;
+    if (username) {
+      setFormData((prev) => ({ ...prev, chefName: username }));
     }
   }, [currentUser]);
 
@@ -156,34 +161,41 @@ export default function CreateRecipe() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(formData);
+    // Validation: ensure imageUrls, bannerImgUrl, favImgUrl are present.
+    if (formData.imageUrls.length < 1)
+      return setError("You must upload at least one image");
+    if (!formData.bannerImgUrl) return setError("Banner image is required.");
+    if (!formData.favImgUrl) return setError("Favorite image is required.");
+    // Updated user reference validation:
+    const userId = currentUser?._id || currentUser?.user?._id;
+    if (!userId) return setError("User reference is missing.");
+
+    setLoading(true);
+    setError(false);
+    // Process cuisineTag input
+    const processedcuisineTag = formData.cuisineTag.reduce((acc, item) => {
+      const trimmed = item.trim();
+      if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+        const items = trimmed
+          .slice(1, -1)
+          .split(",")
+          .map((x) => x.trim().replace(/^['"]|['"]$/g, ""))
+          .filter((x) => x);
+        return acc.concat(items);
+      } else {
+        if (trimmed) acc.push(trimmed);
+        return acc;
+      }
+    }, []);
+
+    // Build the bodyData using the valid userId.
+    const bodyData = {
+      ...formData,
+      cuisineTag: processedcuisineTag, // now directly send cuisine names as strings
+      userRef: userId,
+    };
+
     try {
-      if (formData.imageUrls.length < 1)
-        return setError("You must upload at least one image");
-      setLoading(true);
-      setError(false);
-
-      // Process cuisines input
-      const processedCuisines = formData.cuisines.reduce((acc, item) => {
-        const trimmed = item.trim();
-        if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-          const items = trimmed
-            .slice(1, -1)
-            .split(",")
-            .map((x) => x.trim().replace(/^['"]|['"]$/g, ""))
-            .filter((x) => x);
-          return acc.concat(items);
-        } else {
-          if (trimmed) acc.push(trimmed);
-          return acc;
-        }
-      }, []);
-
-      const bodyData = {
-        ...formData,
-        cuisines: processedCuisines, // now directly send cuisine names as strings
-        userRef: currentUser._id,
-      };
-
       const res = await fetch(`/api/recipe/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -238,568 +250,581 @@ export default function CreateRecipe() {
   };
 
   return (
-    <main className="p-3 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-semibold text-center my-7">
-        Create a Recipe
-      </h1>
-
-      <p>Author: {formData.chefName}</p>
+    <main className="kh-recipedetail">
       <form
         onSubmit={handleSubmit}
         className="flex flex-wrap sm:flex-row gap-4"
       >
-        <input type="hidden" id="userRef" value={currentUser._id} />
-        <div className="flex flex-wrap gap-4 flex-1">
-          <label htmlFor="recipeName">Name</label>
-          <input
-            type="text"
-            placeholder="Name"
-            className="border p-3 rounded-lg"
-            id="recipeName"
-            maxLength="62"
-            minLength="10"
-            required
-            onChange={handleChange}
-            value={formData.recipeName}
-          />
-          <label htmlFor="description">Description</label>
-          <textarea
-            id="description"
-            placeholder="Description"
-            className="border p-3 rounded-lg"
-            required
-            onChange={handleChange}
-            value={formData.description}
-          />
-          <label htmlFor="diet">Diet</label>
-          <input
-            type="text"
-            placeholder="Diet (e.g., vegetarian, non-vegetarian, vegan)"
-            className="border p-3 rounded-lg"
-            id="diet"
-            required
-            onChange={handleChange}
-            value={formData.diet}
-          />
-          <div>
-            <label>Ingredients:</label>
-            {formData.ingredients.map((ingredient, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <div>
-                  <label htmlFor={`ingredient-name-${index}`}>
-                    Name {index + 1}
-                  </label>
-                  <input
-                    id={`ingredient-name-${index}`}
-                    type="text"
-                    placeholder="Ingredient name"
-                    className="border p-3 rounded-lg my-1"
-                    value={ingredient.name}
-                    onChange={(e) => {
-                      const newIngredients = formData.ingredients.map(
-                        (ing, idx) =>
-                          idx === index ? { ...ing, name: e.target.value } : ing
-                      );
-                      setFormData({ ...formData, ingredients: newIngredients });
-                    }}
-                    required
-                  />
-                  <label htmlFor={`ingredient-qty-${index}`}>
-                    Quantity {index + 1}
-                  </label>
-                  <input
-                    id={`ingredient-qty-${index}`}
-                    type="text"
-                    placeholder="Quantity"
-                    className="border p-3 rounded-lg my-1"
-                    value={ingredient.quantity}
-                    onChange={(e) => {
-                      const newIngredients = formData.ingredients.map(
-                        (ing, idx) =>
-                          idx === index
-                            ? { ...ing, quantity: e.target.value }
-                            : ing
-                      );
-                      setFormData({ ...formData, ingredients: newIngredients });
-                    }}
-                    required
-                  />
+        <div className="container">
+          <div className="row">
+            <div className="col-8">
+              <h1 className="text-3xl font-semibold text-center my-7">
+                Create a Recipe
+              </h1>
+            </div>
+            <div className="col-3">
+              <p>Author: {formData.chefName}</p>
+            </div>
+          </div>
+          <AccordionItem title="Accordion Item 1">
+            <div className="div-input-wrapper">
+              <h2>Recipe Information</h2>
+              <input type="hidden" id="userRef" value={currentUser._id} />
+              <label htmlFor="recipeName">Name</label>
+              <input
+                type="text"
+                placeholder="Name"
+                className="border p-3 rounded-lg"
+                id="recipeName"
+                maxLength="62"
+                minLength="10"
+                required
+                onChange={handleChange}
+                value={formData.recipeName}
+              />
+              <label htmlFor="shortDescription">Short Description</label>
+              <textarea
+                id="shortDescription"
+                placeholder="Short description"
+                className="border p-3 rounded-lg"
+                onChange={handleChange}
+                value={formData.shortDescription}
+              />
+              <label htmlFor="description">Long Description</label>
+              <textarea
+                id="description"
+                placeholder="Description"
+                className="border p-3 rounded-lg"
+                required
+                onChange={handleChange}
+                value={formData.description}
+              />
+              <label htmlFor="videoUrl">Video URL</label>
+              <input
+                type="text"
+                id="videoUrl"
+                placeholder="Video URL"
+                className="border p-3 rounded-lg"
+                onChange={handleChange}
+                value={formData.videoUrl}
+              />
+            </div>
+          </AccordionItem>
+          <AccordionItem title="Accordion Item 2">
+            <div className="div-input-wrapper">
+              <h2>Tags</h2>
+              <div className="recipe-tags">
+                <h3>Cuisine Tags</h3>
+                <TagSelector
+                  attribute="cuisineTag"
+                  value={formData.cuisineTag}
+                  onSelect={(selected) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      cuisineTag: selected.map((t) => t._id),
+                    }))
+                  }
+                />
+                <h3>Flavour Tags</h3>
+                <TagSelector
+                  attribute="flavourTag"
+                  value={formData.flavourTag}
+                  onSelect={(selected) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      flavourTag: selected.map((t) => t._id),
+                    }))
+                  }
+                />
+                <h3>Ingredient Tags</h3>
+                <TagSelector
+                  attribute="ingredientTag"
+                  value={formData.ingredientTag}
+                  onSelect={(selected) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      ingredientTag: selected.map((t) => t._id),
+                    }))
+                  }
+                />
+                <h3>General Tags</h3>
+                <TagSelector
+                  attribute="tags"
+                  value={formData.tags}
+                  onSelect={(selected) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      tags: selected.map((t) => t.name),
+                    }))
+                  }
+                />
+              </div>
+            </div>
+          </AccordionItem>
+          <AccordionItem title="Accordion Item 3">
+            <div className="div-input-wrapper">
+              <h2>Diet & Ingredients</h2>
+              <label htmlFor="diet">Diet</label>
+              <select
+                id="diet"
+                className="border p-3 rounded-lg"
+                onChange={handleChange}
+                value={formData.diet}
+                required
+              >
+                <option value="">Select Diet</option>
+                <option value="Vegetarian">Vegetarian</option>
+                <option value="Vegan">Vegan</option>
+                <option value="Non-Vegetarian">Non-Vegetarian</option>
+              </select>
+              <label>Ingredients:</label>
+              {formData.ingredients.map((ingredient, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div>
+                    <label htmlFor={`ingredient-name-${index}`}>
+                      Name {index + 1}
+                    </label>
+                    <input
+                      id={`ingredient-name-${index}`}
+                      type="text"
+                      placeholder="Ingredient name"
+                      className="border p-3 rounded-lg my-1"
+                      value={ingredient.name}
+                      onChange={(e) => {
+                        const newIngredients = formData.ingredients.map(
+                          (ing, idx) =>
+                            idx === index
+                              ? { ...ing, name: e.target.value }
+                              : ing
+                        );
+                        setFormData({
+                          ...formData,
+                          ingredients: newIngredients,
+                        });
+                      }}
+                      required
+                    />
+                    <label htmlFor={`ingredient-qty-${index}`}>
+                      Quantity {index + 1}
+                    </label>
+                    <input
+                      id={`ingredient-qty-${index}`}
+                      type="text"
+                      placeholder="Quantity"
+                      className="border p-3 rounded-lg my-1"
+                      value={ingredient.quantity}
+                      onChange={(e) => {
+                        const newIngredients = formData.ingredients.map(
+                          (ing, idx) =>
+                            idx === index
+                              ? { ...ing, quantity: e.target.value }
+                              : ing
+                        );
+                        setFormData({
+                          ...formData,
+                          ingredients: newIngredients,
+                        });
+                      }}
+                      required
+                    />
+                  </div>
+                  {formData.ingredients.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          ingredients: formData.ingredients.filter(
+                            (_, i) => i !== index
+                          ),
+                        })
+                      }
+                      className="p-1 border rounded text-red-600"
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
-                {formData.ingredients.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFormData({
-                        ...formData,
-                        ingredients: formData.ingredients.filter(
-                          (_, i) => i !== index
-                        ),
-                      })
-                    }
-                    className="p-1 border rounded text-red-600"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() =>
-                setFormData({
-                  ...formData,
-                  ingredients: [
-                    ...formData.ingredients,
-                    { name: "", quantity: "" },
-                  ],
-                })
-              }
-              className="p-2 border rounded my-1"
-            >
-              Add Ingredient
-            </button>
-          </div>
-          <label htmlFor="prepTime">Prep Time</label>
-          <input
-            type="number"
-            placeholder="Prep Time"
-            className="border p-3 rounded-lg"
-            id="prepTime"
-            required
-            onChange={handleChange}
-            value={formData.prepTime}
-          />
-          <label htmlFor="cookTime">Cook Time</label>
-          <input
-            type="number"
-            placeholder="Cook Time"
-            className="border p-3 rounded-lg"
-            id="cookTime"
-            required
-            onChange={handleChange}
-            value={formData.cookTime}
-          />
-          <div className="flex flex-col gap-2">
-            <p>Servings:</p>
-            <label>
+              ))}
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    ingredients: [
+                      ...formData.ingredients,
+                      { name: "", quantity: "" },
+                    ],
+                  })
+                }
+                className="p-2 border rounded my-1"
+              >
+                Add Ingredient
+              </button>
+            </div>
+          </AccordionItem>
+          <AccordionItem title="Accordion Item ">
+            <div className="div-input-wrapper">
+              <h2>Cooking and Prep</h2>
+              <label htmlFor="prepTime">Prep Time</label>
               <input
-                type="radio"
-                name="servings"
-                value="1"
-                checked={formData.servings === "1"}
+                type="number"
+                placeholder="Prep Time"
+                className="border p-3 rounded-lg"
+                id="prepTime"
+                required
                 onChange={handleChange}
+                value={formData.prepTime}
               />
-              1
-            </label>
-            <label>
+              <label htmlFor="cookTime">Cook Time</label>
               <input
-                type="radio"
-                name="servings"
-                value="2"
-                checked={formData.servings === "2"}
+                type="number"
+                placeholder="Cook Time"
+                className="border p-3 rounded-lg"
+                id="cookTime"
+                required
                 onChange={handleChange}
+                value={formData.cookTime}
               />
-              2
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="servings"
-                value="4"
-                checked={formData.servings === "4"}
-                onChange={handleChange}
-              />
-              4
-            </label>
-          </div>
-          <div className="flex flex-col gap-2">
-            <p>Difficulty:</p>
-            <label>
-              <input
-                type="radio"
-                name="difficulty"
-                value="Easy"
-                checked={formData.difficulty === "Easy"}
-                onChange={handleChange}
-              />
-              Easy
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="difficulty"
-                value="Medium"
-                checked={formData.difficulty === "Medium"}
-                onChange={handleChange}
-              />
-              Medium
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="difficulty"
-                value="Hard"
-                checked={formData.difficulty === "Hard"}
-                onChange={handleChange}
-              />
-              Hard
-            </label>
-          </div>
-          <div>
-            <label>Cuisines:</label>
-            {formData.cuisines.map((cuisine, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <label htmlFor={`cuisine-${index}`}>Cuisine {index + 1}</label>
-                <input
-                  id={`cuisine-${index}`}
-                  type="text"
-                  placeholder="Cuisine"
-                  className="border p-3 rounded-lg my-1"
-                  value={cuisine}
-                  onChange={(e) =>
-                    handleArrayChange("cuisines", index, e.target.value)
-                  } // updated field name
-                  required
-                />
-                {formData.cuisines.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFormData({
-                        ...formData,
-                        cuisines: formData.cuisines.filter(
-                          (_, i) => i !== index
-                        ),
-                      })
-                    }
-                    className="p-1 border rounded text-red-600"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => addArrayField("cuisines")} // updated field name
-              className="p-2 border rounded my-1"
-            >
-              Add Cuisine
-            </button>
-          </div>
-          <div>
-            <label>Flavour Tags:</label>
-            {formData.flavourTags.map((tag, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <label htmlFor={`flavortag-${index}`}>
-                  Flavour Tag {index + 1}
+              <div className="flex flex-col gap-2">
+                <p>Servings:</p>
+                <label>
+                  <input
+                    type="radio"
+                    name="servings"
+                    value="1"
+                    checked={formData.servings === "1"}
+                    onChange={handleChange}
+                  />
+                  1
                 </label>
-                <input
-                  id={`flavortag-${index}`}
-                  type="text"
-                  placeholder="Flavour Tag"
-                  className="border p-3 rounded-lg my-1"
-                  value={tag}
-                  onChange={(e) =>
-                    handleArrayChange("flavourTags", index, e.target.value)
-                  }
-                  required
-                />
-                {formData.flavourTags.length > 1 && (
+                <label>
+                  <input
+                    type="radio"
+                    name="servings"
+                    value="2"
+                    checked={formData.servings === "2"}
+                    onChange={handleChange}
+                  />
+                  2
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="servings"
+                    value="4"
+                    checked={formData.servings === "4"}
+                    onChange={handleChange}
+                  />
+                  4
+                </label>
+              </div>
+              <div className="flex flex-col gap-2">
+                <p>Difficulty:</p>
+                <label>
+                  <input
+                    type="radio"
+                    name="difficulty"
+                    value="Easy"
+                    checked={formData.difficulty === "Easy"}
+                    onChange={handleChange}
+                  />
+                  Easy
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="difficulty"
+                    value="Medium"
+                    checked={formData.difficulty === "Medium"}
+                    onChange={handleChange}
+                  />
+                  Medium
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="difficulty"
+                    value="Hard"
+                    checked={formData.difficulty === "Hard"}
+                    onChange={handleChange}
+                  />
+                  Hard
+                </label>
+              </div>
+              <label>Prep Instructions:</label>
+              {formData.prepInstructions.map((instruction, idx) => (
+                <div key={idx} className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    value={instruction}
+                    onChange={(e) => {
+                      const newInstructions = formData.prepInstructions.map(
+                        (ins, i) => (i === idx ? e.target.value : ins)
+                      );
+                      setFormData({
+                        ...formData,
+                        prepInstructions: newInstructions,
+                      });
+                    }}
+                    className="border p-2 rounded my-1"
+                    placeholder="Instruction"
+                  />
+                  {formData.prepInstructions.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          prepInstructions: formData.prepInstructions.filter(
+                            (_, i) => i !== idx
+                          ),
+                        })
+                      }
+                      className="p-1 border rounded text-red-600"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    prepInstructions: [...formData.prepInstructions, ""],
+                  })
+                }
+                className="p-2 border rounded my-1"
+              >
+                Add Instruction
+              </button>
+              <label>Cook Instructions:</label>
+              {formData.cookInstructions.map((instruction, idx) => (
+                <div key={idx} className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    value={instruction}
+                    onChange={(e) => {
+                      const newInstructions = formData.cookInstructions.map(
+                        (ins, i) => (i === idx ? e.target.value : ins)
+                      );
+                      setFormData({
+                        ...formData,
+                        cookInstructions: newInstructions,
+                      });
+                    }}
+                    className="border p-2 rounded my-1"
+                    placeholder="Instruction"
+                  />
+                  {formData.cookInstructions.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          cookInstructions: formData.cookInstructions.filter(
+                            (_, i) => i !== idx
+                          ),
+                        })
+                      }
+                      className="p-1 border rounded text-red-600"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    cookInstructions: [...formData.cookInstructions, ""],
+                  })
+                }
+                className="p-2 border rounded my-1"
+              >
+                Add Instruction
+              </button>
+            </div>
+          </AccordionItem>
+          <AccordionItem title="Accordion Item ">
+            <div className="div-input-wrapper">
+              <h2>Media Upload</h2>
+              <label htmlFor="bannerImg">Banner Image</label>
+              <input
+                type="file"
+                accept="image/png, image/jpeg"
+                id="bannerImg"
+                onChange={handleBannerSelect}
+              />
+              {formData.bannerImgUrl && (
+                <div className="flex items-center gap-2">
+                  <img
+                    src={formData.bannerImgUrl}
+                    alt="Banner"
+                    className="w-20 h-20 object-contain rounded-lg"
+                  />
                   <button
                     type="button"
                     onClick={() =>
                       setFormData({
                         ...formData,
-                        flavourTags: formData.flavourTags.filter(
-                          (_, i) => i !== index
-                        ),
+                        bannerImgUrl: "",
                       })
                     }
-                    className="p-1 border rounded text-red-600"
+                    className="p-2 text-red-700 rounded-lg"
                   >
-                    Remove
+                    Delete
                   </button>
-                )}
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => addArrayField("flavourTags")}
-              className="p-2 border rounded my-1"
-            >
-              Add Flavour Tag
-            </button>
-          </div>
-          <label htmlFor="videoUrl">Video URL</label>
-          <input
-            type="text"
-            placeholder="Video URL"
-            className="border p-3 rounded-lg"
-            id="videoUrl"
-            onChange={handleChange}
-            value={formData.videoUrl}
-          />
-          <label htmlFor="bannerImg">Banner Image</label>
-          <input
-            type="file"
-            accept="image/png, image/jpeg"
-            id="bannerImg"
-            onChange={handleBannerSelect}
-          />
-          {formData.bannerImgUrl && (
-            <div className="flex items-center gap-2">
-              <img
-                src={formData.bannerImgUrl}
-                alt="Banner"
-                className="w-20 h-20 object-contain rounded-lg"
+                </div>
+              )}
+              <label htmlFor="favImg">Favorite Image</label>
+              <input
+                type="file"
+                accept="image/png, image/jpeg"
+                id="favImg"
+                onChange={handleFavSelect}
               />
+              {formData.favImgUrl && (
+                <div className="flex items-center gap-2">
+                  <img
+                    src={formData.favImgUrl}
+                    alt="Favorite"
+                    className="w-20 h-20 object-contain rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        favImgUrl: "",
+                      })
+                    }
+                    className="p-2 text-red-700 rounded-lg"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+              <label htmlFor="images">Gallery Images:</label>
+              <input
+                onChange={handleFileSelect}
+                className="p-3 border border-gray-300 rounded w-full"
+                type="file"
+                id="images"
+                accept="image/*"
+                multiple
+              />
+              <p className="text-red-700 text-sm">
+                {imageUploadError && imageUploadError}
+              </p>
+              {formData.imageUrls.length > 0 &&
+                formData.imageUrls.map((url, index) => (
+                  <div
+                    key={url}
+                    className="flex justify-between p-3 border items-center"
+                  >
+                    <img
+                      src={url}
+                      alt="recipe image"
+                      className="w-20 h-20 object-contain rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="p-3 text-red-700 rounded-lg uppercase hover:opacity-75"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+            </div>
+          </AccordionItem>
+          <AccordionItem title="Accordion Item ">
+            <div className="div-input-wrapper">
+              <h2>Nutritional Info</h2>
+              {formData.nutritionalInfo.map((item, idx) => (
+                <div key={idx} className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    value={item.name}
+                    onChange={(e) => {
+                      const newInfo = formData.nutritionalInfo.map((info, i) =>
+                        i === idx ? { ...info, name: e.target.value } : info
+                      );
+                      setFormData({
+                        ...formData,
+                        nutritionalInfo: newInfo,
+                      });
+                    }}
+                    placeholder="Nutrient"
+                    className="border p-2 rounded"
+                    required
+                  />
+                  <input
+                    type="text"
+                    value={item.value}
+                    onChange={(e) => {
+                      const newInfo = formData.nutritionalInfo.map((info, i) =>
+                        i === idx ? { ...info, value: e.target.value } : info
+                      );
+                      setFormData({
+                        ...formData,
+                        nutritionalInfo: newInfo,
+                      });
+                    }}
+                    placeholder="Amount"
+                    className="border p-2 rounded"
+                    required
+                  />
+                  {formData.nutritionalInfo.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          nutritionalInfo: formData.nutritionalInfo.filter(
+                            (_, i) => i !== idx
+                          ),
+                        })
+                      }
+                      className="p-1 border rounded text-red-600"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              ))}
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, bannerImgUrl: "" })}
-                className="p-2 text-red-700 rounded-lg"
-              >
-                Delete
-              </button>
-            </div>
-          )}
-          <label htmlFor="favImg">Favorite Image</label>
-          <input
-            type="file"
-            accept="image/png, image/jpeg"
-            id="favImg"
-            onChange={handleFavSelect}
-          />
-          {formData.favImgUrl && (
-            <div className="flex items-center gap-2">
-              <img
-                src={formData.favImgUrl}
-                alt="Favorite"
-                className="w-20 h-20 object-contain rounded-lg"
-              />
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, favImgUrl: "" })}
-                className="p-2 text-red-700 rounded-lg"
-              >
-                Delete
-              </button>
-            </div>
-          )}
-          <label htmlFor="images">Images:</label>
-          <input
-            onChange={handleFileSelect}
-            className="p-3 border border-gray-300 rounded w-full"
-            type="file"
-            id="images"
-            accept="image/*"
-            multiple
-          />
-          <p className="text-red-700 text-sm">
-            {imageUploadError && imageUploadError}
-          </p>
-          {formData.imageUrls.length > 0 &&
-            formData.imageUrls.map((url, index) => (
-              <div
-                key={url}
-                className="flex justify-between p-3 border items-center"
-              >
-                <img
-                  src={url}
-                  alt="recipe image"
-                  className="w-20 h-20 object-contain rounded-lg"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(index)}
-                  className="p-3 text-red-700 rounded-lg uppercase hover:opacity-75"
-                >
-                  Delete
-                </button>
-              </div>
-            ))}
-          <label htmlFor="shortDescription">Short Description</label>
-          <textarea
-            id="shortDescription"
-            placeholder="Short description"
-            onChange={handleChange}
-            value={formData.shortDescription}
-          />
-
-          <label>Nutritional Info:</label>
-          {formData.nutritionalInfo.map((item, idx) => (
-            <div key={idx} className="flex gap-2 items-center">
-              <input
-                type="text"
-                value={item.name}
-                onChange={(e) => {
-                  const newInfo = formData.nutritionalInfo.map((info, i) =>
-                    i === idx ? { ...info, name: e.target.value } : info
-                  );
-                  setFormData({ ...formData, nutritionalInfo: newInfo });
-                }}
-                placeholder="Nutrient"
-                className="border p-2 rounded"
-                required
-              />
-              <input
-                type="text"
-                value={item.value}
-                onChange={(e) => {
-                  const newInfo = formData.nutritionalInfo.map((info, i) =>
-                    i === idx ? { ...info, value: e.target.value } : info
-                  );
-                  setFormData({ ...formData, nutritionalInfo: newInfo });
-                }}
-                placeholder="Amount"
-                className="border p-2 rounded"
-                required
-              />
-              {formData.nutritionalInfo.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setFormData({
-                      ...formData,
-                      nutritionalInfo: formData.nutritionalInfo.filter(
-                        (_, i) => i !== idx
-                      ),
-                    })
-                  }
-                  className="p-1 border rounded text-red-600"
-                >
-                  Remove
-                </button>
-              )}
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() =>
-              setFormData({
-                ...formData,
-                nutritionalInfo: [
-                  ...formData.nutritionalInfo,
-                  { name: "", value: "" },
-                ],
-              })
-            }
-            className="p-2 border rounded my-1"
-          >
-            Add Nutritional Info
-          </button>
-
-          <label>Cook Instructions:</label>
-          {formData.cookInstructions.map((instruction, idx) => (
-            <div key={idx} className="flex gap-2 items-center">
-              <input
-                type="text"
-                value={instruction}
-                onChange={(e) => {
-                  const newInstructions = formData.cookInstructions.map(
-                    (ins, i) => (i === idx ? e.target.value : ins)
-                  );
+                onClick={() =>
                   setFormData({
                     ...formData,
-                    cookInstructions: newInstructions,
-                  });
-                }}
-                className="border p-2 rounded my-1"
-                placeholder="Instruction"
-              />
-              {formData.cookInstructions.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setFormData({
-                      ...formData,
-                      cookInstructions: formData.cookInstructions.filter(
-                        (_, i) => i !== idx
-                      ),
-                    })
-                  }
-                  className="p-1 border rounded text-red-600"
-                >
-                  Remove
-                </button>
-              )}
+                    nutritionalInfo: [
+                      ...formData.nutritionalInfo,
+                      { name: "", value: "" },
+                    ],
+                  })
+                }
+                className="p-2 border rounded my-1"
+              >
+                Add Nutritional Info
+              </button>
             </div>
-          ))}
-          <button
-            type="button"
-            onClick={() =>
-              setFormData({
-                ...formData,
-                cookInstructions: [...formData.cookInstructions, ""],
-              })
-            }
-            className="p-2 border rounded my-1"
-          >
-            Add Instruction
-          </button>
+          </AccordionItem>
+        </div>
 
-          <label>Prep Instructions:</label>
-          {formData.prepInstructions.map((instruction, idx) => (
-            <div key={idx} className="flex gap-2 items-center">
-              <input
-                type="text"
-                value={instruction}
-                onChange={(e) => {
-                  const newInstructions = formData.prepInstructions.map(
-                    (ins, i) => (i === idx ? e.target.value : ins)
-                  );
-                  setFormData({
-                    ...formData,
-                    prepInstructions: newInstructions,
-                  });
-                }}
-                className="border p-2 rounded my-1"
-                placeholder="Instruction"
-              />
-              {formData.prepInstructions.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setFormData({
-                      ...formData,
-                      prepInstructions: formData.prepInstructions.filter(
-                        (_, i) => i !== idx
-                      ),
-                    })
-                  }
-                  className="p-1 border rounded text-red-600"
-                >
-                  Remove
-                </button>
-              )}
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() =>
-              setFormData({
-                ...formData,
-                prepInstructions: [...formData.prepInstructions, ""],
-              })
-            }
-            className="p-2 border rounded my-1"
-          >
-            Add Instruction
-          </button>
+        <div className="wrapper">
+          <input type="hidden" id="userRef" value={currentUser._id} />
 
-          <label htmlFor="tags">Tags (comma separated)</label>
-          <input
-            type="text"
-            id="tags"
-            placeholder="e.g., easy, vegan"
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                tags: e.target.value.split(",").map((s) => s.trim()),
-              })
-            }
-            value={formData.tags.join(", ")}
-          />
+          {/* 4. Cooking and Prep */}
+
+          {/* 5. Media Upload */}
+
+          {/* 6. Nutritional Info */}
 
           <button
             type="submit"

@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import userRouter from './routes/user.route.js';
 import authRouter from './routes/auth.route.js';
 import recipeRouter from './routes/recipe.route.js';
+import tagRouter from './routes/tag.route.js'; // Added tag router
+import cors from 'cors';
 
 import cookieParser from 'cookie-parser';
 dotenv.config();
@@ -17,6 +19,8 @@ mongoose.connect(process.env.MONGODB_AUTH_URI).then(() => {
 const app = express();
 app.use(express.json());
 
+app.use(cors());
+
 app.use(cookieParser());
 
 app.listen(3000, () => {
@@ -24,15 +28,15 @@ app.listen(3000, () => {
 });
 
 app.use("/api/user", userRouter);
-app.use("/api/auth", authRouter); // Ensure this route is correct
-app.use('/api/recipe', recipeRouter); // Ensure this route is correct
+app.use("/api/auth", authRouter);
+app.use('/api/recipe', recipeRouter);
+app.use('/api/tag', tagRouter); // Set up tag routes
 
 app.use((err, req, res, next) => { // Error handling middleware
   const statusCode = err.statusCode || 500;
   const message = err.message || 'api/index: Internal Server Error';
 
-  console.log('api/index: MongoDB URI', process.env.MONGODB_AUTH_URI);
-  console.log('api/index: Error details', err); // Log error details
+  console.log('api/index: Error details', err);
   return res.status(statusCode).json({
     success: false,
     statusCode,

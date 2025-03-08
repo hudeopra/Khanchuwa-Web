@@ -4,7 +4,6 @@ const recipeSchema = new mongoose.Schema({
   recipeName: { type: String, required: true },
   description: { type: String, required: true },
   diet: { type: String, required: true },
-  // Updated ingredients field:
   ingredients: [{
     name: { type: String, required: true },
     quantity: { type: String, required: true }
@@ -14,19 +13,20 @@ const recipeSchema = new mongoose.Schema({
   servings: { type: Number, required: true },
   difficulty: { type: String, required: true },
   chefName: { type: String, required: true },
-  cuisines: { type: [String], required: true },
+  // Updated: references now point to RecipeTag for all tag types
+  cuisineTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag', required: true }],
   imageUrls: { type: [String], required: true },
-  flavourTags: { type: [String], required: true },
-  videoUrl: { type: String, required: false },
+  flavourTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag', required: true }],
+  videoUrl: { type: String },
   bannerImgUrl: { type: String, required: true },
   favImgUrl: { type: String, required: true },
   userRef: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  // new attributes below
   shortDescription: { type: String },
   nutritionalInfo: { type: mongoose.Schema.Types.Mixed },
   cookInstructions: { type: [String] },
   prepInstructions: { type: [String] },
   tags: { type: [String] },
+  ingredientTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag', required: true }],
   rating: { type: Number },
   reviews: [
     {

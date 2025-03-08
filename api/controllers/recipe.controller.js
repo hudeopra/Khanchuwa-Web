@@ -33,7 +33,11 @@ export const getAllRecipes = async (req, res, next) => {
 
 export const getRecipeById = async (req, res, next) => {
   try {
-    const recipe = await Recipe.findById(req.params.id);
+    const recipe = await Recipe.findById(req.params.id)
+      .populate("cuisineTag")
+      .populate("flavourTag")
+      .populate("ingredientTag")
+      .populate("tags");
     if (!recipe) {
       return res.status(404).json({ message: 'Recipe not found' });
     }

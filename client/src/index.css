@@ -602,3 +602,130 @@ body {
 /* Profile Page start */
 
 /* Profile Page ends */
+/* Profile edit page start */
+.card {
+  background-color: unset;
+  color: #fff;
+}
+
+/* TagSelector.css */
+.tag-selector {
+  max-width: 400px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: var(--dark-charcol);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.selected-tags-header h3,
+.tags-dictionary h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: rgba(62, 99, 221, 0.3);
+  color: #333;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.remove-tag {
+  margin-left: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+}
+
+.search-box {
+  margin: 20px 0;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+.search-icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.tag-input {
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 4px;
+  font-size: 14px;
+}
+
+.suggestions {
+  position: absolute;
+  background-color: var(--border-light);
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+  width: 100%;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion-item {
+  padding: 8px;
+  cursor: pointer;
+  color: #333;
+}
+
+.suggestion-item:hover {
+  background-color: rgba(110, 86, 207, 0.1);
+}
+
+.tags-dictionary {
+  margin-top: 20px;
+}
+
+.tags-dictionary pre {
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Custom arrow styling */
+.accordion .btn-link::before {
+  content: "\25BC"; /* Down arrow */
+  float: right;
+  transition: transform 0.3s ease;
+}
+.accordion .btn-link.collapsed::before {
+  transform: rotate(180deg); /* Up arrow when collapsed */
+}
+.accordion .btn-link {
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+  color: #000;
+}
+.accordion .card-header {
+  padding: 0;
+}
+/* Prodile Edit page ends */
