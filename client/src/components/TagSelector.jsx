@@ -89,11 +89,11 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
 
   return (
     <div className="tag-selector">
-      <h3>{attribute} Selector</h3>
+      <label>{attribute} Selector</label>
       <div className="selected-tags">
         {selectedTags.length > 0 ? (
-          selectedTags.map((tag) => (
-            <span key={tag._id} className="tag-badge">
+          selectedTags.map((tag, index) => (
+            <span key={tag._id || `${tag.name}-${index}`} className="tag-badge">
               {tag.name}
               <button onClick={() => handleRemoveTag(tag._id)}>&times;</button>
             </span>
@@ -110,18 +110,21 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
           onKeyDown={handleKeyDown}
           placeholder="Search or create a tag..."
         />
-        <button
+        {/* <button
           onClick={async () =>
             inputValue && (await handleTagSelect(inputValue.trim()))
           }
         >
           Add
-        </button>
+        </button> */}
       </div>
       {suggestions.length > 0 && (
         <div className="suggestions">
-          {suggestions.map((sug) => (
-            <div key={sug} onClick={async () => await handleTagSelect(sug)}>
+          {suggestions.map((sug, index) => (
+            <div
+              key={`${sug}-${index}`}
+              onClick={async () => await handleTagSelect(sug)}
+            >
               {sug}
             </div>
           ))}
