@@ -223,91 +223,6 @@ export default function ProfileEdit() {
       <h1>Profile Page</h1>
       <div className="kh-profile__user">
         <form onSubmit={handleSubmit} className="">
-          <div class="accordion" id="accordionExample">
-            <div class="card">
-              <div class="card-header" id="headingOne">
-                <h2 class="mb-0">
-                  <button
-                    class="btn btn-link btn-block text-left"
-                    type="button"
-                    data-toggle="collapse"
-                    data-target="#collapseOne"
-                    aria-expanded="true"
-                    aria-controls="collapseOne"
-                  >
-                    Collapsible Group Item #1
-                  </button>
-                </h2>
-              </div>
-
-              <div
-                id="collapseOne"
-                class="collapse show"
-                aria-labelledby="headingOne"
-                data-parent="#accordionExample"
-              >
-                <div class="card-body">
-                  Some placeholder content for the first accordion panel. This
-                  panel is shown by default, thanks to the <code>.show</code>{" "}
-                  class.
-                </div>
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-header" id="headingTwo">
-                <h2 class="mb-0">
-                  <button
-                    class="btn btn-link btn-block text-left collapsed"
-                    type="button"
-                    data-toggle="collapse"
-                    data-target="#collapseTwo"
-                    aria-expanded="false"
-                    aria-controls="collapseTwo"
-                  >
-                    Collapsible Group Item #2
-                  </button>
-                </h2>
-              </div>
-              <div
-                id="collapseTwo"
-                class="collapse"
-                aria-labelledby="headingTwo"
-                data-parent="#accordionExample"
-              >
-                <div class="card-body">
-                  Some placeholder content for the second accordion panel. This
-                  panel is hidden by default.
-                </div>
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-header" id="headingThree">
-                <h2 class="mb-0">
-                  <button
-                    class="btn btn-link btn-block text-left collapsed"
-                    type="button"
-                    data-toggle="collapse"
-                    data-target="#collapseThree"
-                    aria-expanded="false"
-                    aria-controls="collapseThree"
-                  >
-                    Collapsible Group Item #3
-                  </button>
-                </h2>
-              </div>
-              <div
-                id="collapseThree"
-                class="collapse"
-                aria-labelledby="headingThree"
-                data-parent="#accordionExample"
-              >
-                <div class="card-body">
-                  And lastly, the placeholder content for the third and final
-                  accordion panel. This panel is hidden by default.
-                </div>
-              </div>
-            </div>
-          </div>
           <div className="kh-input-wrapper text-center">
             <input
               onChange={(e) => setFile(e.target.files[0])}
@@ -472,17 +387,21 @@ export default function ProfileEdit() {
                   <label>
                     Primary
                     <input
-                      type="checkbox"
+                      type="radio"
+                      name="phonePrimary"
                       checked={phone.isPrimary || false}
-                      onChange={(e) =>
-                        handleArrayChange(
-                          e,
-                          "phoneNumbers",
-                          index,
-                          "isPrimary",
-                          "checkbox"
-                        )
-                      }
+                      onChange={() => {
+                        const updatedPhones = userData.phoneNumbers.map(
+                          (p, i) => ({
+                            ...p,
+                            isPrimary: i === index,
+                          })
+                        );
+                        setUserData({
+                          ...userData,
+                          phoneNumbers: updatedPhones,
+                        });
+                      }}
                     />
                   </label>
                 </div>
@@ -490,14 +409,14 @@ export default function ProfileEdit() {
             <button
               type="button"
               onClick={() => {
-                if ((userData.phoneNumbers?.length || 0) < 2) {
+                if ((userData.phoneNumbers?.length || 0) < 3) {
                   addArrayItem("phoneNumbers", {
                     number: "",
-                    isPrimary: false,
+                    isPrimary: userData.phoneNumbers?.length === 0, // default primary for first phone
                   });
                 }
               }}
-              disabled={(userData.phoneNumbers?.length || 0) >= 2}
+              disabled={(userData.phoneNumbers?.length || 0) >= 3}
             >
               +
             </button>
@@ -648,9 +567,7 @@ export default function ProfileEdit() {
               {userData.preferences?.dietaryRestrictions &&
                 userData.preferences.dietaryRestrictions.map((item, index) => (
                   <div key={index}>
-                    <input
-                      type="text"
-                      placeholder="Restriction"
+                    <select
                       value={item || ""}
                       onChange={(e) => {
                         const restrictions = [
@@ -666,7 +583,14 @@ export default function ProfileEdit() {
                         });
                       }}
                       className="border p-2 rounded"
-                    />
+                    >
+                      <option value="">Select Restriction</option>
+                      <option value="none">None</option>
+                      <option value="vegetarian">Vegetarian</option>
+                      <option value="vegan">Vegan</option>
+                      <option value="glutenFree">Gluten Free</option>
+                      <option value="dairyFree">Dairy Free</option>
+                    </select>
                   </div>
                 ))}
               <button
@@ -701,9 +625,7 @@ export default function ProfileEdit() {
               {userData.preferences?.allergies &&
                 userData.preferences.allergies.map((item, index) => (
                   <div key={index}>
-                    <input
-                      type="text"
-                      placeholder="Allergy"
+                    <select
                       value={item || ""}
                       onChange={(e) => {
                         const allergies = [...userData.preferences.allergies];
@@ -717,7 +639,16 @@ export default function ProfileEdit() {
                         });
                       }}
                       className="border p-2 rounded"
-                    />
+                    >
+                      <option value="">Select Allergy</option>
+                      <option value="none">None</option>
+                      <option value="peanuts">Peanuts</option>
+                      <option value="shellfish">Shellfish</option>
+                      <option value="dairy">Dairy</option>
+                      <option value="gluten">Gluten</option>
+                      <option value="soy">Soy</option>
+                      <option value="eggs">Eggs</option>
+                    </select>
                   </div>
                 ))}
               <button
