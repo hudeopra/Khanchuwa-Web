@@ -30,6 +30,11 @@ export default function RecipeDetail() {
   const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
   const [deleteError, setDeleteError] = useState(null);
 
+  console.log("User data:", userData);
+  if (userData.currentUser) {
+    console.log("Current user details:", userData.currentUser);
+  }
+
   useEffect(() => {
     console.log("Fetching recipe with ID:", id); // Log the ID
 
@@ -339,8 +344,8 @@ export default function RecipeDetail() {
           </button>
         </form>
       )}
-      {userData.currentUser &&
-        recipe.userRef === userData.currentUser.user._id && (
+      {userData.currentUser?._id &&
+        recipe.userRef === userData.currentUser._id && (
           <div className="my-4">
             <button
               onClick={() => navigate(`/recipes/edit/${id}`)}
@@ -350,8 +355,8 @@ export default function RecipeDetail() {
             </button>
           </div>
         )}
-      {userData.currentUser &&
-        recipe.userRef === userData.currentUser.user._id && (
+      {userData.currentUser?._id &&
+        recipe.userRef === userData.currentUser._id && (
           <div className="my-4">
             <button
               onClick={() => setShowDeleteConfirmation(true)}

@@ -34,6 +34,7 @@ export default function App() {
           {/* Updated route for editing */}
         </Route>
         <Route path="/recipes" element={<RecipeList />} />
+        <Route path="/search" element={<RecipeList />} />
         <Route path="/recipes/:id" element={<RecipeDetail />} />
         <Route path="*" element={<NotFound />} /> {/* Add NotFound route */}
       </Routes>

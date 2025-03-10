@@ -1,4 +1,5 @@
 import Recipe from '../models/recipe.model.js';
+import User from '../models/user.model.js';
 
 // Create a recipe using properly formatted data from the client.
 export const createRecipe = async (req, res, next) => {
@@ -79,6 +80,80 @@ export const deleteRecipe = async (req, res, next) => {
     if (!recipe) return res.status(404).json({ message: 'Recipe not found' });
     await recipe.deleteOne(); // updated from recipe.remove()
     return res.status(200).json({ message: 'Recipe deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// New function: Filter recipes based on query parameters
+export const filterRecipes = async (req, res, next) => {
+  try {
+    const {
+      userId,
+      ingredientTag,
+      cuisineTag,
+      flavorTag,
+      diet,
+      // Remove direct recipe filters for allergies, dietaryRestrictions, tastePreferences
+      allergies,
+      dietaryRestrictions,
+      tastePreferences,
+      searchTerm,
+    } = req.query;
+
+    let filter = {};
+
+    if (userId) {
+      filter.userRef = userId;
+    }
+    if (ingredientTag) {
+      const tags = ingredientTag.split(",").map(tag => tag.trim());
+      filter.ingredientTag = { $in: tags };
+    }
+    if (cuisineTag) {
+      const cuisines = cuisineTag.split(",").map(tag => tag.trim());
+      filter.cuisineTag = { $in: cuisines };
+    }
+    if (flavorTag) {
+      const flavors = flavorTag.split(",").map(tag => tag.trim());
+      filter.flavourTag = { $in: flavors };
+    }
+    if (diet) {
+      filter.diet = diet;
+    }
+    if (searchTerm) {
+      const words = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
+      filter.$and = words.map(word => ({
+        $or: [
+          { recipeName: new RegExp(word, "i") },
+          { description: new RegExp(word, "i") },
+          { chefName: new RegExp(word, "i") },
+        ]
+      }));
+    }
+
+    // New: Filter based on user preferences (allergies, dietaryRestrictions, tastePreferences)
+    if (allergies || dietaryRestrictions || tastePreferences) {
+      let userFilter = {};
+      if (allergies) {
+        const allergyFilters = allergies.split(",").map(tag => tag.trim());
+        userFilter["preferences.allergies"] = { $in: allergyFilters };
+      }
+      if (dietaryRestrictions) {
+        const restrictions = dietaryRestrictions.split(",").map(tag => tag.trim());
+        userFilter["preferences.dietaryRestrictions"] = { $in: restrictions };
+      }
+      if (tastePreferences) {
+        const tasteFilters = tastePreferences.split(",").map(tag => tag.trim());
+        userFilter["preferences.tastePreferences"] = { $in: tasteFilters };
+      }
+      const users = await User.find(userFilter).select("_id");
+      const userIds = users.map(u => u._id);
+      filter.userRef = { $in: userIds };
+    }
+
+    const recipes = await Recipe.find(filter);
+    return res.status(200).json(recipes);
   } catch (error) {
     next(error);
   }

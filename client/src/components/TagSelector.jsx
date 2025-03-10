@@ -110,13 +110,7 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
           onKeyDown={handleKeyDown}
           placeholder="Search or create a tag..."
         />
-        {/* <button
-          onClick={async () =>
-            inputValue && (await handleTagSelect(inputValue.trim()))
-          }
-        >
-          Add
-        </button> */}
+        {/* Removed non necessary Add button */}
       </div>
       {suggestions.length > 0 && (
         <div className="suggestions">

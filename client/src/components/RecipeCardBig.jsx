@@ -1,11 +1,35 @@
-import React from "react";
-import { recipeCardBig } from "../assets/js/dummyContent.js";
+import React, { useEffect, useState } from "react";
 import * as images from "../assets/js/images.js";
 
 const RecipeCardBig = () => {
-  // Get the first 7 items from the recipeCardBig array
-  const displayedCards = recipeCardBig.slice(0, 11);
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Fetch recipes from DB
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const res = await fetch("/api/recipe/all");
+        const data = await res.json();
+        const dataArr = Array.isArray(data) ? data : [];
+        setRecipes(dataArr);
+        setLoading(false);
+        console.log(data);
+      } catch (error) {
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+
+    fetchRecipes();
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  // Get top 11 recipes
+  const displayedCards = recipes.slice(0, 7);
   // Split data into horizontal and vertical cards
   const horizontalCards = displayedCards.slice(0, 3);
   const verticalCards = displayedCards.slice(3);
@@ -20,12 +44,17 @@ const RecipeCardBig = () => {
         >
           <div className="kh-recipe-block__item--img">
             <img
-              src={images[`recipe${item.name.replace(/ /g, "")}Thumb`]}
-              alt={item.name}
+              // Use image from DB if available, otherwise fallback to images asset
+              src={
+                item.imageUrls && item.imageUrls.length > 0
+                  ? item.imageUrls[0]
+                  : images[`recipe${item.recipeName.replace(/ /g, "")}Thumb`]
+              }
+              alt={item.recipeName}
             />
           </div>
           <div className="kh-recipe-block__content">
-            <h3>{item.name}</h3>
+            <h3>{item.recipeName}</h3>
             <span>{item.description} Recipes</span>
           </div>
           <div className="kh-recipe-block__info">
@@ -40,13 +69,17 @@ const RecipeCardBig = () => {
       {verticalCards.map((item, index) => (
         <div key={index} className="kh-recipe-block__item">
           <div className="kh-recipe-block__content">
-            <h3>{item.name}</h3>
+            <h3>{item.recipeName}</h3>
             <span>{item.description} Recipes</span>
           </div>
           <div className="kh-recipe-block__item--img">
             <img
-              src={images[`recipe${item.name.replace(/ /g, "")}Thumb`]}
-              alt={item.name}
+              src={
+                item.imageUrls && item.imageUrls.length > 0
+                  ? item.imageUrls[0]
+                  : images[`recipe${item.recipeName.replace(/ /g, "")}Thumb`]
+              }
+              alt={item.recipeName}
             />
           </div>
           <div className="kh-recipe-block__info">
