@@ -23,3 +23,29 @@ export const createTag = async (req, res, next) => {
     next(error);
   }
 };
+
+// New endpoint: PATCH /api/tag/addRecipeRef
+export const addRecipeRef = async (req, res, next) => {
+  try {
+    const { tagId, recipeId } = req.body;
+    const tag = await RecipeTag.findById(tagId);
+    if (!tag) return res.status(404).json({ message: 'Tag not found' });
+    await tag.addRecipeReference(recipeId);
+    res.status(200).json(tag);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// New endpoint: PATCH /api/tag/removeRecipeRef
+export const removeRecipeRef = async (req, res, next) => {
+  try {
+    const { tagId, recipeId } = req.body;
+    const tag = await RecipeTag.findById(tagId);
+    if (!tag) return res.status(404).json({ message: 'Tag not found' });
+    await tag.removeRecipeReference(recipeId);
+    res.status(200).json(tag);
+  } catch (error) {
+    next(error);
+  }
+};

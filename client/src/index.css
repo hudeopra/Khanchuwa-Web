@@ -774,3 +774,13 @@ body {
   display: flex;
 }
 /* Prodile Edit page ends */
+
+/* textbox */
+.jodit * {
+  background-color: var(--dark-charcol) !important;
+  color: #fff;
+}
+.jodit-icon {
+  fill: #fff !important;
+}
+/* textbox */

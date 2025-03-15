@@ -89,7 +89,6 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
 
   return (
     <div className="tag-selector">
-      <label>{attribute} Selector</label>
       <div className="selected-tags">
         {selectedTags.length > 0 ? (
           selectedTags.map((tag, index) => (

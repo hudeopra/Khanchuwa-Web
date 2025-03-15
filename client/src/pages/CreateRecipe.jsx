@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import TagSelector from "../components/TagSelector.jsx";
 import AccordionItem from "../components/AccordionItem.jsx";
+import TextEditor from "../components/TextEditor.jsx"; // NEW IMPORT
 
 export default function CreateRecipe() {
   const { currentUser } = useSelector((state) => state.user);
@@ -38,9 +39,11 @@ export default function CreateRecipe() {
       { name: "Protein", value: "" },
       { name: "Fat", value: "" },
     ], // default to 2 items
-    cookInstructions: [""], // changed to include one default input
-    prepInstructions: [""], // changed to include one default input
+    cookInstructions: "", // Initialize the new instructions as empty strings
+    prepInstructions: "", // Initialize the new instructions as empty strings
     tags: [],
+    mealType: [], // UPDATED: multiple meal types can be selected
+    cookingMethod: [], // UPDATED: cooking methods (multiple), will include extra +1 option
   });
   const [imageUploadError, setImageUploadError] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -157,14 +160,40 @@ export default function CreateRecipe() {
     }
   };
 
+  // Add helper to update an ingredient tag with the new recipe reference
+  const updateIngredientTagReference = async (tagId, recipeId) => {
+    try {
+      await fetch("/api/tag/addRecipeRef", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tagId, recipeId }),
+      });
+    } catch (err) {
+      console.error("Error updating ingredient tag reference:", err);
+    }
+  };
+
+  // Add helper to update a tag’s recipeRefs array with the newly created recipe’s _id
+  const updateTagReference = async (tagId, recipeId) => {
+    try {
+      await fetch("/api/tag/addRecipeRef", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tagId, recipeId }),
+      });
+    } catch (err) {
+      console.error("Error updating tag reference:", err);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(formData);
     // Validation: ensure imageUrls, bannerImgUrl, favImgUrl are present.
     if (formData.imageUrls.length < 1)
       return setError("You must upload at least one image");
-    if (!formData.bannerImgUrl) return setError("Banner image is required.");
-    if (!formData.favImgUrl) return setError("Favorite image is required.");
+    if (!formData.bannerImgUrl) return setError("Banner image is .");
+    if (!formData.favImgUrl) return setError("Favorite image is .");
     // Updated user reference validation:
     const userId = currentUser?._id || currentUser?.user?._id;
     if (!userId) return setError("User reference is missing.");
@@ -207,6 +236,34 @@ export default function CreateRecipe() {
       if (data.success === false) {
         setError(data.message);
       } else if (data._id) {
+        // Update each ingredient tag used:
+        await Promise.all(
+          formData.ingredientTag.map((tagId) =>
+            updateIngredientTagReference(tagId, data._id)
+          )
+        );
+        // For each ingredient tag used, update the tag with the new recipe's _id.
+        await Promise.all(
+          formData.ingredientTag.map((tagId) =>
+            updateTagReference(tagId, data._id)
+          )
+        );
+        // Update for ingredientTag, cuisineTag and flavourTag
+        await Promise.all(
+          formData.ingredientTag.map((tagId) =>
+            updateTagReference(tagId, data._id)
+          )
+        );
+        await Promise.all(
+          formData.cuisineTag.map((tagId) =>
+            updateTagReference(tagId, data._id)
+          )
+        );
+        await Promise.all(
+          formData.flavourTag.map((tagId) =>
+            updateTagReference(tagId, data._id)
+          )
+        );
         navigate(`/recipes/${data._id}`);
       } else {
         setError("Recipe creation failed. Please try again.");
@@ -248,6 +305,16 @@ export default function CreateRecipe() {
     }
   };
 
+  // Helper to toggle checkbox options
+  const toggleOption = (field, option) => {
+    setFormData((prev) => {
+      const current = prev[field] || [];
+      return current.includes(option)
+        ? { ...prev, [field]: current.filter((o) => o !== option) }
+        : { ...prev, [field]: [...current, option] };
+    });
+  };
+
   return (
     <main className="kh-recipe-form">
       <form onSubmit={handleSubmit} className="">
@@ -280,7 +347,6 @@ export default function CreateRecipe() {
                               id="recipeName"
                               maxLength="62"
                               minLength="10"
-                              required
                               onChange={handleChange}
                               value={formData.recipeName}
                             />
@@ -301,12 +367,35 @@ export default function CreateRecipe() {
                         </div>
                       </div>
                       <div className="kh-recipe-form__form--item">
+                        <label>Meal Type</label>
+                        {[
+                          "Appetizer",
+                          "Main Course",
+                          "Dessert",
+                          "Snack",
+                          "Beverage",
+                          "Lunch",
+                          "Dinner",
+                          "Breakfast",
+                        ].map((opt) => (
+                          <div key={opt}>
+                            <input
+                              type="checkbox"
+                              checked={
+                                formData.mealType?.includes(opt) || false
+                              }
+                              onChange={() => toggleOption("mealType", opt)}
+                            />
+                            <label>{opt}</label>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="kh-recipe-form__form--item">
                         <label htmlFor="description">Long Description</label>
                         <textarea
                           id="description"
                           placeholder="Description"
                           className="border  rounded-lg"
-                          required
                           onChange={handleChange}
                           value={formData.description}
                         />
@@ -363,7 +452,6 @@ export default function CreateRecipe() {
                           }}
                           placeholder="Enter amount"
                           className="border p-2 rounded"
-                          required
                         />
                       </div>
                     ))}
@@ -381,7 +469,6 @@ export default function CreateRecipe() {
                         className="border  rounded-lg"
                         onChange={handleChange}
                         value={formData.diet}
-                        required
                       >
                         <option value="">Select Diet</option>
                         <option value="Vegetarian">Vegetarian</option>
@@ -396,7 +483,6 @@ export default function CreateRecipe() {
                       <select
                         id="difficulty"
                         className="border  rounded-lg"
-                        required
                         onChange={handleChange}
                         value={formData.difficulty}
                       >
@@ -415,7 +501,6 @@ export default function CreateRecipe() {
                         placeholder="Prep Time"
                         className="border  rounded-lg"
                         id="prepTime"
-                        required
                         onChange={handleChange}
                         value={formData.prepTime}
                       />
@@ -427,7 +512,6 @@ export default function CreateRecipe() {
                         placeholder="Cook Time"
                         className="border  rounded-lg"
                         id="cookTime"
-                        required
                         onChange={handleChange}
                         value={formData.cookTime}
                       />
@@ -465,6 +549,31 @@ export default function CreateRecipe() {
                         4
                       </label>
                     </div>
+                    <div className="kh-recipe-form__form--item">
+                      <label>Cooking Method</label>
+                      {[
+                        "Grilled",
+                        "Baked",
+                        "Boiled",
+                        "Fried",
+                        "Roasting",
+                        "Steamed",
+                        "Simmering",
+                        "Raw",
+                        "+1",
+                      ].map((opt) => (
+                        <div key={opt}>
+                          <input
+                            type="checkbox"
+                            checked={
+                              formData.cookingMethod?.includes(opt) || false
+                            }
+                            onChange={() => toggleOption("cookingMethod", opt)}
+                          />
+                          <label>{opt}</label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div className="kh-recipe-form__form--item">
                     <label>Ingredients:</label>
@@ -492,7 +601,6 @@ export default function CreateRecipe() {
                                 ingredients: newIngredients,
                               });
                             }}
-                            required
                           />
                         </div>
                         <div className="kh-recipe-form__ingredient--item">
@@ -518,7 +626,6 @@ export default function CreateRecipe() {
                                 ingredients: newIngredients,
                               });
                             }}
-                            required
                           />
                         </div>
                         <div className="kh-recipe-form__ingredient--item">
@@ -561,122 +668,20 @@ export default function CreateRecipe() {
               </AccordionItem>
               <AccordionItem title="Instructions">
                 <div className="div-input-wrapper">
-                  <div className="row">
-                    <div className="col-12 col-lg-6">
-                      <div className="kh-recipe-form__form--item">
-                        <label>Prep Instructions:</label>
-                        {formData.prepInstructions.map((instruction, idx) => (
-                          <div key={idx} className="flex gap-2 items-center">
-                            <input
-                              type="text"
-                              value={instruction}
-                              onChange={(e) => {
-                                const newInstructions =
-                                  formData.prepInstructions.map((ins, i) =>
-                                    i === idx ? e.target.value : ins
-                                  );
-                                setFormData({
-                                  ...formData,
-                                  prepInstructions: newInstructions,
-                                });
-                              }}
-                              className="border p-2 rounded my-1"
-                              placeholder="Instruction"
-                            />
-                            {formData.prepInstructions.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setFormData({
-                                    ...formData,
-                                    prepInstructions:
-                                      formData.prepInstructions.filter(
-                                        (_, i) => i !== idx
-                                      ),
-                                  })
-                                }
-                                className="p-1 border rounded text-red-600"
-                              >
-                                Remove
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData({
-                              ...formData,
-                              prepInstructions: [
-                                ...formData.prepInstructions,
-                                "",
-                              ],
-                            })
-                          }
-                          className="p-2 border rounded my-1"
-                        >
-                          Add Instruction
-                        </button>
-                      </div>
-                    </div>
-                    <div className="col-12 col-lg-6">
-                      <div className="kh-recipe-form__form--item">
-                        <label>Cook Instructions:</label>
-                        {formData.cookInstructions.map((instruction, idx) => (
-                          <div key={idx} className="flex gap-2 items-center">
-                            <input
-                              type="text"
-                              value={instruction}
-                              onChange={(e) => {
-                                const newInstructions =
-                                  formData.cookInstructions.map((ins, i) =>
-                                    i === idx ? e.target.value : ins
-                                  );
-                                setFormData({
-                                  ...formData,
-                                  cookInstructions: newInstructions,
-                                });
-                              }}
-                              className="border p-2 rounded my-1"
-                              placeholder="Instruction"
-                            />
-                            {formData.cookInstructions.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setFormData({
-                                    ...formData,
-                                    cookInstructions:
-                                      formData.cookInstructions.filter(
-                                        (_, i) => i !== idx
-                                      ),
-                                  })
-                                }
-                                className="p-1 border rounded text-red-600"
-                              >
-                                Remove
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData({
-                              ...formData,
-                              cookInstructions: [
-                                ...formData.cookInstructions,
-                                "",
-                              ],
-                            })
-                          }
-                          className="p-2 border rounded my-1"
-                        >
-                          Add Instruction
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <label>Preparation Instructions:</label>
+                  <TextEditor
+                    value={formData.prepInstructions}
+                    onChange={(val) =>
+                      setFormData({ ...formData, prepInstructions: val })
+                    }
+                  />
+                  <label>Cooking Instructions:</label>
+                  <TextEditor
+                    value={formData.cookInstructions}
+                    onChange={(val) =>
+                      setFormData({ ...formData, cookInstructions: val })
+                    }
+                  />
                 </div>
               </AccordionItem>
             </div>

@@ -10,6 +10,7 @@ import {
 import { app } from "../firebase";
 import TagSelector from "../components/TagSelector.jsx";
 import AccordionItem from "../components/AccordionItem.jsx";
+import TextEditor from "../components/TextEditor.jsx"; // NEW IMPORT
 
 export default function EditRecipe() {
   const { id } = useParams();
@@ -21,6 +22,11 @@ export default function EditRecipe() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const [imageUploadError, setImageUploadError] = useState(false);
+  const [previousTags, setPreviousTags] = useState({
+    ingredientTag: [],
+    cuisineTag: [],
+    flavourTag: [],
+  });
 
   useEffect(() => {
     async function fetchRecipe() {
@@ -65,9 +71,16 @@ export default function EditRecipe() {
                   { name: "", value: "" },
                   { name: "", value: "" },
                 ],
-          cookInstructions: data.cookInstructions || [],
-          prepInstructions: data.prepInstructions || [],
+          cookInstructions: data.cookInstructions || "",
+          prepInstructions: data.prepInstructions || "",
           tags: data.tags || [],
+          cookingMethod: data.cookingMethod || [], // NEW: Initialize cookingMethod
+        });
+        // Save the original tag arrays for future diff
+        setPreviousTags({
+          ingredientTag: data.ingredientTag || [],
+          cuisineTag: data.cuisineTag || [],
+          flavourTag: data.flavourTag || [],
         });
       } catch (err) {
         setError(err.message);
@@ -188,6 +201,32 @@ export default function EditRecipe() {
     }
   };
 
+  // Helper to update a tag reference
+  const updateTagReference = async (tagId, recipeId) => {
+    try {
+      await fetch("/api/tag/addRecipeRef", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tagId, recipeId }),
+      });
+    } catch (err) {
+      console.error("Error updating tag reference:", err);
+    }
+  };
+
+  // Helper to remove a tag reference
+  const removeTagReference = async (tagId, recipeId) => {
+    try {
+      await fetch("/api/tag/removeRecipeRef", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tagId, recipeId }),
+      });
+    } catch (err) {
+      console.error("Error removing tag reference:", err);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -200,11 +239,53 @@ export default function EditRecipe() {
       if (data.success === false) {
         setError(data.message);
       } else {
+        // Compute removed tags per type
+        const removedIngredientTags = previousTags.ingredientTag.filter(
+          (tagId) => !formData.ingredientTag.includes(tagId)
+        );
+        const removedCuisineTags = previousTags.cuisineTag.filter(
+          (tagId) => !formData.cuisineTag.includes(tagId)
+        );
+        const removedFlavourTags = previousTags.flavourTag.filter(
+          (tagId) => !formData.flavourTag.includes(tagId)
+        );
+        // Remove tag references for removed tags
+        await Promise.all(
+          removedIngredientTags.map((tagId) => removeTagReference(tagId, id))
+        );
+        await Promise.all(
+          removedCuisineTags.map((tagId) => removeTagReference(tagId, id))
+        );
+        await Promise.all(
+          removedFlavourTags.map((tagId) => removeTagReference(tagId, id))
+        );
+        // For current tags, add recipe reference (optionally you can check new ones only)
+        await Promise.all(
+          formData.ingredientTag.map((tagId) => updateTagReference(tagId, id))
+        );
+        await Promise.all(
+          formData.cuisineTag.map((tagId) => updateTagReference(tagId, id))
+        );
+        await Promise.all(
+          formData.flavourTag.map((tagId) => updateTagReference(tagId, id))
+        );
         navigate(`/recipes/${id}`);
       }
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  // Add a helper to toggle checkbox options
+  const toggleOption = (field, option) => {
+    setFormData((prev) => {
+      const current = prev[field] || [];
+      if (current.includes(option)) {
+        return { ...prev, [field]: current.filter((o) => o !== option) };
+      } else {
+        return { ...prev, [field]: [...current, option] };
+      }
+    });
   };
 
   if (loading) return <p>Loading recipe data...</p>;
@@ -272,6 +353,30 @@ export default function EditRecipe() {
                           onChange={handleChange}
                           value={formData.description}
                         />
+                      </div>
+                      <div className="kh-recipe-form__form--item">
+                        <label>Meal Type</label>
+                        {[
+                          "Appetizer",
+                          "Main Course",
+                          "Dessert",
+                          "Snack",
+                          "Beverage",
+                          "Lunch",
+                          "Dinner",
+                          "Breakfast",
+                        ].map((opt) => (
+                          <div key={opt}>
+                            <input
+                              type="checkbox"
+                              checked={
+                                formData.mealType?.includes(opt) || false
+                              }
+                              onChange={() => toggleOption("mealType", opt)}
+                            />
+                            <label>{opt}</label>
+                          </div>
+                        ))}
                       </div>
                     </div>
                     <div className="col-4">
@@ -519,126 +624,49 @@ export default function EditRecipe() {
                       Add Ingredient
                     </button>
                   </div>
+                  <div className="kh-recipe-form__form--item">
+                    <label>Cooking Method</label>
+                    {[
+                      "Grilled",
+                      "Baked",
+                      "Boiled",
+                      "Fried",
+                      "Roasting",
+                      "Steamed",
+                      "Simmering",
+                      "Raw",
+                      "+1",
+                    ].map((opt) => (
+                      <div key={opt}>
+                        <input
+                          type="checkbox"
+                          checked={
+                            formData.cookingMethod?.includes(opt) || false
+                          }
+                          onChange={() => toggleOption("cookingMethod", opt)}
+                        />
+                        <label>{opt}</label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </AccordionItem>
               <AccordionItem title="Instructions">
                 <div className="div-input-wrapper">
-                  <div className="row">
-                    <div className="col-12 col-lg-6">
-                      <div className="kh-recipe-form__form--item">
-                        <label>Prep Instructions:</label>
-                        {formData.prepInstructions.map((instruction, idx) => (
-                          <div key={idx} className="flex gap-2 items-center">
-                            <input
-                              type="text"
-                              value={instruction}
-                              onChange={(e) => {
-                                const newInstructions =
-                                  formData.prepInstructions.map((ins, i) =>
-                                    i === idx ? e.target.value : ins
-                                  );
-                                setFormData({
-                                  ...formData,
-                                  prepInstructions: newInstructions,
-                                });
-                              }}
-                              className="border p-2 rounded my-1"
-                              placeholder="Instruction"
-                            />
-                            {formData.prepInstructions.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setFormData({
-                                    ...formData,
-                                    prepInstructions:
-                                      formData.prepInstructions.filter(
-                                        (_, i) => i !== idx
-                                      ),
-                                  })
-                                }
-                                className="p-1 border rounded text-red-600"
-                              >
-                                Remove
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData({
-                              ...formData,
-                              prepInstructions: [
-                                ...formData.prepInstructions,
-                                "",
-                              ],
-                            })
-                          }
-                          className="p-2 border rounded my-1"
-                        >
-                          Add Instruction
-                        </button>
-                      </div>
-                    </div>
-                    <div className="col-12 col-lg-6">
-                      <div className="kh-recipe-form__form--item">
-                        <label>Cook Instructions:</label>
-                        {formData.cookInstructions.map((instruction, idx) => (
-                          <div key={idx} className="flex gap-2 items-center">
-                            <input
-                              type="text"
-                              value={instruction}
-                              onChange={(e) => {
-                                const newInstructions =
-                                  formData.cookInstructions.map((ins, i) =>
-                                    i === idx ? e.target.value : ins
-                                  );
-                                setFormData({
-                                  ...formData,
-                                  cookInstructions: newInstructions,
-                                });
-                              }}
-                              className="border p-2 rounded my-1"
-                              placeholder="Instruction"
-                            />
-                            {formData.cookInstructions.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setFormData({
-                                    ...formData,
-                                    cookInstructions:
-                                      formData.cookInstructions.filter(
-                                        (_, i) => i !== idx
-                                      ),
-                                  })
-                                }
-                                className="p-1 border rounded text-red-600"
-                              >
-                                Remove
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData({
-                              ...formData,
-                              cookInstructions: [
-                                ...formData.cookInstructions,
-                                "",
-                              ],
-                            })
-                          }
-                          className="p-2 border rounded my-1"
-                        >
-                          Add Instruction
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <label>Preparation Instructions:</label>
+                  <TextEditor
+                    value={formData.prepInstructions}
+                    onChange={(val) =>
+                      setFormData({ ...formData, prepInstructions: val })
+                    }
+                  />
+                  <label>Cooking Instructions:</label>
+                  <TextEditor
+                    value={formData.cookInstructions}
+                    onChange={(val) =>
+                      setFormData({ ...formData, cookInstructions: val })
+                    }
+                  />
                 </div>
               </AccordionItem>
             </div>

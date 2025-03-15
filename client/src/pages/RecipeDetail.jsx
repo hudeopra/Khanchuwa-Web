@@ -119,6 +119,8 @@ export default function RecipeDetail() {
   //   typeof userData.currentUser.user._id
   // );
   // console.log("Recipe User Ref:", recipe.userRef, typeof recipe.userRef);
+  const currentUserId =
+    userData.currentUser?._id || userData.currentUser?.user?._id;
   return (
     <main className="p-3 max-w-4xl mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">
@@ -146,21 +148,27 @@ export default function RecipeDetail() {
       )}
       <div>
         <strong>Cook Instructions:</strong>
-        <ol>
-          {recipe.cookInstructions &&
-            recipe.cookInstructions.map((instruction, idx) => (
+        {Array.isArray(recipe.cookInstructions) ? (
+          <ol>
+            {recipe.cookInstructions.map((instruction, idx) => (
               <li key={idx}>{instruction}</li>
             ))}
-        </ol>
+          </ol>
+        ) : (
+          <div dangerouslySetInnerHTML={{ __html: recipe.cookInstructions }} />
+        )}
       </div>
       <div>
         <strong>Prep Instructions:</strong>
-        <ul>
-          {recipe.prepInstructions &&
-            recipe.prepInstructions.map((note, idx) => (
+        {Array.isArray(recipe.prepInstructions) ? (
+          <ul>
+            {recipe.prepInstructions.map((note, idx) => (
               <li key={idx}>{note}</li>
             ))}
-        </ul>
+          </ul>
+        ) : (
+          <div dangerouslySetInnerHTML={{ __html: recipe.prepInstructions }} />
+        )}
       </div>
       <p>
         <strong>Diet:</strong> {recipe.diet || "N/A"}
@@ -344,28 +352,26 @@ export default function RecipeDetail() {
           </button>
         </form>
       )}
-      {userData.currentUser?._id &&
-        recipe.userRef === userData.currentUser._id && (
-          <div className="my-4">
-            <button
-              onClick={() => navigate(`/recipes/edit/${id}`)}
-              className="p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
-            >
-              Edit Recipe
-            </button>
-          </div>
-        )}
-      {userData.currentUser?._id &&
-        recipe.userRef === userData.currentUser._id && (
-          <div className="my-4">
-            <button
-              onClick={() => setShowDeleteConfirmation(true)}
-              className="p-3 bg-red-600 text-white rounded-lg hover:opacity-90"
-            >
-              Delete Recipe
-            </button>
-          </div>
-        )}
+      {currentUserId && recipe.userRef === currentUserId && (
+        <div className="my-4">
+          <button
+            onClick={() => navigate(`/recipes/edit/${id}`)}
+            className="p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
+          >
+            Edit Recipe
+          </button>
+        </div>
+      )}
+      {currentUserId && recipe.userRef === currentUserId && (
+        <div className="my-4">
+          <button
+            onClick={() => setShowDeleteConfirmation(true)}
+            className="p-3 bg-red-600 text-white rounded-lg hover:opacity-90"
+          >
+            Delete Recipe
+          </button>
+        </div>
+      )}
       {showDeleteConfirmation && (
         <form onSubmit={handleDeleteRecipe} className="border p-4 my-4">
           <h3 className="text-xl font-semibold">Confirm Deletion</h3>
