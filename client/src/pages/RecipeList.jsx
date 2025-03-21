@@ -171,24 +171,24 @@ export default function RecipeList() {
               </div>
             </div>
             <div>
-              <h2>Cuisine Tags (Count: {cuisineTags.length})</h2>
-              <ul>
+              <span>Cuisine Tags (Count: {cuisineTags.length})</span>
+              {/* <ul>
                 {cuisineTags.map((tag) => (
                   <li key={tag._id || tag.name}>{tag.name}</li>
                 ))}
-              </ul>
-              <h2>Ingredient Tags (Count: {ingredientTags.length})</h2>
-              <ul>
+              </ul> */}
+              <span>Ingredient Tags (Count: {ingredientTags.length})</span>
+              {/* <ul>
                 {ingredientTags.map((tag) => (
                   <li key={tag._id || tag.name}>{tag.name}</li>
                 ))}
-              </ul>
-              <h2>Flavour Tags (Count: {flavourTags.length})</h2>
-              <ul>
+              </ul> */}
+              <span>Flavour Tags (Count: {flavourTags.length})</span>
+              {/* <ul>
                 {flavourTags.map((tag) => (
                   <li key={tag._id || tag.name}>{tag.name}</li>
                 ))}
-              </ul>
+              </ul> */}
             </div>
           </div>
           {filteredRecipes.map((recipe) => (
@@ -200,7 +200,7 @@ export default function RecipeList() {
                 <Link to={`/recipes/${recipe._id}`} className="">
                   <div className="kh-recipe-block__content">
                     <h3 className="">{recipe.recipeName}</h3>
-                    <p className="">{recipe.description}</p>
+                    <p className="">{recipe.shortDescription}</p>
                     <span className="">By {recipe.chefName}</span>
                   </div>
                   <div className="kh-recipe-block__item--img">

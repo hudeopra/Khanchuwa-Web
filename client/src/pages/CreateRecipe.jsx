@@ -190,10 +190,10 @@ export default function CreateRecipe() {
     e.preventDefault();
     console.log(formData);
     // Validation: ensure imageUrls, bannerImgUrl, favImgUrl are present.
-    if (formData.imageUrls.length < 1)
-      return setError("You must upload at least one image");
-    if (!formData.bannerImgUrl) return setError("Banner image is .");
-    if (!formData.favImgUrl) return setError("Favorite image is .");
+    // if (formData.imageUrls.length < 1)
+    //   return setError("You must upload at least one image");
+    // if (!formData.bannerImgUrl) return setError("Banner image is .");
+    // if (!formData.favImgUrl) return setError("Favorite image is .");
     // Updated user reference validation:
     const userId = currentUser?._id || currentUser?.user?._id;
     if (!userId) return setError("User reference is missing.");
@@ -366,29 +366,60 @@ export default function CreateRecipe() {
                           </div>
                         </div>
                       </div>
-                      <div className="kh-recipe-form__form--item">
+                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                         <label>Meal Type</label>
-                        {[
-                          "Appetizer",
-                          "Main Course",
-                          "Dessert",
-                          "Snack",
-                          "Beverage",
-                          "Lunch",
-                          "Dinner",
-                          "Breakfast",
-                        ].map((opt) => (
-                          <div key={opt}>
-                            <input
-                              type="checkbox"
-                              checked={
-                                formData.mealType?.includes(opt) || false
-                              }
-                              onChange={() => toggleOption("mealType", opt)}
-                            />
-                            <label>{opt}</label>
-                          </div>
-                        ))}
+                        <div className="d-flex flex-wrap gap-2">
+                          {[
+                            "Appetizer",
+                            "Soup",
+                            "Main Course (Entrée)",
+                            "Side Dish",
+                            "Dessert",
+                          ].map((opt) => (
+                            <div
+                              class="kh-recipe-form__checkbox--item"
+                              key={opt}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.mealType?.includes(opt) || false
+                                }
+                                onChange={() => toggleOption("mealType", opt)}
+                              />
+                              <label>{opt}</label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
+                        <label>Meal Times</label>
+                        <div className="d-flex flex-wrap gap-2">
+                          {[
+                            "Snack",
+                            "Breakfast",
+                            "Brunch",
+                            "Afternoon Tea",
+                            "Lunch",
+                            "Dinner",
+                            "Supper",
+                            "Late Night Snack",
+                          ].map((opt) => (
+                            <div
+                              className="kh-recipe-form__checkbox--item"
+                              key={opt}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.mealType?.includes(opt) || false
+                                }
+                                onChange={() => toggleOption("mealType", opt)}
+                              />
+                              <label>{opt}</label>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                       <div className="kh-recipe-form__form--item">
                         <label htmlFor="description">Long Description</label>
@@ -549,120 +580,127 @@ export default function CreateRecipe() {
                         4
                       </label>
                     </div>
-                    <div className="kh-recipe-form__form--item">
+                    <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                       <label>Cooking Method</label>
-                      {[
-                        "Grilled",
-                        "Baked",
-                        "Boiled",
-                        "Fried",
-                        "Roasting",
-                        "Steamed",
-                        "Simmering",
-                        "Raw",
-                        "+1",
-                      ].map((opt) => (
-                        <div key={opt}>
-                          <input
-                            type="checkbox"
-                            checked={
-                              formData.cookingMethod?.includes(opt) || false
-                            }
-                            onChange={() => toggleOption("cookingMethod", opt)}
-                          />
-                          <label>{opt}</label>
-                        </div>
-                      ))}
+                      <div className="d-flex flex-wrap gap-2">
+                        {[
+                          "Stir-fried",
+                          "Grilled",
+                          "Baked",
+                          "Boiled",
+                          "Fried",
+                          "Roasting",
+                          "Steamed",
+                          "Simmered",
+                          "Fresh",
+                        ].map((opt) => (
+                          <div
+                            className="kh-recipe-form__checkbox--item"
+                            key={opt}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={
+                                formData.cookingMethod?.includes(opt) || false
+                              }
+                              onChange={() =>
+                                toggleOption("cookingMethod", opt)
+                              }
+                            />
+                            <label>{opt}</label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div className="kh-recipe-form__form--item">
-                    <label>Ingredients:</label>
-                    {formData.ingredients.map((ingredient, index) => (
-                      <div key={index} className="kh-recipe-form__ingredient">
-                        <div className="kh-recipe-form__ingredient--item">
-                          <label htmlFor={`ingredient-name-${index}`}>
-                            Name {index + 1}
-                          </label>
-                          <input
-                            id={`ingredient-name-${index}`}
-                            type="text"
-                            placeholder="Ingredient name"
-                            className="border  rounded-lg my-1"
-                            value={ingredient.name}
-                            onChange={(e) => {
-                              const newIngredients = formData.ingredients.map(
-                                (ing, idx) =>
-                                  idx === index
-                                    ? { ...ing, name: e.target.value }
-                                    : ing
-                              );
-                              setFormData({
-                                ...formData,
-                                ingredients: newIngredients,
-                              });
-                            }}
-                          />
-                        </div>
-                        <div className="kh-recipe-form__ingredient--item">
-                          {" "}
-                          <label htmlFor={`ingredient-qty-${index}`}>
-                            Quantity {index + 1}
-                          </label>
-                          <input
-                            id={`ingredient-qty-${index}`}
-                            type="text"
-                            placeholder="Quantity"
-                            className="border  rounded-lg my-1"
-                            value={ingredient.quantity}
-                            onChange={(e) => {
-                              const newIngredients = formData.ingredients.map(
-                                (ing, idx) =>
-                                  idx === index
-                                    ? { ...ing, quantity: e.target.value }
-                                    : ing
-                              );
-                              setFormData({
-                                ...formData,
-                                ingredients: newIngredients,
-                              });
-                            }}
-                          />
-                        </div>
-                        <div className="kh-recipe-form__ingredient--item">
-                          {formData.ingredients.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() =>
+                    <div className="kh-recipe-form__form--item">
+                      <label>Ingredients:</label>
+                      {formData.ingredients.map((ingredient, index) => (
+                        <div key={index} className="kh-recipe-form__ingredient">
+                          <div className="kh-recipe-form__ingredient--item">
+                            <label htmlFor={`ingredient-name-${index}`}>
+                              Name {index + 1}
+                            </label>
+                            <input
+                              id={`ingredient-name-${index}`}
+                              type="text"
+                              placeholder="Ingredient name"
+                              className="border  rounded-lg my-1"
+                              value={ingredient.name}
+                              onChange={(e) => {
+                                const newIngredients = formData.ingredients.map(
+                                  (ing, idx) =>
+                                    idx === index
+                                      ? { ...ing, name: e.target.value }
+                                      : ing
+                                );
                                 setFormData({
                                   ...formData,
-                                  ingredients: formData.ingredients.filter(
-                                    (_, i) => i !== index
-                                  ),
-                                })
-                              }
-                              className=""
-                            >
-                              Remove
-                            </button>
-                          )}
+                                  ingredients: newIngredients,
+                                });
+                              }}
+                            />
+                          </div>
+                          <div className="kh-recipe-form__ingredient--item">
+                            {" "}
+                            <label htmlFor={`ingredient-qty-${index}`}>
+                              Quantity {index + 1}
+                            </label>
+                            <input
+                              id={`ingredient-qty-${index}`}
+                              type="text"
+                              placeholder="Quantity"
+                              className="border  rounded-lg my-1"
+                              value={ingredient.quantity}
+                              onChange={(e) => {
+                                const newIngredients = formData.ingredients.map(
+                                  (ing, idx) =>
+                                    idx === index
+                                      ? { ...ing, quantity: e.target.value }
+                                      : ing
+                                );
+                                setFormData({
+                                  ...formData,
+                                  ingredients: newIngredients,
+                                });
+                              }}
+                            />
+                          </div>
+                          <div className="kh-recipe-form__ingredient--item">
+                            {formData.ingredients.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setFormData({
+                                    ...formData,
+                                    ingredients: formData.ingredients.filter(
+                                      (_, i) => i !== index
+                                    ),
+                                  })
+                                }
+                                className=""
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({
-                          ...formData,
-                          ingredients: [
-                            ...formData.ingredients,
-                            { name: "", quantity: "" },
-                          ],
-                        })
-                      }
-                      className=""
-                    >
-                      Add Ingredient
-                    </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            ingredients: [
+                              ...formData.ingredients,
+                              { name: "", quantity: "" },
+                            ],
+                          })
+                        }
+                        className=""
+                      >
+                        Add Ingredient
+                      </button>
+                    </div>
                   </div>
                 </div>
               </AccordionItem>
@@ -838,6 +876,10 @@ export default function CreateRecipe() {
                         setFormData((prev) => ({
                           ...prev,
                           ingredientTag: selected.map((t) => t._id),
+                          ingredients: selected.map((t) => ({
+                            name: t.name,
+                            quantity: "",
+                          })),
                         }))
                       }
                     />

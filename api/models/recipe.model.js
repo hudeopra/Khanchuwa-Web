@@ -24,7 +24,6 @@ const recipeSchema = new mongoose.Schema({
   nutritionalInfo: { type: mongoose.Schema.Types.Mixed },
   cookInstructions: { type: String },
   prepInstructions: { type: String },
-  tags: { type: [String] },
   ingredientTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
   rating: { type: Number },
   reviews: [
@@ -35,7 +34,12 @@ const recipeSchema = new mongoose.Schema({
     }
   ],
   mealType: { type: [String] }, // UPDATED: Now an array of meal types (e.g., Appetizer, Main Course, Dessert, Snack, Beverage, Lunch, Dinner, Breakfast)
-  cookingMethod: { type: [String] } // remains an array; UI updated to include +1 option
+  cookingMethod: { type: [String] }, // remains an array; UI updated to include +1 option
+  recipeFav: { type: Number, default: 0 }, // NEW: recipeFav counter
+  recipeViews: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }]
 }, {
   timestamps: true,
 });

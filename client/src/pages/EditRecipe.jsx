@@ -343,7 +343,7 @@ export default function EditRecipe() {
                           </div>
                         </div>
                       </div>
-                      <div className="kh-recipe-form__form--item">
+                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                         <label htmlFor="description">Long Description</label>
                         <textarea
                           id="description"
@@ -672,7 +672,14 @@ export default function EditRecipe() {
             </div>
             <div className="col-3">
               <div className="kh-recipe-form__admin">
-                <p>Author: {formData.chefName}</p>
+                <label htmlFor="chefName">Author:</label>
+                <input
+                  type="text"
+                  id="chefName"
+                  className="border rounded-lg"
+                  value={formData.chefName}
+                  onChange={handleChange}
+                />
                 <div className="submitwrapper">
                   <input type="hidden" id="userRef" value={currentUser._id} />
 

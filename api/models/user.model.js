@@ -61,9 +61,21 @@ const userSchema = new mongoose.Schema({
   passwordResetToken: { type: String, default: null, required: false },
   lastLogin: { type: Date, required: false },
   customFields: { type: mongoose.Schema.Types.Mixed, required: false },
+  // New field: usertype with enum options and default value "guest"
+  usertype: {
+    type: String,
+    enum: ["guest", "creator", "vendor", "admin", "superadmin"],
+    default: "guest"
+  },
   createdRecipes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Recipe'
+  }],
+  // NEW: userFavRecipe to store user's favorite recipes
+  userFavRecipe: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Recipe',
+    required: false
   }]
 }, {
   timestamps: true,
@@ -72,6 +84,8 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 
 export default User;
+
+
 
 
 

@@ -15,7 +15,7 @@ export default function UserRecipie() {
         const data = await res.json();
         // Assuming each recipe's userRef is stored as a string
         const userRecipes = data.filter(
-          (recipe) => recipe.userRef === currentUser._id
+          (recipe) => recipe.userRef === currentUser.user._id
         );
         setRecipes(userRecipes);
       } catch (err) {

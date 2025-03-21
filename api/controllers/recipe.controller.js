@@ -37,10 +37,18 @@ export const getRecipeById = async (req, res, next) => {
     const recipe = await Recipe.findById(req.params.id)
       .populate("cuisineTag")
       .populate("flavourTag")
-      .populate("ingredientTag")
-      .populate("tags");
+      .populate("ingredientTag");
     if (!recipe) {
       return res.status(404).json({ message: 'Recipe not found' });
+    }
+    // Ensure recipeViews is initialized as an array
+    if (!recipe.recipeViews || !Array.isArray(recipe.recipeViews)) {
+      recipe.recipeViews = [];
+    }
+    // Use req.user.id instead of req.user._id
+    if (req.user && !recipe.recipeViews.some(id => id.equals(req.user.id))) {
+      recipe.recipeViews.push(req.user.id);
+      await recipe.save();
     }
     return res.status(200).json(recipe);
   } catch (error) {
@@ -154,6 +162,17 @@ export const filterRecipes = async (req, res, next) => {
 
     const recipes = await Recipe.find(filter);
     return res.status(200).json(recipes);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// New function: Get recipes for a given user (with optional limit)
+export const getRecipesByUser = async (req, res, next) => {
+  try {
+    const limit = parseInt(req.query.limit) || 0;
+    const recipes = await Recipe.find({ userRef: req.params.userId }).limit(limit);
+    return res.status(200).json({ success: true, recipes });
   } catch (error) {
     next(error);
   }

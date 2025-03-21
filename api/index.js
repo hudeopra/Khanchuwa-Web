@@ -5,6 +5,7 @@ import userRouter from './routes/user.route.js';
 import authRouter from './routes/auth.route.js';
 import recipeRouter from './routes/recipe.route.js';
 import tagRouter from './routes/tag.route.js'; // Added tag router
+import blogRouter from './routes/blog.route.js'; // Added tag router
 import cors from 'cors';
 
 import cookieParser from 'cookie-parser';
@@ -30,7 +31,8 @@ app.listen(3000, () => {
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use('/api/recipe', recipeRouter);
-app.use('/api/tag', tagRouter); // Set up tag routes
+app.use('/api/tag', tagRouter);
+app.use('/api/blog', blogRouter); // Set up tag routes
 
 app.use((err, req, res, next) => { // Error handling middleware
   const statusCode = err.statusCode || 500;

@@ -34,6 +34,7 @@ export default function Profile() {
   const [dobError, setDobError] = useState("");
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [recentRecipes, setRecentRecipes] = useState([]);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -85,7 +86,31 @@ export default function Profile() {
           language: "",
           notifications: { email: false, push: false },
         },
+        // New field for usertype
+        usertype: user.usertype || "guest",
       });
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      const user = currentUser.user || currentUser;
+      const userId = user._id;
+      fetch(`http://localhost:3000/api/recipe/user/${userId}?limit=5`)
+        .then((res) => {
+          if (!res.ok) {
+            return res.text().then((text) => {
+              throw new Error(`Fetch error: ${res.status} ${text}`);
+            });
+          }
+          return res.json();
+        })
+        .then((data) => {
+          if (data.success) {
+            setRecentRecipes(data.recipes);
+          }
+        })
+        .catch((error) => console.error(error));
     }
   }, [currentUser]);
 
@@ -105,7 +130,7 @@ export default function Profile() {
       },
       (error) => {
         setFileUploadError(true);
-        setError(error.message);
+        console.error(error.message);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
@@ -221,144 +246,276 @@ export default function Profile() {
   return (
     <main className="kh-profile">
       <h1>User Information</h1>
-      {currentUser ? (
-        (() => {
-          const user = currentUser.user || currentUser;
-          return (
-            <div className="profile-card">
-              <img src={user.avatar} alt="Avatar" className="profile-avatar" />
-              <div className="profile-details">
-                <p>
-                  <strong>Username:</strong> {user.username}
-                </p>
-                <p>
-                  <strong>Email:</strong> {user.email}
-                </p>
-                {user.fullname && (
-                  <p>
-                    <strong>Full Name:</strong> {user.fullname}
-                  </p>
-                )}
-                {user.dateOfBirth && (
-                  <p>
-                    <strong>Date Of Birth:</strong>{" "}
-                    {new Date(user.dateOfBirth).toLocaleDateString()}
-                  </p>
-                )}
-                {user.gender && (
-                  <p>
-                    <strong>Gender:</strong> {user.gender}
-                  </p>
-                )}
-                {user.emails && (
-                  <p>
-                    <strong>Alternative Emails:</strong> {user.emails}
-                  </p>
-                )}
-                {user.phoneNumbers && user.phoneNumbers.length > 0 && (
-                  <div>
-                    <strong>Phone Numbers:</strong>
-                    <ul>
-                      {user.phoneNumbers.map((phone, index) => (
-                        <li key={index}>
-                          {phone.number} {phone.isPrimary && "(Primary)"}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {user.addresses && user.addresses.length > 0 && (
-                  <div>
-                    <strong>Addresses:</strong>
-                    <ul>
-                      {user.addresses.map((addr, index) => (
-                        <li key={index}>
-                          {addr.type}: {addr.street}, {addr.city}, {addr.state},{" "}
-                          {addr.zip}, {addr.country}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {user.socialMedia && user.socialMedia.length > 0 && (
-                  <div>
-                    <strong>Social Media:</strong>
-                    <ul>
-                      {user.socialMedia.map((sm, index) => (
-                        <li key={index}>
-                          {sm.platform}:{" "}
-                          <a
-                            href={sm.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {sm.url}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {user.preferences && (
-                  <div>
-                    <strong>Preferences:</strong>
-                    <p>
-                      <strong>Language:</strong> {user.preferences.language}
-                    </p>
-                    {user.preferences.dietaryRestrictions &&
-                      user.preferences.dietaryRestrictions.length > 0 && (
-                        <div>
-                          <strong>Dietary Restrictions:</strong>
-                          <ul>
-                            {user.preferences.dietaryRestrictions.map(
-                              (item, index) => (
-                                <li key={index}>{item}</li>
-                              )
-                            )}
-                          </ul>
-                        </div>
-                      )}
-                    {user.preferences.allergies &&
-                      user.preferences.allergies.length > 0 && (
-                        <div>
-                          <strong>Allergies:</strong>
-                          <ul>
-                            {user.preferences.allergies.map((item, index) => (
-                              <li key={index}>{item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    {user.preferences.tastePreferences &&
-                      user.preferences.tastePreferences.length > 0 && (
-                        <div>
-                          <strong>Taste Preferences:</strong>
-                          <ul>
-                            {user.preferences.tastePreferences.map(
-                              (item, index) => (
-                                <li key={index}>{item}</li>
-                              )
-                            )}
-                          </ul>
-                        </div>
-                      )}
-                    {user.preferences.notifications && (
-                      <p>
-                        <strong>Notifications:</strong> Email:{" "}
-                        {user.preferences.notifications.email ? "Yes" : "No"},
-                        Push:{" "}
-                        {user.preferences.notifications.push ? "Yes" : "No"}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
+      <div className="container">
+        <div className="row">
+          <div className="col-3">
+            <div className="kh-profile__menu">
+              <nav className={`kh-profile__menu--menu-wrapper `}>
+                <div className="kh-profile__menu--menu-block">
+                  <ul>
+                    <li>
+                      <Link to={"/"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>Home</span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to={"/"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>Recipes</span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to={"/"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>Trending</span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to={"/"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>Random</span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to={"/"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>Search</span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to={"/"}>
+                        <img
+                          src="../src/assets/img/search/chefLogo.png"
+                          alt="Khanchuwa Logo"
+                        />
+                        <span>About Khanchuwa</span>
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </nav>
             </div>
-          );
-        })()
-      ) : (
-        <p>No user data available</p>
-      )}
+          </div>
+          <div className="col-9">
+            <div className="kh-profile__tab">
+              {currentUser ? (
+                (() => {
+                  const user = currentUser.user || currentUser;
+                  return (
+                    <div className="row">
+                      <div className="col-6">
+                        <div className="kh-profile__tab--wrapper kh-profile__tab--id-card">
+                          <div className="kh-profile__tab--item">
+                            <img
+                              src={user.avatar}
+                              alt="Avatar"
+                              className="profile-avatar"
+                            />
+                          </div>
+                          <div className="kh-profile__tab--user-info">
+                            {user.fullname && <h2>{user.fullname}</h2>}
+                            <span>@{user.username}</span>
+                          </div>
+                          <div className="kh-profile__tab--item">
+                            <strong>Language:</strong>
+                            {user.preferences.language}
+                          </div>
+                        </div>
+                        <div className="kh-profile__tab--wrapper kh-profile__tab--user-details">
+                          <div className="kh-profile__tab--item">
+                            {user.dateOfBirth && (
+                              <p>
+                                <strong>Date Of Birth:</strong>{" "}
+                                {new Date(
+                                  user.dateOfBirth
+                                ).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                          <div className="kh-profile__tab--item">
+                            {user.gender && (
+                              <p>
+                                <strong>Gender:</strong> {user.gender}
+                              </p>
+                            )}
+                          </div>
+                          <div className="kh-profile__tab--item">
+                            {user.phoneNumbers &&
+                              user.phoneNumbers.length > 0 && (
+                                <div>
+                                  <strong>Phone Numbers:</strong>
+                                  <ul>
+                                    {user.phoneNumbers.map((phone, index) => (
+                                      <li key={index}>
+                                        {phone.number}{" "}
+                                        {phone.isPrimary && "(Primary)"}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                          </div>
+                          <div className="kh-profile__tab--item">
+                            {user.addresses && user.addresses.length > 0 && (
+                              <div>
+                                <strong>Addresses:</strong>
+                                <ul>
+                                  {user.addresses.map((addr, index) => (
+                                    <li key={index}>
+                                      {addr.type}: {addr.street}, {addr.city}
+                                      {/* {addr.type}: {addr.street}, {addr.city},{" "}
+                                      {addr.state}, {addr.zip}, {addr.country} */}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                          <div className="kh-profile__tab--item">
+                            {user.socialMedia &&
+                              user.socialMedia.length > 0 && (
+                                <div>
+                                  <strong>Social Media:</strong>
+                                  <ul>
+                                    {user.socialMedia.map((sm, index) => (
+                                      <li key={index}>
+                                        {sm.platform}:{" "}
+                                        <a
+                                          href={sm.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                        >
+                                          {sm.url}
+                                        </a>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                          </div>
+
+                          <div className="kh-profile__tab--item"></div>
+                          <div className="kh-profile__tab--item"></div>
+                          <div className="kh-profile__tab--item"></div>
+                        </div>
+                      </div>
+                      <div className="col-6">
+                        <div className="kh-profile__tab--wrapper">
+                          {user.preferences && (
+                            <div>
+                              <strong>Preferences:</strong>
+                              {user.preferences.dietaryRestrictions &&
+                                user.preferences.dietaryRestrictions.length >
+                                  0 && (
+                                  <div>
+                                    <strong>Dietary Restrictions:</strong>
+                                    <ul>
+                                      {user.preferences.dietaryRestrictions.map(
+                                        (item, index) => (
+                                          <li key={index}>{item}</li>
+                                        )
+                                      )}
+                                    </ul>
+                                  </div>
+                                )}
+                              {user.preferences.allergies &&
+                                user.preferences.allergies.length > 0 && (
+                                  <div>
+                                    <strong>Allergies:</strong>
+                                    <ul>
+                                      {user.preferences.allergies.map(
+                                        (item, index) => (
+                                          <li key={index}>{item}</li>
+                                        )
+                                      )}
+                                    </ul>
+                                  </div>
+                                )}
+                              {user.preferences.tastePreferences &&
+                                user.preferences.tastePreferences.length >
+                                  0 && (
+                                  <div>
+                                    <strong>Taste Preferences:</strong>
+                                    <ul>
+                                      {user.preferences.tastePreferences.map(
+                                        (item, index) => (
+                                          <li key={index}>{item}</li>
+                                        )
+                                      )}
+                                    </ul>
+                                  </div>
+                                )}
+                              {user.preferences.notifications && (
+                                <p>
+                                  <strong>Notifications:</strong> Email:{" "}
+                                  {user.preferences.notifications.email
+                                    ? "Yes"
+                                    : "No"}
+                                  , Push:{" "}
+                                  {user.preferences.notifications.push
+                                    ? "Yes"
+                                    : "No"}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()
+              ) : (
+                <p>No user data available</p>
+              )}
+            </div>
+            <div className="kh-recipe-post">
+              {recentRecipes.length > 0 ? (
+                recentRecipes.map((recipe) => (
+                  <div key={recipe._id} className="recipe-block">
+                    <div className="recipe-block-wrapper">
+                      <h3>{recipe.recipeName}</h3>
+                      <img
+                        src={
+                          Array.isArray(recipe.imageUrls) &&
+                          recipe.imageUrls.length > 0
+                            ? recipe.imageUrls[0]
+                            : ""
+                        }
+                        alt={recipe.recipeName}
+                        className="recipe-fav-image"
+                      />
+                    </div>
+                    <Link
+                      to={`/recipe/edit/${recipe._id}`}
+                      className="btn btn-edit"
+                    >
+                      Edit
+                    </Link>
+                  </div>
+                ))
+              ) : (
+                <p>No recent recipes.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

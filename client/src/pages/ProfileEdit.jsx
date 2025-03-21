@@ -85,6 +85,8 @@ export default function ProfileEdit() {
           language: "",
           notifications: { email: false, push: false },
         },
+        // New field for usertype with default "guest"
+        usertype: user.usertype || "guest",
       });
     }
   }, [currentUser]);
@@ -106,6 +108,7 @@ export default function ProfileEdit() {
       (error) => {
         setFileUploadError(true);
         setError(error.message);
+        console.error(error.message);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
@@ -505,43 +508,63 @@ export default function ProfileEdit() {
               +
             </button>
           </div>
-          {/* Dynamic array field for Social Media */}
+          {/* Replace dynamic social media block with fixed social media inputs */}
           <div className="kh-input-wrapper">
-            <label>Social Media:</label>
-            {userData.socialMedia &&
-              userData.socialMedia.map((sm, index) => (
-                <div key={index} className="flex space-x-2">
-                  <input
-                    type="text"
-                    placeholder="Platform"
-                    value={sm.platform || ""}
-                    onChange={(e) =>
-                      handleArrayChange(e, "socialMedia", index, "platform")
-                    }
-                    className="border p-2 rounded"
-                  />
-                  <input
-                    type="text"
-                    placeholder="URL"
-                    value={sm.url || ""}
-                    onChange={(e) =>
-                      handleArrayChange(e, "socialMedia", index, "url")
-                    }
-                    className="border p-2 rounded"
-                  />
-                </div>
-              ))}
-            <button
-              type="button"
-              onClick={() => {
-                if ((userData.socialMedia?.length || 0) < 5) {
-                  addArrayItem("socialMedia", { platform: "", url: "" });
-                }
-              }}
-              disabled={(userData.socialMedia?.length || 0) >= 5}
-            >
-              +
-            </button>
+            <label>TikTok:</label>
+            <input
+              type="text"
+              placeholder="TikTok URL"
+              value={userData.socialMedia?.tiktok || ""}
+              id="socialMedia.tiktok"
+              className="border p-2 rounded"
+              onChange={(e) =>
+                setUserData({
+                  ...userData,
+                  socialMedia: {
+                    ...userData.socialMedia,
+                    tiktok: e.target.value,
+                  },
+                })
+              }
+            />
+          </div>
+          <div className="kh-input-wrapper">
+            <label>Instagram:</label>
+            <input
+              type="text"
+              placeholder="Instagram URL"
+              value={userData.socialMedia?.insta || ""}
+              id="socialMedia.insta"
+              className="border p-2 rounded"
+              onChange={(e) =>
+                setUserData({
+                  ...userData,
+                  socialMedia: {
+                    ...userData.socialMedia,
+                    insta: e.target.value,
+                  },
+                })
+              }
+            />
+          </div>
+          <div className="kh-input-wrapper">
+            <label>YouTube:</label>
+            <input
+              type="text"
+              placeholder="YouTube URL"
+              value={userData.socialMedia?.youtube || ""}
+              id="socialMedia.youtube"
+              className="border p-2 rounded"
+              onChange={(e) =>
+                setUserData({
+                  ...userData,
+                  socialMedia: {
+                    ...userData.socialMedia,
+                    youtube: e.target.value,
+                  },
+                })
+              }
+            />
           </div>
           {/* Preferences section */}
           <div className="kh-input-wrapper">

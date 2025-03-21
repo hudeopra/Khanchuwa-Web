@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
 // Helper to format minutes into hr and min string
 const formatTime = (minutes) => {
@@ -30,24 +29,44 @@ export default function RecipeDetail() {
   const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
   const [deleteError, setDeleteError] = useState(null);
 
+  // NEW: state for favorite checkbox
+  const [isFav, setIsFav] = useState(false);
+
+  const dispatch = useDispatch();
+
   console.log("User data:", userData);
   if (userData.currentUser) {
-    console.log("Current user details:", userData.currentUser);
+    console.log(
+      "Current user details:",
+      userData.currentUser.user.userFavRecipe
+    );
   }
 
   useEffect(() => {
-    console.log("Fetching recipe with ID:", id); // Log the ID
-
+    console.log("Fetching recipe with ID:", id);
     const fetchRecipe = async () => {
       try {
         const res = await fetch(`/api/recipe/${id}`);
-        const data = await res.json();
-        console.log("API response:", data); // Log the API response
-
+        const contentType = res.headers.get("content-type");
+        let data;
+        if (contentType && contentType.includes("application/json")) {
+          data = await res.json();
+        } else {
+          const text = await res.text();
+          throw new Error(text);
+        }
+        console.log("API response:", data);
         if (res.ok) {
           setRecipe(data);
+          if (userData.currentUser && userData.currentUser.userFavRecipe) {
+            setIsFav(
+              userData.currentUser.userFavRecipe.some(
+                (favId) => String(favId) === String(data._id)
+              )
+            );
+          }
         } else {
-          setError(data.message);
+          setError(data.message || "Unexpected error");
         }
       } catch (err) {
         setError(err.message);
@@ -55,9 +74,8 @@ export default function RecipeDetail() {
         setLoading(false);
       }
     };
-
     fetchRecipe();
-  }, [id]);
+  }, [id, userData]);
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
@@ -121,150 +139,209 @@ export default function RecipeDetail() {
   // console.log("Recipe User Ref:", recipe.userRef, typeof recipe.userRef);
   const currentUserId =
     userData.currentUser?._id || userData.currentUser?.user?._id;
+  // Filter out null values and ensure recipeViews is an array of strings
+  const viewedIds =
+    recipe && Array.isArray(recipe.recipeViews)
+      ? recipe.recipeViews.filter((v) => v) // remove null/undefined
+      : [];
+  const hasViewed = currentUserId ? viewedIds.includes(currentUserId) : false;
+  const mainClass = hasViewed
+    ? "kh-recipe-single"
+    : "kh-recipe-single hasnot-viewed";
   return (
-    <main className="p-3 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-semibold text-center my-7">
-        {recipe.recipeName || "N/A"}
-      </h1>
-      <p className="text-lg">{recipe.description || "N/A"}</p>
-      <p>
+    <main className={mainClass}>
+      <div className="container py-5">
+        <div className="row">
+          <div className="col-12">
+            <div className="kh-recipe-single__head">
+              <h1 className="mb-2">{recipe.recipeName || "N/A"}</h1>
+              <div className="kh-recipe-single__head--banner">
+                <img
+                  src={recipe.bannerImgUrl || backupBannerUrl}
+                  alt="Banner"
+                  className=" kh-recipe-single__banner rounded-lg "
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = backupBannerUrl;
+                  }}
+                />
+                <div className="kh-recipe-single__head--info-wrapper">
+                  <div className="kh-recipe-single__head--info">
+                    <span>Prep:</span>{" "}
+                    {recipe.prepTime ? formatTime(recipe.prepTime) : "N/A"}
+                  </div>
+                  <div className="kh-recipe-single__head--info">
+                    <span>Cook:</span>{" "}
+                    {recipe.cookTime ? formatTime(recipe.cookTime) : "N/A"}
+                  </div>
+                  <div className="kh-recipe-single__head--info">
+                    <span>Servings:</span> {recipe.servings || "N/A"}
+                  </div>
+                  <div className="kh-recipe-single__head--info">
+                    <span>Difficulty:</span> {recipe.difficulty || "N/A"}
+                  </div>
+                  <div className="kh-recipe-single__head--info">
+                    <span>Diet:</span> {recipe.diet || "N/A"}
+                  </div>
+                  <div className="kh-recipe-single__head--info">
+                    <div className="my-4">
+                      <label>
+                        <input
+                          type="checkbox" // Changed from "radio" to "checkbox"
+                        />
+                        Add to Wishlist
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="kh-recipe-single__head--title">
+                <p>
+                  <strong>By:</strong> {recipe.chefName || "N/A"}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="col-4">
+            <div className="kh-recipe-single__ingredient-list">
+              <strong>Ingredients:</strong>{" "}
+              {recipe.ingredients && recipe.ingredients.length > 0 ? (
+                <ul>
+                  {recipe.ingredients.map((ing, idx) => (
+                    <li key={idx}>
+                      <input type="checkbox" id={`ingredient-${idx}`} />
+                      <label htmlFor={`ingredient-${idx}`}>
+                        <span>{ing.name}: </span> {ing.quantity}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                "N/A"
+              )}
+            </div>
+            <div className="kh-recipe-single__tags">
+              <h4>Cuisine:</h4>
+              <ul className="kh-recipe-single__tags--list">
+                {recipe.cuisineTag && recipe.cuisineTag.length > 0 ? (
+                  recipe.cuisineTag.map((tag) => (
+                    <li
+                      className="kh-recipe-single__tags--item"
+                      key={typeof tag === "object" ? tag._id : tag}
+                    >
+                      {typeof tag === "object" ? tag.name : tag}
+                    </li>
+                  ))
+                ) : (
+                  <li>N/A</li>
+                )}
+              </ul>
+            </div>
+            <div className="kh-recipe-single__tags">
+              <h4>Flavour Tags:</h4>
+              <ul className="kh-recipe-single__tags--list">
+                {recipe.flavourTag && recipe.flavourTag.length > 0 ? (
+                  recipe.flavourTag.map((tag) => (
+                    <li
+                      className="kh-recipe-single__tags--item"
+                      key={typeof tag === "object" ? tag._id : tag}
+                    >
+                      {typeof tag === "object" ? tag.name : tag}
+                    </li>
+                  ))
+                ) : (
+                  <li>N/A</li>
+                )}
+              </ul>
+            </div>
+            <div className="kh-recipe-single__tags">
+              <h4>Ingredient Tags:</h4>
+              <ul className="kh-recipe-single__tags--list">
+                {recipe.ingredientTag && recipe.ingredientTag.length > 0 ? (
+                  recipe.ingredientTag.map((tag) => (
+                    <li
+                      className="kh-recipe-single__tags--item"
+                      key={typeof tag === "object" ? tag._id : tag}
+                    >
+                      {typeof tag === "object" ? tag.name : tag}
+                    </li>
+                  ))
+                ) : (
+                  <li>N/A</li>
+                )}
+              </ul>
+            </div>
+          </div>
+          <div className="col-8">
+            <div className="kh-recipe-single__content">
+              <p className="text-lg">{recipe.description || "N/A"}</p>
+              <div className="kh-recipe-single__content--nutritional">
+                <p>
+                  <strong>Nutritional Info:</strong>
+                </p>
+                {recipe.nutritionalInfo &&
+                Array.isArray(recipe.nutritionalInfo) &&
+                recipe.nutritionalInfo.length > 0 ? (
+                  <ul className="list-disc ml-6">
+                    {recipe.nutritionalInfo.map((item, idx) => (
+                      <li key={idx}>
+                        <span className="font-semibold">{item.name}:</span>{" "}
+                        {item.value}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>N/A</p>
+                )}
+              </div>
+              <div>
+                <strong>Prep Instructions:</strong>
+                {Array.isArray(recipe.prepInstructions) ? (
+                  <ul>
+                    {recipe.prepInstructions.map((note, idx) => (
+                      <li key={idx}>{note}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: recipe.prepInstructions,
+                    }}
+                  />
+                )}
+              </div>
+              <div>
+                <strong>Cook Instructions:</strong>
+                {Array.isArray(recipe.cookInstructions) ? (
+                  <ol>
+                    {recipe.cookInstructions.map((instruction, idx) => (
+                      <li key={idx}>{instruction}</li>
+                    ))}
+                  </ol>
+                ) : (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: recipe.cookInstructions,
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* <p>
         <strong>Short Description:</strong> {recipe.shortDescription || "N/A"}
-      </p>
-      <p>
-        <strong>Nutritional Info:</strong>
-      </p>
-      {recipe.nutritionalInfo &&
-      Array.isArray(recipe.nutritionalInfo) &&
-      recipe.nutritionalInfo.length > 0 ? (
-        <ul className="list-disc ml-6">
-          {recipe.nutritionalInfo.map((item, idx) => (
-            <li key={idx}>
-              <span className="font-semibold">{item.name}:</span> {item.value}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>N/A</p>
-      )}
-      <div>
-        <strong>Cook Instructions:</strong>
-        {Array.isArray(recipe.cookInstructions) ? (
-          <ol>
-            {recipe.cookInstructions.map((instruction, idx) => (
-              <li key={idx}>{instruction}</li>
-            ))}
-          </ol>
-        ) : (
-          <div dangerouslySetInnerHTML={{ __html: recipe.cookInstructions }} />
-        )}
-      </div>
-      <div>
-        <strong>Prep Instructions:</strong>
-        {Array.isArray(recipe.prepInstructions) ? (
-          <ul>
-            {recipe.prepInstructions.map((note, idx) => (
-              <li key={idx}>{note}</li>
-            ))}
-          </ul>
-        ) : (
-          <div dangerouslySetInnerHTML={{ __html: recipe.prepInstructions }} />
-        )}
-      </div>
-      <p>
-        <strong>Diet:</strong> {recipe.diet || "N/A"}
-      </p>
-      <p>
-        <strong>Ingredients:</strong>{" "}
-        {recipe.ingredients && recipe.ingredients.length > 0
-          ? recipe.ingredients.map((ing, idx) => (
-              <span key={idx}>
-                {ing.quantity} {ing.name}
-                {idx !== recipe.ingredients.length - 1 ? ", " : ""}
-              </span>
-            ))
-          : "N/A"}
-      </p>
-      <p>
-        <strong>Prep Time:</strong>{" "}
-        {recipe.prepTime ? formatTime(recipe.prepTime) : "N/A"}
-      </p>
-      <p>
-        <strong>Cook Time:</strong>{" "}
-        {recipe.cookTime ? formatTime(recipe.cookTime) : "N/A"}
-      </p>
-      <p>
-        <strong>Servings:</strong> {recipe.servings || "N/A"}
-      </p>
-      <p>
-        <strong>Difficulty:</strong> {recipe.difficulty || "N/A"}
-      </p>
-      <p>
-        <strong>Chef:</strong> {recipe.chefName || "N/A"}
-      </p>
-      <p>
-        <strong>Cuisine:</strong>
-      </p>
-      <ul>
-        {recipe.cuisineTag && recipe.cuisineTag.length > 0 ? (
-          recipe.cuisineTag.map((tag) => (
-            <li key={typeof tag === "object" ? tag._id : tag}>
-              {typeof tag === "object" ? tag.name : tag}
-            </li>
-          ))
-        ) : (
-          <li>N/A</li>
-        )}
-      </ul>
-      <p>
-        <strong>Flavour Tags:</strong>
-      </p>
-      <ul>
-        {recipe.flavourTag && recipe.flavourTag.length > 0 ? (
-          recipe.flavourTag.map((tag) => (
-            <li key={typeof tag === "object" ? tag._id : tag}>
-              {typeof tag === "object" ? tag.name : tag}
-            </li>
-          ))
-        ) : (
-          <li>N/A</li>
-        )}
-      </ul>
-      <p>
-        <strong>Ingredient Tags:</strong>
-      </p>
-      <ul>
-        {recipe.ingredientTag && recipe.ingredientTag.length > 0 ? (
-          recipe.ingredientTag.map((tag) => (
-            <li key={typeof tag === "object" ? tag._id : tag}>
-              {typeof tag === "object" ? tag.name : tag}
-            </li>
-          ))
-        ) : (
-          <li>N/A</li>
-        )}
-      </ul>
-      <p>
-        <strong>Tags:</strong>{" "}
-        {recipe.tags && recipe.tags.length > 0 ? recipe.tags.join(", ") : "N/A"}
-      </p>
+      </p> */}
+
+      <p></p>
+
       <p>
         <strong>Rating:</strong> {recipe.rating || "N/A"}
       </p>
       <p>
         <strong>User Reference:</strong> {recipe.userRef || "N/A"}
       </p>
-      <div>
-        <strong>Banner Image:</strong>
-        <img
-          src={recipe.bannerImgUrl || backupBannerUrl}
-          alt="Banner"
-          className="w-64 h-auto rounded-lg my-2"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = backupBannerUrl;
-          }}
-        />
-      </div>
       <div>
         <strong>Favourite Image:</strong>
         <img
@@ -297,10 +374,14 @@ export default function RecipeDetail() {
       <div>
         <strong>Video:</strong>{" "}
         {recipe.videoUrl ? (
-          <video controls className="w-64 h-64">
-            <source src={recipe.videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          <iframe
+            width="640"
+            height="360"
+            src={recipe.videoUrl.replace("watch?v=", "embed/")}
+            frameBorder="0"
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
         ) : (
           "N/A"
         )}
