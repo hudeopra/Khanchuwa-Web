@@ -110,6 +110,7 @@ export default function Profile() {
         .then((data) => {
           if (data.success) {
             setRecentRecipes(data.recipes);
+            console.log("Recent Recipes: ", data.recipes);
           }
         })
         .catch((error) => console.error(error));
@@ -353,22 +354,48 @@ export default function Profile() {
                           </div>
                           <div className="kh-profile__tab--item">
                             {user.socialMedia &&
-                              user.socialMedia.length > 0 && (
-                                <div>
+                              user.socialMedia.filter(
+                                (sm) => sm.platform || sm.url
+                              ).length > 0 && (
+                                <div className="kh-profile__tab--social-media">
                                   <strong>Social Media:</strong>
                                   <ul>
-                                    {user.socialMedia.map((sm, index) => (
-                                      <li key={index}>
-                                        {sm.platform}:{" "}
-                                        <a
-                                          href={sm.url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                        >
-                                          {sm.url}
-                                        </a>
-                                      </li>
-                                    ))}
+                                    {user.socialMedia
+                                      .filter((sm) => sm.platform || sm.url)
+                                      .map((sm, index) => (
+                                        <li key={index}>
+                                          {/* {sm.platform
+                                            ? `${sm.platform}: `
+                                            : ""} */}
+                                          {sm.platform &&
+                                            sm.platform.toLowerCase() ===
+                                              "instagram" &&
+                                            // image already rendered if needed; removed separate img tag
+                                            ""}
+                                          {sm.platform &&
+                                            sm.platform.toLowerCase() ===
+                                              "tiktok" &&
+                                            ""}
+                                          {sm.platform &&
+                                            sm.platform.toLowerCase() ===
+                                              "youtube" &&
+                                            ""}
+                                          {sm.url && (
+                                            <a
+                                              href={`${
+                                                sm.url
+                                              }?img=../src/assets/img/search/${sm.platform.toLowerCase()}.png`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                            >
+                                              <img
+                                                src={`../src/assets/img/search/${sm.platform.toLowerCase()}.png`}
+                                                alt={`${sm.platform} Logo`}
+                                              />
+                                            </a>
+                                          )}
+                                        </li>
+                                      ))}
                                   </ul>
                                 </div>
                               )}
@@ -467,6 +494,22 @@ export default function Profile() {
                         alt={recipe.recipeName}
                         className="recipe-fav-image"
                       />
+
+                      <h3>{recipe.shortDescription}</h3>
+                      <h3>{recipe.diet}</h3>
+                      <h3>{recipe.updatedAt}</h3>
+                      <p>mealtype:</p>
+                      <ul>
+                        {recipe.mealType.map((meal, index) => (
+                          <li key={index}>{meal}</li>
+                        ))}
+                      </ul>
+                      <h3>Ingredients:</h3>
+                      <ul>
+                        {recipe.ingredients.map((ingredient) => (
+                          <li key={ingredient._id}>{ingredient.name}</li>
+                        ))}
+                      </ul>
                     </div>
                     <Link
                       to={`/recipe/edit/${recipe._id}`}

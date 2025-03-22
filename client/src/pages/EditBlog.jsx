@@ -23,12 +23,18 @@ const EditBlog = () => {
     bannerImgUrl: "",
     favImgUrl: "",
     blogBody: "",
-    tags: [],
+    cuisineTag: [],
+    flavourTag: [],
+    ingredientTag: [],
   });
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
-  const [previousTags, setPreviousTags] = useState([]);
+  const [previousTags, setPreviousTags] = useState({
+    cuisineTag: [],
+    flavourTag: [],
+    ingredientTag: [],
+  });
 
   useEffect(() => {
     const fetchBlog = async () => {
@@ -53,9 +59,15 @@ const EditBlog = () => {
           bannerImgUrl: data.bannerImgUrl || "",
           favImgUrl: data.favImgUrl || "",
           blogBody: data.blogBody || "",
-          tags: data.tags || [],
+          cuisineTag: data.cuisineTag || [],
+          flavourTag: data.flavourTag || [],
+          ingredientTag: data.ingredientTag || [],
         });
-        setPreviousTags(data.tags || []);
+        setPreviousTags({
+          cuisineTag: data.cuisineTag || [],
+          flavourTag: data.flavourTag || [],
+          ingredientTag: data.ingredientTag || [],
+        });
       } catch (err) {
         console.error("Error fetching blog data:", err); // Debugging log
         setError(err.message);
@@ -111,6 +123,32 @@ const EditBlog = () => {
     }
   };
 
+  const updateTagBlogReference = async (tagId, blogId) => {
+    try {
+      await fetch("/api/tag/addBlogRef", {
+        // updated endpoint
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tagId, blogId }),
+      });
+    } catch (err) {
+      console.error("Error updating blog tag reference:", err);
+    }
+  };
+
+  const removeTagBlogReference = async (tagId, blogId) => {
+    try {
+      await fetch("/api/tag/removeBlogRef", {
+        // updated endpoint
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tagId, blogId }),
+      });
+    } catch (err) {
+      console.error("Error removing blog tag reference:", err);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = currentUser?._id || currentUser?.user?._id;
@@ -134,6 +172,21 @@ const EditBlog = () => {
         setError(data.message || "Failed to update blog.");
       } else {
         console.log("Blog updated successfully:", data); // Debugging log
+        const categories = ["cuisineTag", "flavourTag", "ingredientTag"];
+        for (const cat of categories) {
+          const removed = previousTags[cat].filter(
+            (tagId) => !formData[cat].includes(tagId)
+          );
+          const added = formData[cat].filter(
+            (tagId) => !previousTags[cat].includes(tagId)
+          );
+          await Promise.all(
+            removed.map((tagId) => removeTagBlogReference(tagId, id))
+          );
+          await Promise.all(
+            added.map((tagId) => updateTagBlogReference(tagId, id))
+          );
+        }
         navigate(`/blogs/${id}`);
       }
     } catch (err) {
@@ -245,16 +298,50 @@ const EditBlog = () => {
             )}
           </AccordionItem>
           <AccordionItem title="Tags">
-            <TagSelector
-              attribute="tags"
-              value={formData.tags}
-              onSelect={(selected) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  tags: selected.map((t) => t._id),
-                }))
-              }
-            />
+            <div className="div-input-wrapper">
+              <h4>Tags</h4>
+              <div className="kh-blog-edit__form--item">
+                <span>Cuisine Tags</span>
+                <TagSelector
+                  attribute="cuisineTag"
+                  value={formData.cuisineTag}
+                  onSelect={(selected) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      cuisineTag: selected.map((t) => t._id),
+                    }))
+                  }
+                />
+              </div>
+              <div className="kh-blog-edit__form--item">
+                <span>Flavour Tags</span>
+                <TagSelector
+                  attribute="flavourTag"
+                  value={formData.flavourTag}
+                  onSelect={(selected) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      flavourTag: selected.map((t) => t._id),
+                    }))
+                  }
+                />
+              </div>
+              <div className="kh-blog-edit__form--item">
+                <span>Ingredient Tags</span>
+                <TagSelector
+                  attribute="ingredientTag"
+                  value={formData.ingredientTag}
+                  onSelect={(selected) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      ingredientTag: selected
+                        .filter((t) => t != null)
+                        .map((t) => (t && t._id ? t._id : t)),
+                    }))
+                  }
+                />
+              </div>
+            </div>
           </AccordionItem>
           <AccordionItem title="Blog Content">
             <label>

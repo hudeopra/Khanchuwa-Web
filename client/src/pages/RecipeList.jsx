@@ -96,78 +96,105 @@ export default function RecipeList() {
               <h2>Filter by Tags</h2>
               <div>
                 <h3>Cuisine Tags</h3>
-                {cuisineTags.map((tag) => (
-                  <label key={tag._id || tag.name}>
-                    <input
-                      type="checkbox"
-                      value={tag._id || tag.name}
-                      checked={selectedCuisine.includes(tag._id || tag.name)}
-                      onChange={(e) => {
-                        e.target.checked
-                          ? setSelectedCuisine([
-                              ...selectedCuisine,
-                              e.target.value,
-                            ])
-                          : setSelectedCuisine(
-                              selectedCuisine.filter(
-                                (t) => t !== e.target.value
-                              )
-                            );
-                      }}
-                    />
-                    {tag.name}
-                  </label>
-                ))}
+                <div className="d-flex flex-wrap gap-2">
+                  {cuisineTags
+                    .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
+                    .map((tag) => (
+                      <div
+                        key={tag._id || tag.name}
+                        className="kh-recipe-form__checkbox--item"
+                      >
+                        <input
+                          type="checkbox"
+                          value={tag._id || tag.name}
+                          checked={selectedCuisine.includes(
+                            tag._id || tag.name
+                          )}
+                          onChange={(e) => {
+                            e.target.checked
+                              ? setSelectedCuisine([
+                                  ...selectedCuisine,
+                                  e.target.value,
+                                ])
+                              : setSelectedCuisine(
+                                  selectedCuisine.filter(
+                                    (t) => t !== e.target.value
+                                  )
+                                );
+                          }}
+                        />
+                        <label>{tag.name}</label>
+                      </div>
+                    ))}
+                </div>
               </div>
               <div>
-                <h3>Ingredient Tags</h3>
-                {ingredientTags.map((tag) => (
-                  <label key={tag._id || tag.name}>
-                    <input
-                      type="checkbox"
-                      value={tag._id || tag.name}
-                      checked={selectedIngredient.includes(tag._id || tag.name)}
-                      onChange={(e) => {
-                        e.target.checked
-                          ? setSelectedIngredient([
-                              ...selectedIngredient,
-                              e.target.value,
-                            ])
-                          : setSelectedIngredient(
-                              selectedIngredient.filter(
-                                (t) => t !== e.target.value
-                              )
-                            );
-                      }}
-                    />
-                    {tag.name}
-                  </label>
-                ))}
+                <h3>Ingredient Tags</h3>{" "}
+                <div className="d-flex flex-wrap gap-2">
+                  {ingredientTags
+                    .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
+                    .map((tag) => (
+                      <div
+                        key={tag._id || tag.name}
+                        className="kh-recipe-form__checkbox--item"
+                      >
+                        <input
+                          type="checkbox"
+                          value={tag._id || tag.name}
+                          checked={selectedIngredient.includes(
+                            tag._id || tag.name
+                          )}
+                          onChange={(e) => {
+                            e.target.checked
+                              ? setSelectedIngredient([
+                                  ...selectedIngredient,
+                                  e.target.value,
+                                ])
+                              : setSelectedIngredient(
+                                  selectedIngredient.filter(
+                                    (t) => t !== e.target.value
+                                  )
+                                );
+                          }}
+                        />
+                        <label>{tag.name}</label>
+                      </div>
+                    ))}
+                </div>
               </div>
               <div>
                 <h3>Flavour Tags</h3>
-                {flavourTags.map((tag) => (
-                  <label key={tag._id || tag.name}>
-                    <input
-                      type="checkbox"
-                      value={tag._id || tag.name}
-                      checked={selectedFlavour.includes(tag._id || tag.name)}
-                      onChange={(e) => {
-                        e.target.checked
-                          ? setSelectedFlavour([
-                              ...selectedFlavour,
-                              e.target.value,
-                            ])
-                          : setSelectedFlavour(
-                              selectedFlavour.filter(
-                                (t) => t !== e.target.value
-                              )
-                            );
-                      }}
-                    />
-                    {tag.name}
-                  </label>
-                ))}
+                <div className="d-flex flex-wrap gap-2">
+                  {flavourTags
+                    .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
+                    .map((tag) => (
+                      <div
+                        key={tag._id || tag.name}
+                        className="kh-recipe-form__checkbox--item"
+                      >
+                        <input
+                          type="checkbox"
+                          value={tag._id || tag.name}
+                          checked={selectedFlavour.includes(
+                            tag._id || tag.name
+                          )}
+                          onChange={(e) => {
+                            e.target.checked
+                              ? setSelectedFlavour([
+                                  ...selectedFlavour,
+                                  e.target.value,
+                                ])
+                              : setSelectedFlavour(
+                                  selectedFlavour.filter(
+                                    (t) => t !== e.target.value
+                                  )
+                                );
+                          }}
+                        />
+                        <label>{tag.name}</label>
+                      </div>
+                    ))}
+                </div>
               </div>
             </div>
             <div>

@@ -22,7 +22,9 @@ const CreateBlog = () => {
     bannerImgUrl: "",
     favImgUrl: "",
     blogBody: "",
-    tags: [],
+    cuisineTag: [],
+    flavourTag: [],
+    ingredientTag: [],
   });
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
@@ -72,6 +74,19 @@ const CreateBlog = () => {
     }
   };
 
+  const updateTagBlogReference = async (tagId, blogId) => {
+    try {
+      await fetch("/api/tag/addBlogRef", {
+        // updated endpoint
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tagId, blogId }),
+      });
+    } catch (err) {
+      console.error("Error updating blog tag reference:", err);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = currentUser?._id || currentUser?.user?._id;
@@ -92,6 +107,21 @@ const CreateBlog = () => {
       if (!res.ok) {
         setError(data.message || "Failed to create blog.");
       } else {
+        await Promise.all(
+          formData.cuisineTag.map((tagId) =>
+            updateTagBlogReference(tagId, data._id)
+          )
+        );
+        await Promise.all(
+          formData.flavourTag.map((tagId) =>
+            updateTagBlogReference(tagId, data._id)
+          )
+        );
+        await Promise.all(
+          formData.ingredientTag.map((tagId) =>
+            updateTagBlogReference(tagId, data._id)
+          )
+        );
         console.log("Blog created successfully:", data); // Debugging log
         navigate(`/blogs/${data._id}`);
       }
@@ -201,16 +231,50 @@ const CreateBlog = () => {
             )}
           </AccordionItem>
           <AccordionItem title="Tags">
-            <TagSelector
-              attribute="tags"
-              value={formData.tags}
-              onSelect={(selected) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  tags: selected.map((t) => t._id),
-                }))
-              }
-            />
+            <div className="div-input-wrapper">
+              <h4>Tags</h4>
+              <div className="kh-blog-create__form--item">
+                <span>Cuisine Tags</span>
+                <TagSelector
+                  attribute="cuisineTag"
+                  value={formData.cuisineTag}
+                  onSelect={(selected) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      cuisineTag: selected.map((t) => t._id),
+                    }))
+                  }
+                />
+              </div>
+              <div className="kh-blog-create__form--item">
+                <span>Flavour Tags</span>
+                <TagSelector
+                  attribute="flavourTag"
+                  value={formData.flavourTag}
+                  onSelect={(selected) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      flavourTag: selected.map((t) => t._id),
+                    }))
+                  }
+                />
+              </div>
+              <div className="kh-blog-create__form--item">
+                <span>Ingredient Tags</span>
+                <TagSelector
+                  attribute="ingredientTag"
+                  value={formData.ingredientTag}
+                  onSelect={(selected) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      ingredientTag: selected
+                        .filter((t) => t != null)
+                        .map((t) => (t && t._id ? t._id : t)),
+                    }))
+                  }
+                />
+              </div>
+            </div>
           </AccordionItem>
           <AccordionItem title="Blog Content">
             <label>

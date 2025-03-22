@@ -1,5 +1,12 @@
 import express from 'express';
-import { getTagsByType, createTag, addRecipeRef, removeRecipeRef } from '../controllers/tag.controller.js';
+import {
+  getTagsByType,
+  createTag,
+  addRecipeRef,
+  removeRecipeRef,
+  addBlogRef,        // NEW IMPORT
+  removeBlogRef      // NEW IMPORT
+} from '../controllers/tag.controller.js';
 // import { verifyToken } from '../utils/verifyUser.js'; // Temporarily disabled
 
 const router = express.Router();
@@ -13,8 +20,10 @@ router.post('/', /* verifyToken, */ createTag);
 // add route to fetch recipes by tag name
 
 
-// New routes to update recipe references for a tag.
+// New routes to update recipe references and blog references:
 router.patch('/addRecipeRef', addRecipeRef);
 router.patch('/removeRecipeRef', removeRecipeRef);
+router.patch('/addBlogRef', addBlogRef);        // NEW ROUTE for blog reference
+router.patch('/removeBlogRef', removeBlogRef);  // NEW ROUTE for blog reference
 
 export default router;

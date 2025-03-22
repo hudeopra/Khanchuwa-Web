@@ -134,7 +134,7 @@ export default function ProfileNav({ active, subActive }) {
               >
                 <li>
                   <Link
-                    to={"/user-blog/new"}
+                    to={"/create-blog"}
                     className={active === "New Blog" ? "active" : ""}
                   >
                     <img

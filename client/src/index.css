@@ -627,6 +627,7 @@ ul.kh-profile__menu--sub-menu-block {
   overflow: hidden;
   transition: max-height 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
   border-right: 2px solid var(--border-light);
+  text-align: right;
 }
 
 ul.kh-profile__menu--sub-menu-block.active {
@@ -647,6 +648,23 @@ ul.kh-profile__menu--sub-menu-block.active {
   opacity: 1;
   width: auto;
   margin-left: 16px;
+}
+.kh-profile__tab--social-media ul {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.kh-profile__tab--social-media img {
+  height: 32px;
+  width: 32px;
+  object-fit: contain;
+}
+.kh-recipe-post .recipe-block-wrapper img {
+  height: 60px;
+  width: 120px;
+  object-fit: cover;
+}
+.kh-recipe-post .recipe-block-wrapper {
 }
 /* Profile Page ends */
 /* Profile edit page start */
@@ -824,7 +842,7 @@ ul.kh-profile__menu--sub-menu-block.active {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 15px 30px;
+  padding: 15px 10px 15px 15px;
   justify-content: space-between;
 }
 . .kh-profile__menu--menu-block a:hover,
@@ -924,6 +942,7 @@ ul.kh-profile__menu--sub-menu-block.active {
   position: absolute;
   top: 0;
   left: 0;
+  right: 0;
   opacity: 0;
   min-height: 35px;
 }

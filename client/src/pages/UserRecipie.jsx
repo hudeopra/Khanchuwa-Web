@@ -14,9 +14,10 @@ export default function UserRecipie() {
       try {
         const res = await fetch("/api/recipe/all");
         const data = await res.json();
-        // Assuming each recipe's userRef is stored as a string
+        // Compare recipe.userRef with currentUser._id by converting to string
         const userRecipes = data.filter(
-          (recipe) => recipe.userRef === currentUser.user._id
+          (recipe) =>
+            recipe.userRef?.toString() === currentUser?._id?.toString()
         );
         setRecipes(userRecipes);
       } catch (err) {
@@ -25,7 +26,11 @@ export default function UserRecipie() {
         setLoading(false);
       }
     }
-    if (currentUser) fetchRecipes();
+    if (currentUser?._id) {
+      fetchRecipes();
+    } else {
+      setLoading(false);
+    }
   }, [currentUser]);
 
   if (loading) return <p>Loading recipes...</p>;

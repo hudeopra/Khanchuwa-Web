@@ -160,27 +160,37 @@ export default function ProfileEdit() {
     try {
       dispatch(updateUserStart());
       const userId = currentUser.user ? currentUser.user._id : currentUser._id;
-      console.log("User ID: ", userId); // verify user id is available and accurate
-      console.log("User Data: ", userData);
-      if (userId) {
-        const res = await fetch(`/api/user/update/${userId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userData),
-        });
-        const data = await res.json();
-        if (data.success === false) {
-          dispatch(updateUserFailure(data.message));
-          return;
-        }
+      // Transform socialMedia object into array
+      const socialMediaArray = [
+        ...(userData.socialMedia?.tiktok
+          ? [{ platform: "TikTok", url: userData.socialMedia.tiktok }]
+          : []),
+        ...(userData.socialMedia?.insta
+          ? [{ platform: "Instagram", url: userData.socialMedia.insta }]
+          : []),
+        ...(userData.socialMedia?.youtube
+          ? [{ platform: "YouTube", url: userData.socialMedia.youtube }]
+          : []),
+      ];
+      // Merge the transformed array into userData before sending
+      const updatedUserData = { ...userData, socialMedia: socialMediaArray };
 
-        dispatch(updateUserSuccess(data));
-        setUpdateSuccess(true);
-      } else {
-        throw new Error("User ID is not available");
+      // ...existing code...
+      const res = await fetch(`/api/user/update/${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedUserData),
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(updateUserFailure(data.message));
+        return;
       }
+
+      dispatch(updateUserSuccess(data));
+      setUpdateSuccess(true);
     } catch (error) {
       dispatch(updateUserFailure(error.message));
     }

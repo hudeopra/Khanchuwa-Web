@@ -14,9 +14,10 @@ export default function UserBlog() {
       try {
         const res = await fetch("/api/blog/all");
         const data = await res.json();
-        // Filter blogs created by the current user
+        console.log(data);
+        // Compare blog.userRef with currentUser._id by converting to string
         const userBlogs = data.filter(
-          (blog) => blog.userRef === currentUser.user._id
+          (blog) => blog.userRef?.toString() === currentUser?._id?.toString()
         );
         setBlogs(userBlogs);
       } catch (err) {
@@ -25,7 +26,11 @@ export default function UserBlog() {
         setLoading(false);
       }
     }
-    if (currentUser) fetchBlogs();
+    if (currentUser?._id) {
+      fetchBlogs();
+    } else {
+      setLoading(false);
+    }
   }, [currentUser]);
 
   if (loading) return <p>Loading blogs...</p>;

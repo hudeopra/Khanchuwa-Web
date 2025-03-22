@@ -30,6 +30,7 @@ const blogSchema = new Schema({
   },
   cuisineTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
   flavourTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
+  ingredientTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
   userRef: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   recipeFav: { type: Number, default: 0 }, // NEW: recipeFav counter
   reviews: [

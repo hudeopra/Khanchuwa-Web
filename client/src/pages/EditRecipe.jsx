@@ -819,17 +819,23 @@ export default function EditRecipe() {
                           flavourTag: selected.map((t) => t._id),
                         }))
                       }
+                      s
                     />
                   </div>
                   <div className="kh-recipe-form__form--item">
                     <span>Ingredient Tags</span>
+                    {/* Updated: store full tag objects rather than mapping to _id */}
                     <TagSelector
                       attribute="ingredientTag"
                       value={formData.ingredientTag}
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          ingredientTag: selected.map((t) => t._id),
+                          ingredientTag: selected,
+                          ingredients: selected.map((t) => ({
+                            name: t.name,
+                            quantity: "",
+                          })),
                         }))
                       }
                     />

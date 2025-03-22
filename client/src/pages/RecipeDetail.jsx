@@ -29,17 +29,10 @@ export default function RecipeDetail() {
   const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
   const [deleteError, setDeleteError] = useState(null);
 
-  // NEW: state for favorite checkbox
-  const [isFav, setIsFav] = useState(false);
-
   const dispatch = useDispatch();
 
   console.log("User data:", userData);
   if (userData.currentUser) {
-    console.log(
-      "Current user details:",
-      userData.currentUser.user.userFavRecipe
-    );
   }
 
   useEffect(() => {
@@ -58,13 +51,6 @@ export default function RecipeDetail() {
         console.log("API response:", data);
         if (res.ok) {
           setRecipe(data);
-          if (userData.currentUser && userData.currentUser.userFavRecipe) {
-            setIsFav(
-              userData.currentUser.userFavRecipe.some(
-                (favId) => String(favId) === String(data._id)
-              )
-            );
-          }
         } else {
           setError(data.message || "Unexpected error");
         }

@@ -32,20 +32,34 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
       return;
     }
     const filtered = dbTags
-      .filter(
-        (tag) =>
+      .filter((tag) => {
+        if (!tag || !tag.name) return false;
+        return (
           tag.name.toLowerCase().includes(val.toLowerCase()) &&
-          !selectedTags.some(
-            (sel) => sel.name.toLowerCase() === tag.name.toLowerCase()
-          )
-      )
+          !selectedTags.some((sel) => {
+            if (sel && sel.name) {
+              return sel.name.toLowerCase() === tag.name.toLowerCase();
+            } else if (typeof sel === "string") {
+              return sel.toLowerCase() === tag.name.toLowerCase();
+            }
+            return false;
+          })
+        );
+      })
       .map((tag) => tag.name);
     setSuggestions(filtered);
   };
 
   const handleTagSelect = async (tagName) => {
     if (
-      selectedTags.some((t) => t.name.toLowerCase() === tagName.toLowerCase())
+      selectedTags.some((t) => {
+        if (t && typeof t === "object" && t.name) {
+          return t.name.toLowerCase() === tagName.toLowerCase();
+        } else if (typeof t === "string") {
+          return t.toLowerCase() === tagName.toLowerCase();
+        }
+        return false;
+      })
     )
       return;
     let tagObj = dbTags.find(
@@ -83,20 +97,38 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
     }
   };
 
-  const handleRemoveTag = (tagId) => {
-    setSelectedTags((prev) => prev.filter((t) => t._id !== tagId));
+  const handleRemoveTag = (tagIdentifier) => {
+    setSelectedTags((prev) =>
+      prev.filter((t) =>
+        // Compare by _id if available; otherwise, compare tag string's lower case.
+        t && t._id
+          ? t._id !== tagIdentifier
+          : t.toLowerCase() !== tagIdentifier.toLowerCase()
+      )
+    );
   };
+
+  // Use a safe array filtering out null or undefined values.
+  const safeSelected = (selectedTags || []).filter((t) => t != null);
 
   return (
     <div className="tag-selector">
       <div className="selected-tags">
-        {selectedTags.length > 0 ? (
-          selectedTags.map((tag, index) => (
-            <span key={tag._id || `${tag.name}-${index}`} className="tag-badge">
-              {tag.name}
-              <button onClick={() => handleRemoveTag(tag._id)}>&times;</button>
-            </span>
-          ))
+        {safeSelected.length > 0 ? (
+          safeSelected.map((tag, index) => {
+            const displayName = tag && tag.name ? tag.name : tag;
+            const keyVal = (tag && tag._id) || `${displayName}-${index}`;
+            return (
+              <span key={keyVal} className="tag-badge">
+                {displayName}
+                <button
+                  onClick={() => handleRemoveTag((tag && tag._id) || tag)}
+                >
+                  &times;
+                </button>
+              </span>
+            );
+          })
         ) : (
           <p>No tags selected.</p>
         )}
@@ -109,7 +141,6 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
           onKeyDown={handleKeyDown}
           placeholder="Search or create a tag..."
         />
-        {/* Removed non necessary Add button */}
       </div>
       {suggestions.length > 0 && (
         <div className="suggestions">

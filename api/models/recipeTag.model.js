@@ -21,6 +21,11 @@ const recipeTagSchema = new mongoose.Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: 'Recipe',
     default: []
+  }, // <-- added comma here
+  blogRefs: {             // new field to store all blog ids where the tag is used
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Blog',
+    default: []
   }
 }, { timestamps: true });
 
@@ -42,7 +47,24 @@ recipeTagSchema.methods.removeRecipeReference = async function (recipeId) {
     await this.save();
   }
 };
+// New instance methods to update blogRefs and usedIn count
+recipeTagSchema.methods.addBlogReference = async function (blogId) {
+  // If the blogId is not already associated with this tag, add it.
+  if (!this.blogRefs.some(id => id.toString() === blogId.toString())) {
+    this.blogRefs.push(blogId);
+    this.usedIn.blog = this.blogRefs.length;
+    await this.save();
+  }
+};
 
+recipeTagSchema.methods.removeBlogReference = async function (blogId) {
+  // Remove the blogId if present and update the count.
+  if (this.blogRefs.some(id => id.toString() === blogId.toString())) {
+    this.blogRefs = this.blogRefs.filter(id => id.toString() !== blogId.toString());
+    this.usedIn.blog = this.blogRefs.length;
+    await this.save();
+  }
+};
 const RecipeTag = mongoose.model('RecipeTag', recipeTagSchema, 'recipetags');
 
 export default RecipeTag;

@@ -50,4 +50,30 @@ export const removeRecipeRef = async (req, res, next) => {
   }
 };
 
+// New endpoint: PATCH /api/tag/addBlogRef
+export const addBlogRef = async (req, res, next) => {
+  try {
+    const { tagId, blogId } = req.body;
+    const tag = await RecipeTag.findById(tagId);
+    if (!tag) return res.status(404).json({ message: 'Tag not found' });
+    await tag.addBlogReference(blogId);
+    res.status(200).json(tag);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// New endpoint: PATCH /api/tag/removeBlogRef
+export const removeBlogRef = async (req, res, next) => {
+  try {
+    const { tagId, blogId } = req.body;
+    const tag = await RecipeTag.findById(tagId);
+    if (!tag) return res.status(404).json({ message: 'Tag not found' });
+    await tag.removeBlogReference(blogId);
+    res.status(200).json(tag);
+  } catch (error) {
+    next(error);
+  }
+};
+
 
