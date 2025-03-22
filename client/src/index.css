@@ -142,7 +142,7 @@ main {
   min-height: 100vh;
 }
 .header_fixed {
-  background: rgba(22, 26, 53, 0.7);
+  background: rgba(48, 48, 48, 0.8);
   z-index: 98;
   position: fixed;
   width: 100%;
@@ -612,7 +612,42 @@ body {
 /* category slider ends */
 
 /* Profile Page start */
+.kh-profile__menu {
+  position: relative;
+  height: 100%;
+}
+.kh-profile__menu--menu-wrapper {
+  position: sticky;
+  top: 147px;
+}
+ul.kh-profile__menu--sub-menu-block {
+  max-height: 0;
+  opacity: 0;
+  visibility: hidden;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+  border-right: 2px solid var(--border-light);
+}
 
+ul.kh-profile__menu--sub-menu-block.active {
+  max-height: 500px; /* Set a large enough value to cover the content */
+  opacity: 1;
+  visibility: visible;
+}
+.menu-toggle {
+  background-color: unset !important;
+  margin: 0;
+  padding: 0;
+  visibility: hidden;
+  opacity: 0;
+  width: 0;
+}
+.kh-profile__menu--has-sub-menu:hover .menu-toggle {
+  visibility: visible;
+  opacity: 1;
+  width: auto;
+  margin-left: 16px;
+}
 /* Profile Page ends */
 /* Profile edit page start */
 .card {
@@ -787,16 +822,33 @@ body {
 
 .kh-profile__menu--menu-block a {
   display: flex;
-  align-items: flex-end;
-  gap: 20px;
+  align-items: center;
+  gap: 16px;
   padding: 15px 30px;
+  justify-content: space-between;
 }
-
+. .kh-profile__menu--menu-block a:hover,
+.kh-profile__menu--menu-block a.active {
+  background-color: var(--hover-color);
+}
 .kh-profile__menu--menu-block img {
   width: 30px;
   height: 30px;
   filter: invert(95%) sepia(95%) saturate(21%) hue-rotate(357deg)
     brightness(104%) contrast(107%);
+}
+.kh-profile__menu--menu-block a:hover span,
+.kh-profile__menu--menu-block a.active span {
+  color: var(--primary-color);
+}
+.kh-profile__menu--menu-block a:hover,
+.kh-profile__menu--menu-block a.active {
+  background-color: var(--hover-color);
+}
+.kh-profile__menu--menu-block a:hover img,
+.kh-profile__menu--menu-block a.active img {
+  filter: invert(75%) sepia(65%) saturate(294%) hue-rotate(350deg)
+    brightness(93%) contrast(89%);
 }
 
 .kh-profile__menu--menu-block span {

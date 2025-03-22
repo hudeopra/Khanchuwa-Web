@@ -39,8 +39,14 @@
  * @description Retrieve a specific blog by its ID. Publicly accessible.
  * @access Public
  */
+
+/**
+ * @route GET /user/:userId
+ * @description Retrieve blogs written by a specific user. Publicly accessible.
+ * @access Public
+ */
 import express from 'express';
-import { createBlog, getAllBlogs, getBlogById, updateBlog, addComment, deleteBlog, filterBlogs } from '../controllers/blog.controller.js';
+import { createBlog, getAllBlogs, getBlogById, updateBlog, addComment, deleteBlog, filterBlogs, getBlogsByUser } from '../controllers/blog.controller.js';
 import { verifyToken } from '../utils/verifyUser.js';
 
 const router = express.Router();
@@ -52,5 +58,6 @@ router.delete('/delete/:id', verifyToken, deleteBlog);
 router.get('/all', getAllBlogs);
 router.get('/filter', filterBlogs);
 router.get('/:id', getBlogById);
+router.get('/user/:userId', getBlogsByUser);
 
 export default router;

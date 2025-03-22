@@ -64,8 +64,8 @@ const userSchema = new mongoose.Schema({
   // New field: usertype with enum options and default value "guest"
   usertype: {
     type: String,
-    enum: ["guest", "creator", "vendor", "admin", "superadmin"],
-    default: "guest"
+    enum: ["user", "creator", "vendor", "admin", "superadmin"],
+    default: "user"
   },
   createdRecipes: [{
     type: mongoose.Schema.Types.ObjectId,

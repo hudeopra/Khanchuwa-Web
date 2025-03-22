@@ -452,11 +452,11 @@ main {
   gap: 20px;
   padding: 15px 30px;
 }
-.kh-header__head--menu-block li:hover {
+.kh-header__head--menu-block li a:hover {
   color: #e2bb76;
   background-color: #595959;
 }
-.kh-header__head--menu-block li:hover img {
+.kh-header__head--menu-block li a:hover img {
   filter: invert(75%) sepia(65%) saturate(294%) hue-rotate(350deg) brightness(93%) contrast(89%);
 }
 .kh-header__head--menu-block img {

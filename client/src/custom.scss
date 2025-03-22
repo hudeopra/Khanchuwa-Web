@@ -469,13 +469,13 @@ main {
           align-items: flex-end;
           gap: 20px;
           padding: 15px 30px;
-        }
-        &:hover {
-          color: $primary-color;
-          background-color: $hover-color;
-          img {
-            filter: invert(75%) sepia(65%) saturate(294%) hue-rotate(350deg)
-              brightness(93%) contrast(89%);
+          &:hover {
+            color: $primary-color;
+            background-color: $hover-color;
+            img {
+              filter: invert(75%) sepia(65%) saturate(294%) hue-rotate(350deg)
+                brightness(93%) contrast(89%);
+            }
           }
         }
       }

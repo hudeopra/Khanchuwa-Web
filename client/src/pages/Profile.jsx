@@ -20,6 +20,7 @@ import {
 } from "../redux/user/userSlice";
 import { Link } from "react-router-dom";
 import BootstrapAlert from "../components/BootstrapAlert";
+import ProfileNav from "../components/ProfileNav";
 
 // import { getAuth } from "firebase/auth";
 
@@ -35,6 +36,7 @@ export default function Profile() {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [recentRecipes, setRecentRecipes] = useState([]);
+  const [recentBlogs, setRecentBlogs] = useState([]);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -108,6 +110,28 @@ export default function Profile() {
         .then((data) => {
           if (data.success) {
             setRecentRecipes(data.recipes);
+          }
+        })
+        .catch((error) => console.error(error));
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      const user = currentUser.user || currentUser;
+      const userId = user._id;
+      fetch(`http://localhost:3000/api/blog/user/${userId}?limit=5`)
+        .then((res) => {
+          if (!res.ok) {
+            return res.text().then((text) => {
+              throw new Error(`Fetch error: ${res.status} ${text}`);
+            });
+          }
+          return res.json();
+        })
+        .then((data) => {
+          if (data.success) {
+            setRecentBlogs(data.blogs);
           }
         })
         .catch((error) => console.error(error));
@@ -245,75 +269,15 @@ export default function Profile() {
 
   return (
     <main className="kh-profile">
-      <h1>User Information</h1>
+      <h1>Dashboard</h1>
       <div className="container">
         <div className="row">
           <div className="col-3">
-            <div className="kh-profile__menu">
-              <nav className={`kh-profile__menu--menu-wrapper `}>
-                <div className="kh-profile__menu--menu-block">
-                  <ul>
-                    <li>
-                      <Link to={"/"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Home</span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to={"/"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Recipes</span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to={"/"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Trending</span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to={"/"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Random</span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to={"/"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Search</span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to={"/"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>About Khanchuwa</span>
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </nav>
-            </div>
+            <ProfileNav active="Dashboard" subActive={false} />
           </div>
           <div className="col-9">
             <div className="kh-profile__tab">
+              <h1>User Information</h1>
               {currentUser ? (
                 (() => {
                   const user = currentUser.user || currentUser;
@@ -485,6 +449,9 @@ export default function Profile() {
               )}
             </div>
             <div className="kh-recipe-post">
+              <Link to={`/user-recipe`} className="btn btn-edit">
+                View All recipes
+              </Link>
               {recentRecipes.length > 0 ? (
                 recentRecipes.map((recipe) => (
                   <div key={recipe._id} className="recipe-block">
@@ -511,6 +478,30 @@ export default function Profile() {
                 ))
               ) : (
                 <p>No recent recipes.</p>
+              )}
+            </div>
+            <div className="kh-blog-post">
+              <h2>Recent Blogs</h2>
+              <Link to={`/user-blog`} className="btn btn-edit">
+                View All Blogs
+              </Link>
+              {recentBlogs.length > 0 ? (
+                recentBlogs.map((blog) => (
+                  <div key={blog._id} className="blog-block">
+                    <div className="blog-block-wrapper">
+                      <h3>{blog.blogtitle}</h3>
+                      <p>{blog.blogtype}</p>
+                    </div>
+                    <Link
+                      to={`/blog/edit/${blog._id}`}
+                      className="btn btn-edit"
+                    >
+                      Edit
+                    </Link>
+                  </div>
+                ))
+              ) : (
+                <p>No recent blogs.</p>
               )}
             </div>
           </div>

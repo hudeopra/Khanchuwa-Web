@@ -108,3 +108,16 @@ export const getBlogById = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getBlogsByUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const { limit = 5 } = req.query; // Default limit to 5
+    const blogs = await Blog.find({ userRef: userId })
+      .sort({ createdAt: -1 }) // Sort by most recent
+      .limit(parseInt(limit));
+    return res.status(200).json({ success: true, blogs });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -57,7 +57,6 @@ export default function App() {
         <Route path="/blogs/:id" element={<BlogDetail />} />
         <Route path="*" element={<NotFound />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
       </Routes>
       <Footer />
