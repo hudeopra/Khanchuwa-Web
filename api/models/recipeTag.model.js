@@ -8,8 +8,6 @@ const recipeTagSchema = new mongoose.Schema({
       'flavourTag',
       'cuisineTag',
       'ingredientTag',
-      'mealType',         // new tag type for Meal Type
-      'cookingMethod'     // new tag type for Cooking Method
     ]
   },
   name: { type: String, required: true, unique: true },

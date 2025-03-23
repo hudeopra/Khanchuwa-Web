@@ -1,7 +1,11 @@
 import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { categorySliderData } from "../assets/js/dummyContent.js";
 
-const CategorySlider = () => {
+const CategorySlider = ({ items: propItems }) => {
+  // Use passed items if available, else fallback to dummy data
+  const items =
+    propItems && propItems.length > 0 ? propItems : categorySliderData;
+
   const sliderRef = useRef(null);
   const [position, setPosition] = useState(0);
   const [sliderHeight, setSliderHeight] = useState(0);
@@ -12,9 +16,6 @@ const CategorySlider = () => {
   const [canSlidePrev, setCanSlidePrev] = useState(false);
   const [slideWidth, setSlideWidth] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
-
-  // Use imported data for slider items.
-  const items = categorySliderData;
 
   // Calculate dimensions and update slider container height
   useLayoutEffect(() => {
