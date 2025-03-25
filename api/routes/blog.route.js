@@ -5,7 +5,7 @@
  */
 
 /**
- * @route POST /update/:id
+ * @route PUT /:id
  * @description Update an existing blog by its ID. Requires user authentication.
  * @access Private
  */
@@ -52,7 +52,7 @@ import { verifyToken } from '../utils/verifyUser.js';
 const router = express.Router();
 
 router.post('/create', verifyToken, createBlog);
-router.post('/update/:id', verifyToken, updateBlog);
+router.put('/:id', verifyToken, updateBlog);
 router.post('/comment/:id', addComment); // removed verifyToken so any user can comment
 router.delete('/delete/:id', verifyToken, deleteBlog);
 router.get('/all', getAllBlogs);

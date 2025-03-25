@@ -8,6 +8,7 @@ const recipeTagSchema = new mongoose.Schema({
       'flavourTag',
       'cuisineTag',
       'ingredientTag',
+      'equipmentTag',
     ]
   },
   name: { type: String, required: true, unique: true },

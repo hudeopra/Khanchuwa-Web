@@ -25,6 +25,7 @@ const CreateBlog = () => {
     cuisineTag: [],
     flavourTag: [],
     ingredientTag: [],
+    // equipmentTag: [],
   });
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
@@ -122,6 +123,11 @@ const CreateBlog = () => {
             updateTagBlogReference(tagId, data._id)
           )
         );
+        // await Promise.all(
+        //   formData.equipmentTag.map((tagId) =>
+        //     updateTagBlogReference(tagId, data._id)
+        //   )
+        // );
         console.log("Blog created successfully:", data); // Debugging log
         navigate(`/blogs/${data._id}`);
       }
@@ -274,6 +280,21 @@ const CreateBlog = () => {
                   }
                 />
               </div>
+              {/* <div className="kh-blog-create__form--item">
+                <span>Ingredient Tags</span>
+                <TagSelector
+                  attribute="equipmentTag"
+                  value={formData.equipmentTag}
+                  onSelect={(selected) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      equipmentTag: selected
+                        .filter((t) => t != null)
+                        .map((t) => (t && t._id ? t._id : t)),
+                    }))
+                  }
+                /> 
+              </div>*/}
             </div>
           </AccordionItem>
           <AccordionItem title="Blog Content">

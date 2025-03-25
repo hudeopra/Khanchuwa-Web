@@ -38,6 +38,7 @@ export const getRecipeById = async (req, res, next) => {
       .populate("cuisineTag")
       .populate("flavourTag")
       .populate("ingredientTag");
+    // .populate("equipmentTag");
     if (!recipe) {
       return res.status(404).json({ message: 'Recipe not found' });
     }
@@ -101,6 +102,7 @@ export const filterRecipes = async (req, res, next) => {
       ingredientTag,
       cuisineTag,
       flavorTag,
+      // equipmentTag,
       diet,
       // Remove direct recipe filters for allergies, dietaryRestrictions, tastePreferences
       allergies,
@@ -126,6 +128,10 @@ export const filterRecipes = async (req, res, next) => {
       const flavors = flavorTag.split(",").map(tag => tag.trim());
       filter.flavourTag = { $in: flavors };
     }
+    // if (equipmentTag) {
+    //   const tags = equipmentTag.split(",").map(tag => tag.trim());
+    //   filter.equipmentTag = { $in: tags };
+    // }
     if (diet) {
       filter.diet = diet;
     }

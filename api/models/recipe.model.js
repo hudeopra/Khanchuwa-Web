@@ -25,6 +25,7 @@ const recipeSchema = new mongoose.Schema({
   cookInstructions: { type: String },
   prepInstructions: { type: String },
   ingredientTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
+  equipmentTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
   rating: { type: Number },
   reviews: [
     {

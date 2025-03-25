@@ -9,29 +9,21 @@ export default function UserBlog() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const userId = currentUser?._id;
+
   useEffect(() => {
-    async function fetchBlogs() {
-      try {
-        const res = await fetch("/api/blog/all");
-        const data = await res.json();
-        console.log(data);
-        // Compare blog.userRef with currentUser._id by converting to string
-        const userBlogs = data.filter(
-          (blog) => blog.userRef?.toString() === currentUser?._id?.toString()
-        );
-        setBlogs(userBlogs);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    if (currentUser?._id) {
-      fetchBlogs();
+    if (userId) {
+      fetch(`/api/blog/user/${userId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setBlogs(data.blogs || []);
+        })
+        .catch((err) => setError(err.message))
+        .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
-  }, [currentUser]);
+  }, [userId]);
 
   if (loading) return <p>Loading blogs...</p>;
   if (error) return <p>Error: {error}</p>;

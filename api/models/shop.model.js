@@ -7,16 +7,18 @@ const shopSchema = new mongoose.Schema({
   stock: { type: Number, default: 0 },
   images: { type: [String] },
   category: { type: String },
-  seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
-  rating: { type: Number, default: 0 },
+  seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, required: true },
   reviews: [
     {
-      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-      rating: { type: Number, required: true },
+      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      rating: { type: Number },
       comment: { type: String }
     }
   ],
-  productViews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  cuisineTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
+  flavourTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
+  ingredientTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
+  equipmentTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
 }, {
   timestamps: true,
 });

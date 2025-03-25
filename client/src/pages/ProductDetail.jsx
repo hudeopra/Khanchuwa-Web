@@ -2,12 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-const backupBannerUrl =
-  "https://www.gstatic.com/mobilesdk/240923_mobilesdk/CloudFirestore-Discovery.png";
+const backupImageUrl = "https://cdn-icons-png.flaticon.com/512/219/219969.png";
 
-export default function BlogDetail() {
+export default function ProductDetail() {
   const { id } = useParams();
-  const [blog, setBlog] = useState(null);
+  const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [commentRating, setCommentRating] = useState("");
@@ -18,25 +17,17 @@ export default function BlogDetail() {
   const [deleteError, setDeleteError] = useState(null);
   const navigate = useNavigate();
   const userData = useSelector((state) => state.user);
-  console.log("BlogDetail - current user data:", userData);
   const currentUserId =
     userData.currentUser?._id || userData.currentUser?.user?._id;
 
   useEffect(() => {
-    const fetchBlog = async () => {
+    const fetchProduct = async () => {
       try {
-        const res = await fetch(`/api/blog/${id}`);
-        const contentType = res.headers.get("content-type");
-        let data;
-        if (contentType && contentType.includes("application/json")) {
-          data = await res.json();
-        } else {
-          const text = await res.text();
-          throw new Error(text);
-        }
+        const res = await fetch(`/api/shop/${id}`);
+        const data = await res.json();
         if (res.ok) {
-          console.log("Fetched blog data:", data);
-          setBlog(data);
+          setProduct(data);
+          console.log(data);
         } else {
           setError(data.message || "Unexpected error");
         }
@@ -46,7 +37,7 @@ export default function BlogDetail() {
         setLoading(false);
       }
     };
-    fetchBlog();
+    fetchProduct();
   }, [id]);
 
   const handleCommentSubmit = async (e) => {
@@ -58,21 +49,21 @@ export default function BlogDetail() {
       return;
     }
     try {
-      const res = await fetch(`/api/blog/comment/${id}`, {
+      const res = await fetch(`/api/shop/comment/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: userData.currentUser._id,
-          rating,
+          userId: currentUserId,
+          rating, // using validated rating
           comment: commentText,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setCommentError(data.message || "Failed to add comment");
-        console.error("Error adding comment:", data);
+        setCommentError(data.message || "Failed to add review");
+        console.error("Error adding review:", data);
       } else {
-        setBlog({ ...blog, reviews: data.reviews });
+        setProduct({ ...product, reviews: data.reviews });
         setCommentRating("");
         setCommentText("");
         setCommentError(null);
@@ -83,14 +74,14 @@ export default function BlogDetail() {
     }
   };
 
-  const handleDeleteBlog = async (e) => {
+  const handleDeleteProduct = async (e) => {
     e.preventDefault();
     if (deleteConfirmInput !== "DELETE") {
       setDeleteError('Please type "DELETE" to confirm.');
       return;
     }
     try {
-      const res = await fetch(`/api/blog/delete/${id}`, {
+      const res = await fetch(`/api/shop/delete/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
@@ -98,7 +89,7 @@ export default function BlogDetail() {
       if (!res.ok) {
         setDeleteError(data.message || "Deletion failed");
       } else {
-        navigate("/blogs");
+        navigate("/products");
       }
     } catch (err) {
       setDeleteError(err.message);
@@ -110,31 +101,33 @@ export default function BlogDetail() {
 
   return (
     <main className="container py-5">
-      {/* Blog Header */}
+      {/* Product Header */}
       <header>
-        <h1>{blog.blogtitle || "N/A"}</h1>
+        <h1>{product.productName || "N/A"}</h1>
         <img
-          src={blog.bannerImgUrl || backupBannerUrl}
-          alt="Blog Banner"
+          src={(product.images && product.images[0]) || backupImageUrl}
+          alt="Product"
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src = backupBannerUrl;
+            e.target.src = backupImageUrl;
           }}
           className="rounded-lg"
         />
-        <p>By: {blog.author || "N/A"}</p>
+        <p>Price: {product.price ? `$${product.price}` : "N/A"}</p>
+        <p>Stock: {product.stock || 0}</p>
       </header>
 
-      {/* Blog Content */}
+      {/* Product Description */}
       <section className="my-4">
-        <div>{blog.blogBody || "No content available."}</div>
+        <h2>Description</h2>
+        <p>{product.description || "No description available."}</p>
       </section>
 
-      {/* Comments Section */}
+      {/* Reviews Section */}
       <section className="my-4">
-        <h2>Comments</h2>
-        {blog.reviews && blog.reviews.length > 0 ? (
-          blog.reviews.map((rev, idx) => (
+        <h2>Reviews</h2>
+        {product.reviews && product.reviews.length > 0 ? (
+          product.reviews.map((rev, idx) => (
             <div key={idx} className="border p-2 my-2">
               <p>
                 <strong>Rating:</strong> {rev.rating}
@@ -143,14 +136,14 @@ export default function BlogDetail() {
             </div>
           ))
         ) : (
-          <p>No comments yet.</p>
+          <p>No reviews yet.</p>
         )}
       </section>
 
-      {/* Add Comment */}
+      {/* Add Review Form */}
       {userData.currentUser && (
         <form onSubmit={handleCommentSubmit} className="border p-4 my-4">
-          <h3>Add a Comment</h3>
+          <h3>Add a Review</h3>
           <label htmlFor="commentRating">Rating:</label>
           <input
             type="number"
@@ -175,33 +168,34 @@ export default function BlogDetail() {
             type="submit"
             className="p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
           >
-            Submit Comment
+            Submit Review
           </button>
         </form>
       )}
 
-      {/* Edit and Delete Options for the Author */}
-      {currentUserId && String(blog.userRef) === String(currentUserId) && (
+      {/* Edit and Delete Options for Seller */}
+      {currentUserId && String(product.seller) === String(currentUserId) && (
         <div className="my-4">
           <button
-            onClick={() => navigate(`/blog/edit/${id}`)}
+            onClick={() => navigate(`/product/edit/${id}`)}
             className="p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
           >
-            Edit Blog
+            Edit Product
           </button>
           <button
             onClick={() => setShowDeleteConfirmation(true)}
             className="ml-4 p-3 bg-red-600 text-white rounded-lg hover:opacity-90"
           >
-            Delete Blog
+            Delete Product
           </button>
         </div>
       )}
 
+      {/* Delete Confirmation */}
       {showDeleteConfirmation && (
-        <form onSubmit={handleDeleteBlog} className="border p-4 my-4">
+        <form onSubmit={handleDeleteProduct} className="border p-4 my-4">
           <h3>Confirm Deletion</h3>
-          <p>Type "DELETE" to permanently remove this blog.</p>
+          <p>Type "DELETE" to permanently remove this product.</p>
           <input
             type="text"
             value={deleteConfirmInput}

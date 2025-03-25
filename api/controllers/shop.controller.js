@@ -111,7 +111,8 @@ export const filterShops = async (req, res, next) => {
 export const getShopsByUser = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 0;
-    const shops = await Shop.find({ userRef: req.params.userId }).limit(limit);
+    // Change 'userRef' to 'seller' if shops are associated by seller.
+    const shops = await Shop.find({ seller: req.params.userId }).limit(limit);
     return res.status(200).json({ success: true, shops });
   } catch (error) {
     next(error);
