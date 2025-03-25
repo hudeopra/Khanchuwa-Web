@@ -1,11 +1,15 @@
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
 import { useState, useEffect } from "react";
+import { SignOut } from "./SignOut"; // Changed to named import
 
 export default function ProfileNav({ active, subActive }) {
   const [menuToggles, setMenuToggles] = useState({
     "user-recipe": false,
     "user-blog": false,
   });
+  const dispatch = useDispatch(); // Use useDispatch
 
   useEffect(() => {
     // Initialize menu toggles based on active and subActive props
@@ -19,6 +23,21 @@ export default function ProfileNav({ active, subActive }) {
     e.stopPropagation();
     e.preventDefault();
     setMenuToggles((prev) => ({ ...prev, [menuKey]: !prev[menuKey] }));
+  };
+  const handleSignOut = async () => {
+    try {
+      dispatch(signOutUserStart());
+      const res = await fetch("/api/auth/signout");
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(signOutUserFailure(data.message));
+        return;
+      }
+      dispatch(signOutUserSuccess(data));
+      navigate("/signin");
+    } catch (error) {
+      dispatch(signOutUserFailure(error.message));
+    }
   };
 
   return (
@@ -50,6 +69,8 @@ export default function ProfileNav({ active, subActive }) {
                 <span>Setting</span>
               </Link>
             </li>
+            <SignOut type="list" />
+
             <li className="kh-profile__menu--has-sub-menu">
               <Link
                 to={"/user-recipe"}

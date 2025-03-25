@@ -7,7 +7,7 @@ const shopSchema = new mongoose.Schema({
   stock: { type: Number, default: 0 },
   images: { type: [String] },
   category: { type: String },
-  seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, required: true },
+  seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   reviews: [
     {
       user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

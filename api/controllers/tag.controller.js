@@ -76,4 +76,30 @@ export const removeBlogRef = async (req, res, next) => {
   }
 };
 
+// New endpoint: PATCH /api/tag/addProductRef
+export const addProductRef = async (req, res, next) => {
+  try {
+    const { tagId, productId } = req.body;
+    const tag = await RecipeTag.findById(tagId);
+    if (!tag) return res.status(404).json({ message: 'Tag not found' });
+    await tag.addProductReference(productId);
+    res.status(200).json(tag);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// New endpoint: PATCH /api/tag/removeProductRef
+export const removeProductRef = async (req, res, next) => {
+  try {
+    const { tagId, productId } = req.body;
+    const tag = await RecipeTag.findById(tagId);
+    if (!tag) return res.status(404).json({ message: 'Tag not found' });
+    await tag.removeProductReference(productId);
+    res.status(200).json(tag);
+  } catch (error) {
+    next(error);
+  }
+};
+
 

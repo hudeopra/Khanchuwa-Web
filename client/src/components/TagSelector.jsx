@@ -139,7 +139,7 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          placeholder="Search or create a tag..."
+          placeholder={`Search or create a ${attribute}...`} // updated placeholder for equipmentTag support
         />
       </div>
       {suggestions.length > 0 && (

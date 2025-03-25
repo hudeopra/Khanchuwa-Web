@@ -1,12 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import $ from "jquery"; // Import jQuery
-import {
-  signOutUserStart,
-  signOutUserSuccess,
-  signOutUserFailure,
-} from "../redux/user/userSlice";
+import { SignOut } from "./SignOut"; // Changed to named import
+// import {
+//   signOutUserStart,
+//   signOutUserSuccess,
+//   signOutUserFailure,
+// } from "../redux/user/userSlice";
 
 export default function Header() {
   const { currentUser } = useSelector((state) => state.user);
@@ -14,7 +14,7 @@ export default function Header() {
   const navigate = useNavigate();
   const [isMenuActive, setIsMenuActive] = useState(false);
   const [randomRecipeId, setRandomRecipeId] = useState(null);
-  const dispatch = useDispatch(); // Use useDispatch
+  // const dispatch = useDispatch(); // Use useDispatch
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -56,21 +56,21 @@ export default function Header() {
     setIsMenuActive(!isMenuActive);
   };
 
-  const handleSignOut = async () => {
-    try {
-      dispatch(signOutUserStart());
-      const res = await fetch("/api/auth/signout");
-      const data = await res.json();
-      if (data.success === false) {
-        dispatch(signOutUserFailure(data.message));
-        return;
-      }
-      dispatch(signOutUserSuccess(data));
-      navigate("/signin");
-    } catch (error) {
-      dispatch(signOutUserFailure(error.message));
-    }
-  };
+  // const handleSignOut = async () => {
+  //   try {
+  //     dispatch(signOutUserStart());
+  //     const res = await fetch("/api/auth/signout");
+  //     const data = await res.json();
+  //     if (data.success === false) {
+  //       dispatch(signOutUserFailure(data.message));
+  //       return;
+  //     }
+  //     dispatch(signOutUserSuccess(data));
+  //     navigate("/signin");
+  //   } catch (error) {
+  //     dispatch(signOutUserFailure(error.message));
+  //   }
+  // };
 
   const handleLinkClick = () => {
     setIsMenuActive(false);
@@ -193,7 +193,8 @@ export default function Header() {
                           <span>Create Recipe</span>
                         </Link>
                       </li>
-                      <li onClick={handleLinkClick}>
+                      <SignOut type="list" />
+                      {/* <li onClick={handleLinkClick}>
                         <span onClick={handleSignOut}>
                           <img
                             src="../src/assets/img/search/chefLogo.png"
@@ -201,7 +202,7 @@ export default function Header() {
                           />
                           <span>Sign Out</span>
                         </span>
-                      </li>
+                      </li> */}
                     </ul>
                   ) : (
                     <ul>
