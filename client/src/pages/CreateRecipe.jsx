@@ -529,7 +529,7 @@ export default function CreateRecipe() {
                       <label htmlFor="prepTime">Prep Time</label>
                       <input
                         type="number"
-                        placeholder="Prep Time"
+                        placeholder="Prep Time 5 min default"
                         className="border  rounded-lg"
                         id="prepTime"
                         onChange={handleChange}

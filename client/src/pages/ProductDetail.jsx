@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux"; // unchanged
+import { addToCart } from "../redux/user/userCart"; // added import
 
 const backupImageUrl = "https://cdn-icons-png.flaticon.com/512/219/219969.png";
 
@@ -15,10 +16,18 @@ export default function ProductDetail() {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
   const [deleteError, setDeleteError] = useState(null);
+  const [quantity, setQuantity] = useState(1); // new state for quantity
   const navigate = useNavigate();
   const userData = useSelector((state) => state.user);
+  const userCart = useSelector((state) => state.userCart); // added selector
   const currentUserId =
     userData.currentUser?._id || userData.currentUser?.user?._id;
+  const dispatch = useDispatch(); // new dispatch hook
+
+  // Log redux data whenever user or cart changes
+  React.useEffect(() => {
+    console.log("Redux Data:", { user: userData, cart: userCart });
+  }, [userData, userCart]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -96,6 +105,35 @@ export default function ProductDetail() {
     }
   };
 
+  // New handlers for quantity controls and adding to cart
+  const handleIncrease = () => {
+    setQuantity((prev) => prev + 1);
+  };
+
+  const handleDecrease = () => {
+    setQuantity((prev) => Math.max(1, prev - 1));
+  };
+
+  // Updated handler to pass the price as well
+  const handleAddToCart = () => {
+    if (product) {
+      console.log(
+        "Adding product with _id:",
+        product._id,
+        "and price:",
+        product.price
+      );
+      dispatch(
+        addToCart({
+          _id: product._id,
+          productName: product.productName,
+          quantity,
+          price: product.price, // confirm price is passed
+        })
+      );
+    }
+  };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
@@ -115,6 +153,31 @@ export default function ProductDetail() {
         />
         <p>Price: {product.price ? `$${product.price}` : "N/A"}</p>
         <p>Stock: {product.stock || 0}</p>
+        {/* New Purchase Section */}
+        <div className="my-4">
+          <h2>Purchase</h2>
+          <div className="flex items-center gap-2">
+            <button onClick={handleDecrease} className="p-2 border">
+              -
+            </button>
+            <input
+              type="number"
+              value={quantity}
+              onChange={(e) => setQuantity(Number(e.target.value))}
+              min="1"
+              className="w-16 p-2 border text-center"
+            />
+            <button onClick={handleIncrease} className="p-2 border">
+              +
+            </button>
+          </div>
+          <button
+            onClick={handleAddToCart}
+            className="mt-2 p-3 bg-green-600 text-white rounded-lg hover:opacity-90"
+          >
+            Add to Cart
+          </button>
+        </div>
       </header>
 
       {/* Product Description */}

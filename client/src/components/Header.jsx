@@ -1,12 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux"; // added import
 import { useEffect, useState } from "react";
 import { SignOut } from "./SignOut"; // Changed to named import
-// import {
-//   signOutUserStart,
-//   signOutUserSuccess,
-//   signOutUserFailure,
-// } from "../redux/user/userSlice";
+import { clearCart } from "../redux/user/userCart"; // ensure correct relative path
 
 export default function Header() {
   const { currentUser } = useSelector((state) => state.user);
@@ -14,7 +10,7 @@ export default function Header() {
   const navigate = useNavigate();
   const [isMenuActive, setIsMenuActive] = useState(false);
   const [randomRecipeId, setRandomRecipeId] = useState(null);
-  // const dispatch = useDispatch(); // Use useDispatch
+  const dispatch = useDispatch(); // new dispatch hook
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -35,7 +31,12 @@ export default function Header() {
   const fetchRandomRecipeId = async () => {
     try {
       const response = await fetch("/api/recipe/all");
-      const data = await response.json();
+      const text = await response.text(); // get raw text
+      if (!text) {
+        console.error("No data received from /api/recipe/all");
+        return;
+      }
+      const data = JSON.parse(text); // parse only if text exists
       const randomIndex = Math.floor(Math.random() * data.length);
       setRandomRecipeId(data[randomIndex]._id);
     } catch (error) {
@@ -54,6 +55,10 @@ export default function Header() {
 
   const toggleMenu = () => {
     setIsMenuActive(!isMenuActive);
+  };
+
+  const handleClearCart = () => {
+    dispatch(clearCart());
   };
 
   // const handleSignOut = async () => {
@@ -308,13 +313,21 @@ export default function Header() {
           </div>
           <div className="kh-header__account">
             {currentUser ? (
-              <Link to="/profile" onClick={handleLinkClick}>
-                <img
-                  className="rounded-full h-7 w-7 object-cover"
-                  src={currentUser.avatar}
-                  alt="profile"
-                />
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link to="/profile" onClick={handleLinkClick}>
+                  <img
+                    className="rounded-full h-7 w-7 object-cover"
+                    src={currentUser.avatar}
+                    alt="profile"
+                  />
+                </Link>
+                <button
+                  onClick={handleClearCart}
+                  className="text-xs text-red-600 hover:underline"
+                >
+                  Clear Cart
+                </button>
+              </div>
             ) : (
               <>
                 <Link to="/signin" className="" onClick={handleLinkClick}>
