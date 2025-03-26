@@ -26,7 +26,7 @@ import EditBlog from "./pages/EditBlog"; // Updated import name
 
 // Blogs
 import CreateProduct from "./pages/CreateProduct";
-// import BlogList from "./pages/BlogList"; // Import BlogList component
+import ShopList from "./pages/ShopList"; // Import BlogList component
 import ProductDetail from "./pages/ProductDetail"; // Import BlogDetail component
 import UserProduct from "./pages/UserProduct"; // Import UserBlog component
 import EditProduct from "./pages/EditProduct"; // Updated import name
@@ -67,6 +67,7 @@ export default function App() {
         <Route path="/blogs" element={<BlogList />} />
         <Route path="/blogs/:id" element={<BlogDetail />} />
         <Route path="/products/:id" element={<ProductDetail />} />
+        <Route path="/cookshop" element={<ShopList />} />
         <Route path="*" element={<NotFound />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
