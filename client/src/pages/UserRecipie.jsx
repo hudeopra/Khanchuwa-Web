@@ -14,11 +14,13 @@ export default function UserRecipie() {
       try {
         const res = await fetch("/api/recipe/all");
         const data = await res.json();
-        // Compare recipe.userRef with currentUser._id by converting to string
-        const userRecipes = data.filter(
-          (recipe) =>
-            recipe.userRef?.toString() === currentUser?._id?.toString()
-        );
+        const userRecipes = data.filter((recipe) => {
+          // If recipe.userRef is an object with _id, use that, else use recipe.userRef directly
+          const recipeUserId = recipe.userRef?._id
+            ? recipe.userRef._id.toString()
+            : recipe.userRef?.toString();
+          return recipeUserId === currentUser?._id?.toString();
+        });
         setRecipes(userRecipes);
       } catch (err) {
         setError(err.message);
@@ -37,7 +39,7 @@ export default function UserRecipie() {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <main className="" kh-profile>
+    <main className="kh-profile">
       <div className="container">
         <div className="row">
           <div className="col-3">

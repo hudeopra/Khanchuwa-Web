@@ -2,10 +2,19 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux"; // added import
 import { useEffect, useState } from "react";
 import { SignOut } from "./SignOut"; // Changed to named import
-import { clearCart } from "../redux/user/userCart"; // ensure correct relative path
+import { clearCart, removeFromCart } from "../redux/user/userCart"; // ensure correct relative path
 
 export default function Header() {
-  const { currentUser } = useSelector((state) => state.user);
+  const currentUser = useSelector((state) => state.user.currentUser);
+  const userCart = useSelector((state) => state.userCart);
+  // derive cartItems; if userCart is missing use an empty array
+  const cartItems =
+    (userCart && userCart.items ? userCart.items : userCart) || [];
+
+  useEffect(() => {
+    console.log("Redux data:", { currentUser, cart: userCart });
+  }, [currentUser, userCart]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const [isMenuActive, setIsMenuActive] = useState(false);
@@ -61,21 +70,10 @@ export default function Header() {
     dispatch(clearCart());
   };
 
-  // const handleSignOut = async () => {
-  //   try {
-  //     dispatch(signOutUserStart());
-  //     const res = await fetch("/api/auth/signout");
-  //     const data = await res.json();
-  //     if (data.success === false) {
-  //       dispatch(signOutUserFailure(data.message));
-  //       return;
-  //     }
-  //     dispatch(signOutUserSuccess(data));
-  //     navigate("/signin");
-  //   } catch (error) {
-  //     dispatch(signOutUserFailure(error.message));
-  //   }
-  // };
+  // Added function to remove an item from the cart via Redux
+  const handleRemoveFromCart = (itemId) => {
+    dispatch(removeFromCart(itemId));
+  };
 
   const handleLinkClick = () => {
     setIsMenuActive(false);
@@ -199,15 +197,6 @@ export default function Header() {
                         </Link>
                       </li>
                       <SignOut type="list" />
-                      {/* <li onClick={handleLinkClick}>
-                        <span onClick={handleSignOut}>
-                          <img
-                            src="../src/assets/img/search/chefLogo.png"
-                            alt="Khanchuwa Logo"
-                          />
-                          <span>Sign Out</span>
-                        </span>
-                      </li> */}
                     </ul>
                   ) : (
                     <ul>
@@ -327,6 +316,42 @@ export default function Header() {
                 >
                   Clear Cart
                 </button>
+                <div className="kh-header__cart">
+                  {cartItems && cartItems.length > 0 ? (
+                    <ul className="kh-header__cart--items">
+                      {cartItems.map((item) => (
+                        <li className="kh-header__cart--item" key={item.id}>
+                          <div className="kh-header__cart--item--wrapper">
+                            {/* <img
+                              src={item.imageUrls[0]}
+                              alt={item.recipeName}
+                              className="kh-header__cart--item--img"
+                            /> */}
+                            <div className="kh-header__cart--item--details">
+                              <p className="kh-header__cart--item--name">
+                                {item.productName}
+                              </p>
+                              <p className="kh-header__cart--item--price">
+                                {item.price}
+                              </p>
+                              <p className="kh-header__cart--item--price">
+                                {item.quantity}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleRemoveFromCart(item.id)}
+                              className="kh-header__cart--item--remove" // added class
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>Cart is empty</p>
+                  )}
+                </div>
               </div>
             ) : (
               <>

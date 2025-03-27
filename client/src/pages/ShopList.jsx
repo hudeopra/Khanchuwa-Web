@@ -13,11 +13,17 @@ export default function ShopList() {
   // Use the entire user slice directly (updated to match RecipeDetail.jsx)
   const userData = useSelector((state) => state.user);
 
-  // Debug: log the full redux user slice and current user property
+  // Changed from state.cart to state.userCart
+  const userCart = useSelector((state) => state.userCart);
+
   useEffect(() => {
     console.log("Full Redux user slice:", userData);
-    console.log("Redux Data:", { currentUser: userData.currentUser });
-  }, [userData]);
+    console.log("Full Redux cart slice:", userCart);
+    console.log("Redux Data:", {
+      currentUser: userData.currentUser,
+      cart: userCart,
+    });
+  }, [userData, userCart]);
 
   useEffect(() => {
     const fetchProducts = async () => {
