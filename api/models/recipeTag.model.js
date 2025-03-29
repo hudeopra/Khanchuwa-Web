@@ -15,7 +15,6 @@ const recipeTagSchema = new mongoose.Schema({
   usedIn: {                 // tracks usage in recipes, blogs, and products
     recipe: { type: Number, default: 0 },
     blog: { type: Number, default: 0 },
-    product: { type: Number, default: 0 } // NEW: Tracks usage in products
   },
   recipeRefs: {             // stores all recipe IDs where the tag is used
     type: [mongoose.Schema.Types.ObjectId],
@@ -27,14 +26,61 @@ const recipeTagSchema = new mongoose.Schema({
     ref: 'Blog',
     default: []
   },
-  productRefs: {            // NEW: stores all product IDs where the tag is used
+
+
+  // New: equipmentRefs field for equipment tags
+  equipmentRefs: {            // stores all equipment IDs where the tag is used
     type: [mongoose.Schema.Types.ObjectId],
-    ref: 'Shop',
+    ref: 'Equipment',         // adjust reference as needed
     default: []
   },
-  productLink: {            // stores product link
+  favImg: {                 // favorite image for cuisine or flavor tags
     type: String,
-    default: ''
+    default: function () {
+      return (this.tagType === 'cuisineTag' || this.tagType === 'flavourTag') ? '' : undefined;
+    }
+  },
+  bannerImg: {              // banner image for cuisine or flavor tags
+    type: String,
+    default: function () {
+      return (this.tagType === 'cuisineTag' || this.tagType === 'flavourTag') ? '' : undefined;
+    }
+  },
+  mrkPrice: {               // market price for ingredient or equipment tags
+    type: Number,
+    default: function () {
+      return (this.tagType === 'ingredientTag' || this.tagType === 'equipmentTag') ? 0 : undefined;
+    }
+  },
+  stock: {                  // stock for ingredient or equipment tags
+    type: Number,
+    default: function () {
+      return (this.tagType === 'ingredientTag' || this.tagType === 'equipmentTag') ? 0 : undefined;
+    }
+  },
+  disPrice: {               // discounted price for ingredient or equipment tags
+    type: Number,
+    default: function () {
+      return (this.tagType === 'ingredientTag' || this.tagType === 'equipmentTag') ? 0 : undefined;
+    }
+  },
+  description: {            // description for ingredient or equipment tags
+    type: String,
+    default: function () {
+      return (this.tagType === 'ingredientTag' || this.tagType === 'equipmentTag') ? '' : undefined;
+    }
+  },
+  productLink: {            // description for ingredient or equipment tags
+    type: String,
+    default: function () {
+      return (this.tagType === 'ingredientTag' || this.tagType === 'equipmentTag') ? '' : undefined;
+    }
+  },
+  category: {               // category for ingredient or equipment tags
+    type: [String],
+    default: function () {
+      return (this.tagType === 'ingredientTag' || this.tagType === 'equipmentTag') ? [] : undefined;
+    }
   }
 }, { timestamps: true });
 
@@ -72,28 +118,20 @@ recipeTagSchema.methods.removeBlogReference = async function (blogId) {
   }
 };
 
-// New instance methods to update productRefs and usedIn count
-recipeTagSchema.methods.addProductReference = async function (productId) {
-  console.log('addProductReference called for tag:', this.name, 'with productId:', productId);
-  if (!this.productRefs.some(id => id.toString() === productId.toString())) {
-    this.productRefs.push(productId);
-    this.usedIn.product = this.productRefs.length;
-    console.log('Updated productRefs for tag:', this.name, this.productRefs);
+
+
+// New instance methods for equipmentRefs
+recipeTagSchema.methods.addEquipmentReference = async function (equipmentId) {
+  if (!this.equipmentRefs.some(id => id.toString() === equipmentId.toString())) {
+    this.equipmentRefs.push(equipmentId);
     await this.save();
-  } else {
-    console.log('Product already referenced for tag:', this.name);
   }
 };
 
-recipeTagSchema.methods.removeProductReference = async function (productId) {
-  console.log('removeProductReference called for tag:', this.name, 'with productId:', productId);
-  if (this.productRefs.some(id => id.toString() === productId.toString())) {
-    this.productRefs = this.productRefs.filter(id => id.toString() !== productId.toString());
-    this.usedIn.product = this.productRefs.length;
-    console.log('Updated productRefs after removal:', this.productRefs);
+recipeTagSchema.methods.removeEquipmentReference = async function (equipmentId) {
+  if (this.equipmentRefs.some(id => id.toString() === equipmentId.toString())) {
+    this.equipmentRefs = this.equipmentRefs.filter(id => id.toString() !== equipmentId.toString());
     await this.save();
-  } else {
-    console.log('Product reference not found for tag:', this.name);
   }
 };
 

@@ -215,7 +215,7 @@ export default function RecipeDetail() {
                       className="kh-recipe-single__tags--item"
                       key={typeof tag === "object" ? tag._id : tag}
                     >
-                      {typeof tag === "object" ? tag.name : tag}
+                      {typeof tag === "object" ? tag.tagName : tag}
                     </li>
                   ))
                 ) : (
@@ -232,7 +232,7 @@ export default function RecipeDetail() {
                       className="kh-recipe-single__tags--item"
                       key={typeof tag === "object" ? tag._id : tag}
                     >
-                      {typeof tag === "object" ? tag.name : tag}
+                      {typeof tag === "object" ? tag.tagName : tag}
                     </li>
                   ))
                 ) : (
@@ -249,7 +249,24 @@ export default function RecipeDetail() {
                       className="kh-recipe-single__tags--item"
                       key={typeof tag === "object" ? tag._id : tag}
                     >
-                      {typeof tag === "object" ? tag.name : tag}
+                      {typeof tag === "object" ? tag.tagName : tag}
+                    </li>
+                  ))
+                ) : (
+                  <li>N/A</li>
+                )}
+              </ul>
+            </div>
+            <div className="kh-recipe-single__tags">
+              <h4>equipmentTag Tags:</h4>
+              <ul className="kh-recipe-single__tags--list">
+                {recipe.equipmentTag && recipe.equipmentTag.length > 0 ? (
+                  recipe.ingredientTag.map((tag) => (
+                    <li
+                      className="kh-recipe-single__tags--item"
+                      key={typeof tag === "object" ? tag._id : tag}
+                    >
+                      {typeof tag === "object" ? tag.tagName : tag}
                     </li>
                   ))
                 ) : (

@@ -11,6 +11,7 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
       try {
         const res = await fetch(`http://localhost:3000/api/tag/${attribute}`);
         const data = await res.json();
+        console.log("Fetched tags:", data); // Debugging line
         setDbTags(data);
       } catch (err) {
         console.error("Error fetching tags:", err);
@@ -120,7 +121,7 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
             const keyVal = (tag && tag._id) || `${displayName}-${index}`;
             return (
               <span key={keyVal} className="tag-badge">
-                {displayName}
+                {typeof tag === "object" ? tag.tagName || tag.name : tag}
                 <button
                   onClick={() => handleRemoveTag((tag && tag._id) || tag)}
                 >

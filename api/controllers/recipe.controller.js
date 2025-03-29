@@ -102,9 +102,8 @@ export const filterRecipes = async (req, res, next) => {
       ingredientTag,
       cuisineTag,
       flavorTag,
-      // equipmentTag,
+      equipmentTag,  // NEW: equipment tag parameter
       diet,
-      // Remove direct recipe filters for allergies, dietaryRestrictions, tastePreferences
       allergies,
       dietaryRestrictions,
       tastePreferences,
@@ -118,20 +117,20 @@ export const filterRecipes = async (req, res, next) => {
     }
     if (ingredientTag) {
       const tags = ingredientTag.split(",").map(tag => tag.trim());
-      filter.ingredientTag = { $in: tags };
+      filter["ingredientTag.tagId"] = { $in: tags };
     }
     if (cuisineTag) {
       const cuisines = cuisineTag.split(",").map(tag => tag.trim());
-      filter.cuisineTag = { $in: cuisines };
+      filter["cuisineTag.tagId"] = { $in: cuisines };
     }
     if (flavorTag) {
       const flavors = flavorTag.split(",").map(tag => tag.trim());
-      filter.flavourTag = { $in: flavors };
+      filter["flavourTag.tagId"] = { $in: flavors };
     }
-    // if (equipmentTag) {
-    //   const tags = equipmentTag.split(",").map(tag => tag.trim());
-    //   filter.equipmentTag = { $in: tags };
-    // }
+    if (equipmentTag) {
+      const eqTags = equipmentTag.split(",").map(tag => tag.trim());
+      filter["equipmentTag.tagId"] = { $in: eqTags };
+    }
     if (diet) {
       filter.diet = diet;
     }

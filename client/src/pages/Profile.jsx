@@ -498,7 +498,13 @@ export default function Profile() {
                       <h3>{recipe.shortDescription}</h3>
                       <h3>{recipe.diet}</h3>
                       <h3>{recipe.updatedAt}</h3>
-                      <p>mealtype:</p>
+                      <p>mealCourse:</p>
+                      <ul>
+                        {recipe.mealCourse.map((meal, index) => (
+                          <li key={index}>{meal}</li>
+                        ))}
+                      </ul>
+                      <p>mealType:</p>
                       <ul>
                         {recipe.mealType.map((meal, index) => (
                           <li key={index}>{meal}</li>

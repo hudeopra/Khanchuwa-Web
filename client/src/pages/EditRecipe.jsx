@@ -17,7 +17,33 @@ export default function EditRecipe() {
   const navigate = useNavigate();
   const { currentUser } = useSelector((state) => state.user);
   const [recipe, setRecipe] = useState(null);
-  const [formData, setFormData] = useState({});
+  // Change initial formData from {} to an object with default values
+  const [formData, setFormData] = useState({
+    recipeName: "",
+    description: "",
+    diet: "",
+    ingredients: [{ name: "", quantity: "" }],
+    prepTime: "",
+    cookTime: "",
+    servings: "",
+    difficulty: "",
+    chefName: "",
+    videoUrl: "",
+    flavourTag: [],
+    cuisineTag: [],
+    ingredientTag: [],
+    bannerImgUrl: "",
+    favImgUrl: "",
+    shortDescription: "",
+    nutritionalInfo: [],
+    cookInstructions: "",
+    prepInstructions: "",
+    tags: [],
+    cookingMethod: [],
+    mealCourse: [],
+    mealType: [],
+    equipmentTag: [],
+  });
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
@@ -27,6 +53,15 @@ export default function EditRecipe() {
     cuisineTag: [],
     flavourTag: [],
   });
+  // NEW STATE: Add toggle for preparation instructions
+  const [showPrepInstructions, setShowPrepInstructions] = useState(false);
+
+  const handleRemoveImage = (index) => {
+    setFormData({
+      ...formData,
+      imageUrls: formData.imageUrls.filter((_, i) => i !== index),
+    });
+  };
 
   useEffect(() => {
     async function fetchRecipe() {
@@ -75,6 +110,9 @@ export default function EditRecipe() {
           prepInstructions: data.prepInstructions || "",
           tags: data.tags || [],
           cookingMethod: data.cookingMethod || [], // NEW: Initialize cookingMethod
+          mealCourse: data.mealCourse || [],
+          mealType: data.mealType || [],
+          equipmentTag: data.equipmentTag || [],
         });
         // Save the original tag arrays for future diff
         setPreviousTags({
@@ -325,7 +363,7 @@ export default function EditRecipe() {
                               minLength="10"
                               required
                               onChange={handleChange}
-                              value={formData.recipeName}
+                              value={formData.recipeName || ""} // updated value fallback
                             />
                           </div>
                         </div>
@@ -338,7 +376,7 @@ export default function EditRecipe() {
                               placeholder="Video URL"
                               className="border  rounded-lg"
                               onChange={handleChange}
-                              value={formData.videoUrl}
+                              value={formData.videoUrl || ""} // updated value fallback
                             />
                           </div>
                         </div>
@@ -351,32 +389,57 @@ export default function EditRecipe() {
                           className="border  rounded-lg"
                           required
                           onChange={handleChange}
-                          value={formData.description}
+                          value={formData.description || ""} // updated fallback
                         />
                       </div>
                       <div className="kh-recipe-form__form--item">
-                        <label>Meal Type</label>
-                        {[
-                          "Appetizer",
-                          "Main Course",
-                          "Dessert",
-                          "Snack",
-                          "Beverage",
-                          "Lunch",
-                          "Dinner",
-                          "Breakfast",
-                        ].map((opt) => (
-                          <div key={opt}>
-                            <input
-                              type="checkbox"
-                              checked={
-                                formData.mealType?.includes(opt) || false
-                              }
-                              onChange={() => toggleOption("mealType", opt)}
-                            />
-                            <label>{opt}</label>
-                          </div>
-                        ))}
+                        <label>Meal Type (Primary)</label>
+                        <div className="d-flex flex-wrap gap-2">
+                          {[
+                            "Appetizer",
+                            "Soup",
+                            "Main Course (Entrée)",
+                            "Side Dish",
+                            "Dessert",
+                          ].map((opt) => (
+                            <div key={opt}>
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.mealCourse?.includes(opt) || false
+                                }
+                                onChange={() => toggleOption("mealCourse", opt)}
+                              />
+                              <label>{opt}</label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="kh-recipe-form__form--item">
+                        <label>Meal Type (Secondary)</label>
+                        <div className="d-flex flex-wrap gap-2">
+                          {[
+                            "Snack",
+                            "Breakfast",
+                            "Brunch",
+                            "Afternoon Tea",
+                            "Lunch",
+                            "Dinner",
+                            "Supper",
+                            "Late Night Snack",
+                          ].map((opt) => (
+                            <div key={opt}>
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.mealType?.includes(opt) || false
+                                }
+                                onChange={() => toggleOption("mealType", opt)}
+                              />
+                              <label>{opt}</label>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                     <div className="col-4">
@@ -389,7 +452,7 @@ export default function EditRecipe() {
                           placeholder="Short description"
                           className="border  rounded-lg"
                           onChange={handleChange}
-                          value={formData.shortDescription}
+                          value={formData.shortDescription || ""} // updated fallback
                         />
                       </div>
                     </div>
@@ -415,7 +478,7 @@ export default function EditRecipe() {
                           id={`nutritional-info-${idx}`}
                           name={`nutritional-info-${idx}`}
                           type="text"
-                          value={item.value}
+                          value={item.value || ""} // updated fallback
                           onChange={(e) => {
                             const newInfo = formData.nutritionalInfo.map(
                               (info, i) =>
@@ -484,7 +547,7 @@ export default function EditRecipe() {
                         id="prepTime"
                         required
                         onChange={handleChange}
-                        value={formData.prepTime}
+                        value={formData.prepTime || ""} // updated fallback
                       />
                     </div>
                     <div className="kh-recipe-form__form--item">
@@ -496,7 +559,7 @@ export default function EditRecipe() {
                         id="cookTime"
                         required
                         onChange={handleChange}
-                        value={formData.cookTime}
+                        value={formData.cookTime || ""} // updated fallback
                       />
                     </div>
                     <div className="kh-recipe-form__form--item">
@@ -546,7 +609,7 @@ export default function EditRecipe() {
                             type="text"
                             placeholder="Ingredient name"
                             className="border  rounded-lg my-1"
-                            value={ingredient.name}
+                            value={ingredient.name || ""}
                             onChange={(e) => {
                               const newIngredients = formData.ingredients.map(
                                 (ing, idx) =>
@@ -572,7 +635,7 @@ export default function EditRecipe() {
                             type="text"
                             placeholder="Quantity"
                             className="border  rounded-lg my-1"
-                            value={ingredient.quantity}
+                            value={ingredient.quantity || ""}
                             onChange={(e) => {
                               const newIngredients = formData.ingredients.map(
                                 (ing, idx) =>
@@ -624,45 +687,68 @@ export default function EditRecipe() {
                       Add Ingredient
                     </button>
                   </div>
-                  <div className="kh-recipe-form__form--item">
+                  <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                     <label>Cooking Method</label>
-                    {[
-                      "Grilled",
-                      "Baked",
-                      "Boiled",
-                      "Fried",
-                      "Roasting",
-                      "Steamed",
-                      "Simmering",
-                      "Raw",
-                      "+1",
-                    ].map((opt) => (
-                      <div key={opt}>
-                        <input
-                          type="checkbox"
-                          checked={
-                            formData.cookingMethod?.includes(opt) || false
-                          }
-                          onChange={() => toggleOption("cookingMethod", opt)}
-                        />
-                        <label>{opt}</label>
-                      </div>
-                    ))}
+                    <div className="d-flex flex-wrap gap-2">
+                      {[
+                        "Stir-fried",
+                        "Grilled",
+                        "Baked",
+                        "Boiled",
+                        "Fried",
+                        "Roasting",
+                        "Steamed",
+                        "Simmered",
+                        "Fresh",
+                      ].map((opt) => (
+                        <div
+                          className="kh-recipe-form__checkbox--item"
+                          key={opt}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              formData.cookingMethod?.includes(opt) || false
+                            }
+                            onChange={() => toggleOption("cookingMethod", opt)}
+                          />
+                          <label>{opt}</label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </AccordionItem>
               <AccordionItem title="Instructions">
                 <div className="div-input-wrapper">
-                  <label>Preparation Instructions:</label>
-                  <TextEditor
-                    value={formData.prepInstructions}
-                    onChange={(val) =>
-                      setFormData({ ...formData, prepInstructions: val })
-                    }
-                  />
+                  <div className="kh-recipe-form__form--item">
+                    <input
+                      type="checkbox"
+                      id="togglePrepInstructions"
+                      checked={showPrepInstructions}
+                      onChange={() => setShowPrepInstructions((prev) => !prev)}
+                    />
+                    <label htmlFor="togglePrepInstructions">
+                      Include Preparation Instructions
+                    </label>
+                  </div>
+                  {showPrepInstructions && (
+                    <>
+                      <label>Preparation Instructions:</label>
+                      <TextEditor
+                        value={formData.prepInstructions || ""}
+                        onChange={(val) =>
+                          setFormData({
+                            ...formData,
+                            prepInstructions: val,
+                          })
+                        }
+                      />
+                    </>
+                  )}
                   <label>Cooking Instructions:</label>
                   <TextEditor
-                    value={formData.cookInstructions}
+                    value={formData.cookInstructions || ""}
                     onChange={(val) =>
                       setFormData({ ...formData, cookInstructions: val })
                     }
@@ -677,7 +763,7 @@ export default function EditRecipe() {
                   type="text"
                   id="chefName"
                   className="border rounded-lg"
-                  value={formData.chefName}
+                  value={formData.chefName || ""}
                   onChange={handleChange}
                 />
                 <div className="submitwrapper">
@@ -803,7 +889,10 @@ export default function EditRecipe() {
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          cuisineTag: selected.map((t) => t._id),
+                          cuisineTag: selected.map((t) => ({
+                            tagId: t._id,
+                            tagName: t.name,
+                          })),
                         }))
                       }
                     />
@@ -816,25 +905,45 @@ export default function EditRecipe() {
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          flavourTag: selected.map((t) => t._id),
+                          flavourTag: selected.map((t) => ({
+                            tagId: t._id,
+                            tagName: t.name,
+                          })),
                         }))
                       }
-                      s
                     />
                   </div>
                   <div className="kh-recipe-form__form--item">
                     <span>Ingredient Tags</span>
-                    {/* Updated: store full tag objects rather than mapping to _id */}
                     <TagSelector
                       attribute="ingredientTag"
                       value={formData.ingredientTag}
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          ingredientTag: selected,
+                          ingredientTag: selected.map((t) => ({
+                            tagId: t._id,
+                            tagName: t.name,
+                          })),
                           ingredients: selected.map((t) => ({
                             name: t.name,
                             quantity: "",
+                          })),
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="kh-recipe-form__form--item">
+                    <span>Equipment Tags</span>
+                    <TagSelector
+                      attribute="equipmentTag"
+                      value={formData.equipmentTag}
+                      onSelect={(selected) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          equipmentTag: selected.map((t) => ({
+                            tagId: t._id,
+                            tagName: t.name,
                           })),
                         }))
                       }

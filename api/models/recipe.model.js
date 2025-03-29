@@ -13,9 +13,15 @@ const recipeSchema = new mongoose.Schema({
   servings: { type: Number },
   difficulty: { type: String },
   chefName: { type: String },
-  cuisineTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
+  cuisineTag: [{
+    tagId: { type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' },
+    tagName: { type: String }
+  }],
   imageUrls: { type: [String] },
-  flavourTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
+  flavourTag: [{
+    tagId: { type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' },
+    tagName: { type: String }
+  }],
   videoUrl: { type: String },
   bannerImgUrl: { type: String },
   favImgUrl: { type: String },
@@ -24,8 +30,14 @@ const recipeSchema = new mongoose.Schema({
   nutritionalInfo: { type: mongoose.Schema.Types.Mixed },
   cookInstructions: { type: String },
   prepInstructions: { type: String },
-  ingredientTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
-  equipmentTag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }],
+  ingredientTag: [{
+    tagId: { type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' },
+    tagName: { type: String }
+  }],
+  equipmentTag: [{
+    tagId: { type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' },
+    tagName: { type: String }
+  }],
   rating: { type: Number },
   reviews: [
     {
@@ -34,7 +46,8 @@ const recipeSchema = new mongoose.Schema({
       comment: { type: String }
     }
   ],
-  mealType: { type: [String] }, // UPDATED: Now an array of meal types (e.g., Appetizer, Main Course, Dessert, Snack, Beverage, Lunch, Dinner, Breakfast)
+  mealCourse: { type: [String] },
+  mealType: { type: [String] },  // UPDATED: Now an array of meal types (e.g., Appetizer, Main Course, Dessert, Snack, Beverage, Lunch, Dinner, Breakfast)
   cookingMethod: { type: [String] }, // remains an array; UI updated to include +1 option
   recipeFav: { type: Number, default: 0 }, // NEW: recipeFav counter
   recipeViews: [{

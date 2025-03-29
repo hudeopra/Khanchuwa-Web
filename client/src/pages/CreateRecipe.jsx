@@ -30,6 +30,7 @@ export default function CreateRecipe() {
     flavourTag: [],
     cuisineTag: [],
     ingredientTag: [],
+    equipmentTag: [], // NEW: added equipmentTag
     bannerImgUrl: "", // Banner image URL
     favImgUrl: "", // Favorite image URL
     shortDescription: "",
@@ -42,6 +43,7 @@ export default function CreateRecipe() {
     cookInstructions: "", // Initialize the new instructions as empty strings
     prepInstructions: "", // Initialize the new instructions as empty strings
     tags: [],
+    mealCourse: [], // UPDATED: multiple meal types can be selected
     mealType: [], // UPDATED: multiple meal types can be selected
     cookingMethod: [], // UPDATED: cooking methods (multiple), will include extra +1 option
   });
@@ -49,6 +51,8 @@ export default function CreateRecipe() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  // NEW STATE:
+  const [showPrepInstructions, setShowPrepInstructions] = useState(false);
 
   // Set chefName from currentUser’s username
   useEffect(() => {
@@ -200,26 +204,10 @@ export default function CreateRecipe() {
 
     setLoading(true);
     setError(false);
-    // Process cuisineTag input
-    const processedcuisineTag = formData.cuisineTag.reduce((acc, item) => {
-      const trimmed = item.trim();
-      if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-        const items = trimmed
-          .slice(1, -1)
-          .split(",")
-          .map((x) => x.trim().replace(/^['"]|['"]$/g, ""))
-          .filter((x) => x);
-        return acc.concat(items);
-      } else {
-        if (trimmed) acc.push(trimmed);
-        return acc;
-      }
-    }, []);
 
     // Build the bodyData using the valid userId.
     const bodyData = {
       ...formData,
-      cuisineTag: processedcuisineTag, // now directly send cuisine names as strings
       userRef: userId,
     };
 
@@ -377,15 +365,15 @@ export default function CreateRecipe() {
                             "Dessert",
                           ].map((opt) => (
                             <div
-                              class="kh-recipe-form__checkbox--item"
+                              className="kh-recipe-form__checkbox--item"
                               key={opt}
                             >
                               <input
                                 type="checkbox"
                                 checked={
-                                  formData.mealType?.includes(opt) || false
+                                  formData.mealCourse?.includes(opt) || false
                                 }
-                                onChange={() => toggleOption("mealType", opt)}
+                                onChange={() => toggleOption("mealCourse", opt)}
                               />
                               <label>{opt}</label>
                             </div>
@@ -393,7 +381,7 @@ export default function CreateRecipe() {
                         </div>
                       </div>
                       <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
-                        <label>Meal Times</label>
+                        <label>Meal Type</label>
                         <div className="d-flex flex-wrap gap-2">
                           {[
                             "Snack",
@@ -706,13 +694,28 @@ export default function CreateRecipe() {
               </AccordionItem>
               <AccordionItem title="Instructions">
                 <div className="div-input-wrapper">
-                  <label>Preparation Instructions:</label>
-                  <TextEditor
-                    value={formData.prepInstructions}
-                    onChange={(val) =>
-                      setFormData({ ...formData, prepInstructions: val })
-                    }
-                  />
+                  <div className="kh-recipe-form__form--item">
+                    <input
+                      type="checkbox"
+                      id="togglePrepInstructions"
+                      checked={showPrepInstructions}
+                      onChange={() => setShowPrepInstructions((prev) => !prev)}
+                    />
+                    <label htmlFor="togglePrepInstructions">
+                      Include Preparation Instructions
+                    </label>
+                  </div>
+                  {showPrepInstructions && (
+                    <>
+                      <label>Preparation Instructions:</label>
+                      <TextEditor
+                        value={formData.prepInstructions}
+                        onChange={(val) =>
+                          setFormData({ ...formData, prepInstructions: val })
+                        }
+                      />
+                    </>
+                  )}
                   <label>Cooking Instructions:</label>
                   <TextEditor
                     value={formData.cookInstructions}
@@ -849,7 +852,10 @@ export default function CreateRecipe() {
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          cuisineTag: selected.map((t) => t._id),
+                          cuisineTag: selected.map((t) => ({
+                            tagId: t._id,
+                            tagName: t.name,
+                          })),
                         }))
                       }
                     />
@@ -862,7 +868,10 @@ export default function CreateRecipe() {
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          flavourTag: selected.map((t) => t._id),
+                          flavourTag: selected.map((t) => ({
+                            tagId: t._id,
+                            tagName: t.name,
+                          })),
                         }))
                       }
                     />
@@ -875,10 +884,29 @@ export default function CreateRecipe() {
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          ingredientTag: selected.map((t) => t._id),
+                          ingredientTag: selected.map((t) => ({
+                            tagId: t._id,
+                            tagName: t.name,
+                          })),
                           ingredients: selected.map((t) => ({
                             name: t.name,
                             quantity: "",
+                          })),
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="kh-recipe-form__form--item">
+                    <span>Equipment Tags</span>
+                    <TagSelector
+                      attribute="equipmentTag"
+                      value={formData.equipmentTag}
+                      onSelect={(selected) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          equipmentTag: selected.map((t) => ({
+                            tagId: t._id,
+                            tagName: t.name,
                           })),
                         }))
                       }

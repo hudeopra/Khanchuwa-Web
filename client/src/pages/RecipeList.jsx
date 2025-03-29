@@ -11,10 +11,12 @@ export default function RecipeList() {
   const [cuisineTags, setCuisineTags] = useState([]);
   const [ingredientTags, setIngredientTags] = useState([]);
   const [flavourTags, setFlavourTags] = useState([]);
+  const [equipmentTags, setEquipmentTags] = useState([]);
 
   const [selectedCuisine, setSelectedCuisine] = useState([]);
   const [selectedIngredient, setSelectedIngredient] = useState([]);
   const [selectedFlavour, setSelectedFlavour] = useState([]);
+  const [selectedEquipment, setSelectedEquipment] = useState([]);
 
   useEffect(() => {
     const params = {};
@@ -22,12 +24,15 @@ export default function RecipeList() {
     if (selectedIngredient.length)
       params.ingredientTag = selectedIngredient.join(",");
     if (selectedFlavour.length) params.flavorTag = selectedFlavour.join(",");
+    if (selectedEquipment.length)
+      params.equipmentTag = selectedEquipment.join(",");
     if (searchTerm) params.searchTerm = searchTerm;
     setSearchParams(params);
   }, [
     selectedCuisine,
     selectedIngredient,
     selectedFlavour,
+    selectedEquipment,
     searchTerm,
     setSearchParams,
   ]);
@@ -39,31 +44,40 @@ export default function RecipeList() {
           `/api/recipe/filter?${searchParams.toString()}`
         );
         const data = await res.json();
-        setRecipes(data);
+        console.log("Fetched recipes:", data);
+        if (Array.isArray(data)) {
+          setRecipes(data);
+        } else {
+          console.error("API did not return an array:", data);
+          setRecipes([]);
+        }
         setLoading(false);
       } catch (error) {
         setError(error.message);
         setLoading(false);
       }
     };
-
     fetchRecipes();
   }, [searchParams]);
 
   useEffect(() => {
     const fetchAllTags = async () => {
       try {
-        const [cuisineRes, ingredientRes, flavourRes] = await Promise.all([
-          fetch("http://localhost:3000/api/tag/cuisineTag"),
-          fetch("http://localhost:3000/api/tag/ingredientTag"),
-          fetch("http://localhost:3000/api/tag/flavourTag"),
-        ]);
+        const [cuisineRes, ingredientRes, flavourRes, equipmentRes] =
+          await Promise.all([
+            fetch("http://localhost:3000/api/tag/cuisineTag"),
+            fetch("http://localhost:3000/api/tag/ingredientTag"),
+            fetch("http://localhost:3000/api/tag/flavourTag"),
+            fetch("http://localhost:3000/api/tag/equipmentTag"),
+          ]);
         const cuisineData = await cuisineRes.json();
         const ingredientData = await ingredientRes.json();
         const flavourData = await flavourRes.json();
+        const equipmentData = await equipmentRes.json();
         setCuisineTags(cuisineData);
         setIngredientTags(ingredientData);
         setFlavourTags(flavourData);
+        setEquipmentTags(equipmentData);
       } catch (err) {
         console.error("Error fetching tags:", err);
       }
@@ -74,15 +88,20 @@ export default function RecipeList() {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
-  const filteredRecipes = recipes.filter((recipe) => {
-    if (searchTerm) {
-      const searchWords = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
-      const text =
-        `${recipe.recipeName} ${recipe.description} ${recipe.chefName}`.toLowerCase();
-      if (!searchWords.every((word) => text.includes(word))) return false;
+  const filteredRecipes = (Array.isArray(recipes) ? recipes : []).filter(
+    (recipe) => {
+      if (searchTerm) {
+        const searchWords = searchTerm
+          .toLowerCase()
+          .split(/\s+/)
+          .filter(Boolean);
+        const text =
+          `${recipe.recipeName} ${recipe.description} ${recipe.chefName}`.toLowerCase();
+        if (!searchWords.every((word) => text.includes(word))) return false;
+      }
+      return true;
     }
-    return true;
-  });
+  );
 
   return (
     <main className="kh-recipe-list">
@@ -98,7 +117,7 @@ export default function RecipeList() {
                 <h3>Cuisine Tags</h3>
                 <div className="d-flex flex-wrap gap-2">
                   {cuisineTags
-                    .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
+                    // .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
                     .map((tag) => (
                       <div
                         key={tag._id || tag.name}
@@ -132,7 +151,7 @@ export default function RecipeList() {
                 <h3>Ingredient Tags</h3>{" "}
                 <div className="d-flex flex-wrap gap-2">
                   {ingredientTags
-                    .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
+                    // .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
                     .map((tag) => (
                       <div
                         key={tag._id || tag.name}
@@ -166,7 +185,7 @@ export default function RecipeList() {
                 <h3>Flavour Tags</h3>
                 <div className="d-flex flex-wrap gap-2">
                   {flavourTags
-                    .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
+                    // .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
                     .map((tag) => (
                       <div
                         key={tag._id || tag.name}
@@ -194,6 +213,38 @@ export default function RecipeList() {
                         <label>{tag.name}</label>
                       </div>
                     ))}
+                </div>
+              </div>
+              <div>
+                <h3>Equipment Tags</h3>
+                <div className="d-flex flex-wrap gap-2">
+                  {equipmentTags.map((tag) => (
+                    <div
+                      key={tag._id || tag.name}
+                      className="kh-recipe-form__checkbox--item"
+                    >
+                      <input
+                        type="checkbox"
+                        value={tag._id || tag.name}
+                        checked={selectedEquipment.includes(
+                          tag._id || tag.name
+                        )}
+                        onChange={(e) => {
+                          e.target.checked
+                            ? setSelectedEquipment([
+                                ...selectedEquipment,
+                                e.target.value,
+                              ])
+                            : setSelectedEquipment(
+                                selectedEquipment.filter(
+                                  (t) => t !== e.target.value
+                                )
+                              );
+                        }}
+                      />
+                      <label>{tag.name}</label>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

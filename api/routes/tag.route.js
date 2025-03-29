@@ -5,7 +5,9 @@ import {
   addRecipeRef,
   removeRecipeRef,
   addBlogRef,        // NEW IMPORT
-  removeBlogRef      // NEW IMPORT
+  removeBlogRef,     // NEW IMPORT
+  addEquipmentRef,      // NEW IMPORT for equipment reference
+  removeEquipmentRef    // NEW IMPORT for equipment reference
 } from '../controllers/tag.controller.js';
 // import { verifyToken } from '../utils/verifyUser.js'; // Temporarily disabled
 
@@ -25,5 +27,8 @@ router.patch('/addRecipeRef', addRecipeRef);
 router.patch('/removeRecipeRef', removeRecipeRef);
 router.patch('/addBlogRef', addBlogRef);        // NEW ROUTE for blog reference
 router.patch('/removeBlogRef', removeBlogRef);  // NEW ROUTE for blog reference
+// New routes for equipment tag
+router.patch('/addEquipmentRef', addEquipmentRef);
+router.patch('/removeEquipmentRef', removeEquipmentRef);
 
 export default router;

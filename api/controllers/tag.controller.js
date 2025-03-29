@@ -102,4 +102,30 @@ export const removeProductRef = async (req, res, next) => {
   }
 };
 
+// New endpoint: PATCH /api/tag/addEquipmentRef
+export const addEquipmentRef = async (req, res, next) => {
+  try {
+    const { tagId, equipmentId } = req.body;
+    const tag = await RecipeTag.findById(tagId);
+    if (!tag) return res.status(404).json({ message: 'Tag not found' });
+    await tag.addEquipmentReference(equipmentId); // assuming instance method exists
+    res.status(200).json(tag);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// New endpoint: PATCH /api/tag/removeEquipmentRef
+export const removeEquipmentRef = async (req, res, next) => {
+  try {
+    const { tagId, equipmentId } = req.body;
+    const tag = await RecipeTag.findById(tagId);
+    if (!tag) return res.status(404).json({ message: 'Tag not found' });
+    await tag.removeEquipmentReference(equipmentId); // assuming instance method exists
+    res.status(200).json(tag);
+  } catch (error) {
+    next(error);
+  }
+};
+
 
