@@ -7,11 +7,16 @@ import {
   addBlogRef,        // NEW IMPORT
   removeBlogRef,     // NEW IMPORT
   addEquipmentRef,      // NEW IMPORT for equipment reference
-  removeEquipmentRef    // NEW IMPORT for equipment reference
+  removeEquipmentRef,    // NEW IMPORT for equipment reference
+  updateTag,
+  getAllTags           // NEW IMPORT for fetching all tags
 } from '../controllers/tag.controller.js';
 // import { verifyToken } from '../utils/verifyUser.js'; // Temporarily disabled
 
 const router = express.Router();
+
+// New route to fetch all tags
+router.get('/', getAllTags);
 
 // Fetch tags by their type. E.g., GET /api/tag/flavourTag returns all flavour tags.
 router.get('/:type', getTagsByType);
@@ -30,5 +35,8 @@ router.patch('/removeBlogRef', removeBlogRef);  // NEW ROUTE for blog reference
 // New routes for equipment tag
 router.patch('/addEquipmentRef', addEquipmentRef);
 router.patch('/removeEquipmentRef', removeEquipmentRef);
+
+// New route to update a tag
+router.patch('/update/:id', updateTag);
 
 export default router;

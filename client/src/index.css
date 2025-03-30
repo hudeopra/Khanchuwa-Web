@@ -936,6 +936,8 @@ ul.kh-profile__menu--sub-menu-block.active {
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 14px;
+  opacity: 0.8;
+  text-transform: capitalize;
 }
 
 .kh-recipe-form__checkbox--item input {
@@ -945,9 +947,12 @@ ul.kh-profile__menu--sub-menu-block.active {
   right: 0;
   opacity: 0;
   min-height: 35px;
+  z-index: 1;
 }
 .kh-recipe-form__checkbox--item input:checked ~ label {
-  color: red;
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  opacity: 1;
 }
 /* create-recipe page ends*/
 /* single-recipe page starts*/
@@ -1001,3 +1006,81 @@ li.kh-recipe-single__tags--item {
   text-decoration: line-through;
 }
 /* single-recipe page ends*/
+/* recipe list  starts*/
+.kh-recipe-list__filter-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+.kh-recipe-list__filter-wrapper--tags {
+  position: relative;
+}
+.kh-recipe-list__filter-wrapper--tags h3 {
+  padding: 8px 15px;
+  border: 1px solid var(--border-light);
+  display: inline-block;
+}
+.kh-recipe-list__filter {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 10px;
+  flex-wrap: wrap;
+  background-color: var(--hover-color);
+  position: fixed;
+  top: 270px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  width: 100%;
+  z-index: 3;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.kh-recipe-list__filter.filter-popup {
+  opacity: 1;
+  visibility: visible;
+  position: fixed;
+  height: auto;
+  width: 50%;
+  z-index: 5;
+  padding: 30px;
+}
+
+.kh-recipe-list__filter-wrapper--overlay {
+  content: "";
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  background-color: #000;
+  opacity: 0.5;
+  z-index: -1;
+}
+
+.kh-recipe-list__filter-wrapper--overlay.filter-popup {
+  z-index: 2;
+}
+/* recipe List Ends */
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
+  height: 25px;
+  width: 25px;
+  z-index: 5;
+}
+.close-button:hover {
+  color: var(--primary-color);
+}

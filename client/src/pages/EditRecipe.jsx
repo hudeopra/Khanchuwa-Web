@@ -19,6 +19,7 @@ export default function EditRecipe() {
   const [recipe, setRecipe] = useState(null);
   // Change initial formData from {} to an object with default values
   const [formData, setFormData] = useState({
+    imageUrls: [],
     recipeName: "",
     description: "",
     diet: "",
@@ -35,7 +36,12 @@ export default function EditRecipe() {
     bannerImgUrl: "",
     favImgUrl: "",
     shortDescription: "",
-    nutritionalInfo: [],
+    nutritionalInfo: [
+      { name: "Calories", value: "" },
+      { name: "Carbohydrates", value: "" },
+      { name: "Protein", value: "" },
+      { name: "Fat", value: "" },
+    ],
     cookInstructions: "",
     prepInstructions: "",
     tags: [],
@@ -392,8 +398,8 @@ export default function EditRecipe() {
                           value={formData.description || ""} // updated fallback
                         />
                       </div>
-                      <div className="kh-recipe-form__form--item">
-                        <label>Meal Type (Primary)</label>
+                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
+                        <label>Meal Course</label>
                         <div className="d-flex flex-wrap gap-2">
                           {[
                             "Appetizer",
@@ -402,7 +408,10 @@ export default function EditRecipe() {
                             "Side Dish",
                             "Dessert",
                           ].map((opt) => (
-                            <div key={opt}>
+                            <div
+                              className="kh-recipe-form__checkbox--item"
+                              key={opt}
+                            >
                               <input
                                 type="checkbox"
                                 checked={
@@ -415,8 +424,8 @@ export default function EditRecipe() {
                           ))}
                         </div>
                       </div>
-                      <div className="kh-recipe-form__form--item">
-                        <label>Meal Type (Secondary)</label>
+                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
+                        <label>Meal Type</label>
                         <div className="d-flex flex-wrap gap-2">
                           {[
                             "Snack",
@@ -428,7 +437,10 @@ export default function EditRecipe() {
                             "Supper",
                             "Late Night Snack",
                           ].map((opt) => (
-                            <div key={opt}>
+                            <div
+                              className="kh-recipe-form__checkbox--item"
+                              key={opt}
+                            >
                               <input
                                 type="checkbox"
                                 checked={
@@ -516,7 +528,7 @@ export default function EditRecipe() {
                         <option value="">Select Diet</option>
                         <option value="Vegetarian">Vegetarian</option>
                         <option value="Vegan">Vegan</option>
-                        <option value="Non-Vegetarian">Non-Vegetarian</option>
+                        <option value="Non-Vegetarian">Non-Vegetarian</option>m
                         <option value="Gluten-Free">Gluten-Free</option>
                         <option value="High Protein">High Protein</option>
                       </select>
@@ -635,7 +647,7 @@ export default function EditRecipe() {
                             type="text"
                             placeholder="Quantity"
                             className="border  rounded-lg my-1"
-                            value={ingredient.quantity || ""}
+                            value={ingredient.quantity}
                             onChange={(e) => {
                               const newIngredients = formData.ingredients.map(
                                 (ing, idx) =>
@@ -648,7 +660,6 @@ export default function EditRecipe() {
                                 ingredients: newIngredients,
                               });
                             }}
-                            required
                           />
                         </div>
                         <div className="kh-recipe-form__ingredient--item">
@@ -790,11 +801,11 @@ export default function EditRecipe() {
                       id="bannerImg"
                       onChange={handleBannerSelect}
                     />
-                    {formData.bannerImgUrl && (
+                    {formData.bannerImgUrl ? (
                       <div className="flex items-center gap-2">
                         <img
                           src={formData.bannerImgUrl}
-                          alt="Banner"
+                          alt="Current Banner"
                           className="w-20 h-20 object-contain rounded-lg"
                         />
                         <button
@@ -810,6 +821,8 @@ export default function EditRecipe() {
                           Delete
                         </button>
                       </div>
+                    ) : (
+                      <p>No banner image uploaded</p>
                     )}
                   </div>
                   <div className="kh-recipe-form__form--item">
@@ -820,11 +833,11 @@ export default function EditRecipe() {
                       id="favImg"
                       onChange={handleFavSelect}
                     />
-                    {formData.favImgUrl && (
+                    {formData.favImgUrl ? (
                       <div className="flex items-center gap-2">
                         <img
                           src={formData.favImgUrl}
-                          alt="Favorite"
+                          alt="Current Favorite"
                           className="w-20 h-20 object-contain rounded-lg"
                         />
                         <button
@@ -840,13 +853,15 @@ export default function EditRecipe() {
                           Delete
                         </button>
                       </div>
+                    ) : (
+                      <p>No favorite image uploaded</p>
                     )}
                   </div>
                   <div className="kh-recipe-form__form--item">
                     <label htmlFor="images">Gallery Images:</label>
                     <input
                       onChange={handleFileSelect}
-                      className=" border border-gray-300 rounded w-full"
+                      className="border border-gray-300 rounded w-full"
                       type="file"
                       id="images"
                       accept="image/*"
@@ -855,26 +870,29 @@ export default function EditRecipe() {
                     <p className="text-red-700 text-sm">
                       {imageUploadError && imageUploadError}
                     </p>
-                    {formData.imageUrls.length > 0 &&
+                    {formData.imageUrls && formData.imageUrls.length > 0 ? (
                       formData.imageUrls.map((url, index) => (
                         <div
                           key={url}
-                          className="flex justify-between  border items-center"
+                          className="flex justify-between border items-center"
                         >
                           <img
                             src={url}
-                            alt="recipe image"
+                            alt={`Gallery Image ${index + 1}`}
                             className="w-20 h-20 object-contain rounded-lg"
                           />
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(index)}
-                            className=" text-red-700 rounded-lg uppercase hover:opacity-75"
+                            className="text-red-700 rounded-lg uppercase hover:opacity-75"
                           >
                             Delete
                           </button>
                         </div>
-                      ))}
+                      ))
+                    ) : (
+                      <p>No gallery images uploaded</p>
+                    )}
                   </div>
                 </div>
               </AccordionItem>
@@ -924,10 +942,6 @@ export default function EditRecipe() {
                           ingredientTag: selected.map((t) => ({
                             tagId: t._id,
                             tagName: t.name,
-                          })),
-                          ingredients: selected.map((t) => ({
-                            name: t.name,
-                            quantity: "",
                           })),
                         }))
                       }

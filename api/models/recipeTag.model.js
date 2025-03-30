@@ -52,7 +52,13 @@ const recipeTagSchema = new mongoose.Schema({
       return (this.tagType === 'ingredientTag' || this.tagType === 'equipmentTag') ? 0 : undefined;
     }
   },
-  stock: {                  // stock for ingredient or equipment tags
+  inStock: {                  // stock for ingredient or equipment tags
+    type: Number,
+    default: function () {
+      return (this.tagType === 'ingredientTag' || this.tagType === 'equipmentTag') ? false : undefined;
+    }
+  },
+  quantity: {                  // stock for ingredient or equipment tags
     type: Number,
     default: function () {
       return (this.tagType === 'ingredientTag' || this.tagType === 'equipmentTag') ? 0 : undefined;

@@ -128,4 +128,26 @@ export const removeEquipmentRef = async (req, res, next) => {
   }
 };
 
+// New endpoint: PATCH /api/tag/update/:id
+export const updateTag = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updatedTag = await RecipeTag.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updatedTag) return res.status(404).json({ message: 'Tag not found' });
+    res.status(200).json(updatedTag);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// New endpoint: GET /api/tag -> fetches all tags
+export const getAllTags = async (req, res, next) => {
+  try {
+    const tags = await RecipeTag.find({});
+    res.status(200).json(tags);
+  } catch (error) {
+    next(error);
+  }
+};
+
 

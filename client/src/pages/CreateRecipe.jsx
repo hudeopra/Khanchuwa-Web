@@ -355,7 +355,7 @@ export default function CreateRecipe() {
                         </div>
                       </div>
                       <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
-                        <label>Meal Type</label>
+                        <label>Meal Course</label>
                         <div className="d-flex flex-wrap gap-2">
                           {[
                             "Appetizer",

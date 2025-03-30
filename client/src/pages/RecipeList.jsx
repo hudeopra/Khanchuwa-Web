@@ -18,6 +18,12 @@ export default function RecipeList() {
   const [selectedFlavour, setSelectedFlavour] = useState([]);
   const [selectedEquipment, setSelectedEquipment] = useState([]);
 
+  // New state variables for toggle
+  const [showCuisineFilter, setShowCuisineFilter] = useState(false);
+  const [showIngredientFilter, setShowIngredientFilter] = useState(false);
+  const [showFlavourFilter, setShowFlavourFilter] = useState(false);
+  const [showEquipmentFilter, setShowEquipmentFilter] = useState(false);
+
   useEffect(() => {
     const params = {};
     if (selectedCuisine.length) params.cuisineTag = selectedCuisine.join(",");
@@ -78,6 +84,18 @@ export default function RecipeList() {
         setIngredientTags(ingredientData);
         setFlavourTags(flavourData);
         setEquipmentTags(equipmentData);
+        console.log("Fetched tags:", {
+          cuisineData,
+        });
+        console.log("Fetched tags:", {
+          ingredientData,
+        });
+        console.log("Fetched tags:", {
+          flavourData,
+        });
+        console.log("Fetched tags:", {
+          equipmentData,
+        });
       } catch (err) {
         console.error("Error fetching tags:", err);
       }
@@ -111,14 +129,30 @@ export default function RecipeList() {
             <h1 className="text-3xl font-semibold text-center my-7">
               All Recipes
             </h1>
-            <div className="filter-checkboxes">
+            <div className="kh-recipe-list__filter-wrapper">
               <h2>Filter by Tags</h2>
-              <div>
-                <h3>Cuisine Tags</h3>
-                <div className="d-flex flex-wrap gap-2">
-                  {cuisineTags
-                    // .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
-                    .map((tag) => (
+              <div className="kh-recipe-list__filter-wrapper--tags">
+                {/* Toggle Cuisine Filter */}
+                <h3
+                  onClick={() => setShowCuisineFilter(!showCuisineFilter)}
+                  style={{ cursor: "pointer" }}
+                >
+                  Cuisine Tags {cuisineTags.length}
+                </h3>
+                <div
+                  className={`kh-recipe-list__filter ${
+                    showCuisineFilter ? "filter-popup" : ""
+                  }`}
+                >
+                  <button
+                    className="close-button"
+                    onClick={() => setShowCuisineFilter(false)}
+                  >
+                    x
+                  </button>
+
+                  <div className="d-flex gap-2 flex-wrap">
+                    {cuisineTags.map((tag) => (
                       <div
                         key={tag._id || tag.name}
                         className="kh-recipe-form__checkbox--item"
@@ -145,79 +179,131 @@ export default function RecipeList() {
                         <label>{tag.name}</label>
                       </div>
                     ))}
+                  </div>
                 </div>
+                <span
+                  className={`kh-recipe-list__filter-wrapper--overlay ${
+                    showCuisineFilter ? "filter-popup" : ""
+                  }`}
+                ></span>
               </div>
-              <div>
-                <h3>Ingredient Tags</h3>{" "}
-                <div className="d-flex flex-wrap gap-2">
-                  {ingredientTags
-                    // .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
-                    .map((tag) => (
-                      <div
-                        key={tag._id || tag.name}
-                        className="kh-recipe-form__checkbox--item"
-                      >
-                        <input
-                          type="checkbox"
-                          value={tag._id || tag.name}
-                          checked={selectedIngredient.includes(
-                            tag._id || tag.name
-                          )}
-                          onChange={(e) => {
-                            e.target.checked
-                              ? setSelectedIngredient([
-                                  ...selectedIngredient,
-                                  e.target.value,
-                                ])
-                              : setSelectedIngredient(
-                                  selectedIngredient.filter(
-                                    (t) => t !== e.target.value
-                                  )
-                                );
-                          }}
-                        />
-                        <label>{tag.name}</label>
-                      </div>
-                    ))}
+              <div className="kh-recipe-list__filter-wrapper--tags">
+                {/* Toggle Ingredient Filter */}
+                <h3
+                  onClick={() => setShowIngredientFilter(!showIngredientFilter)}
+                  style={{ cursor: "pointer" }}
+                >
+                  Ingredient Tags {ingredientTags.length}
+                </h3>
+                <div
+                  className={`kh-recipe-list__filter ${
+                    showIngredientFilter ? "filter-popup" : ""
+                  }`}
+                >
+                  <button
+                    className="close-button"
+                    onClick={() => setShowIngredientFilter(false)}
+                  >
+                    x
+                  </button>
+                  {ingredientTags.map((tag) => (
+                    <div
+                      key={tag._id || tag.name}
+                      className="kh-recipe-form__checkbox--item"
+                    >
+                      <input
+                        type="checkbox"
+                        value={tag._id || tag.name}
+                        checked={selectedIngredient.includes(
+                          tag._id || tag.name
+                        )}
+                        onChange={(e) => {
+                          e.target.checked
+                            ? setSelectedIngredient([
+                                ...selectedIngredient,
+                                e.target.value,
+                              ])
+                            : setSelectedIngredient(
+                                selectedIngredient.filter(
+                                  (t) => t !== e.target.value
+                                )
+                              );
+                        }}
+                      />
+                      <label>{tag.name}</label>
+                    </div>
+                  ))}
                 </div>
+
+                {/* <span className="kh-recipe-list__filter-wrapper--overlay"></span> */}
               </div>
-              <div>
-                <h3>Flavour Tags</h3>
-                <div className="d-flex flex-wrap gap-2">
-                  {flavourTags
-                    // .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
-                    .map((tag) => (
-                      <div
-                        key={tag._id || tag.name}
-                        className="kh-recipe-form__checkbox--item"
-                      >
-                        <input
-                          type="checkbox"
-                          value={tag._id || tag.name}
-                          checked={selectedFlavour.includes(
-                            tag._id || tag.name
-                          )}
-                          onChange={(e) => {
-                            e.target.checked
-                              ? setSelectedFlavour([
-                                  ...selectedFlavour,
-                                  e.target.value,
-                                ])
-                              : setSelectedFlavour(
-                                  selectedFlavour.filter(
-                                    (t) => t !== e.target.value
-                                  )
-                                );
-                          }}
-                        />
-                        <label>{tag.name}</label>
-                      </div>
-                    ))}
+              <div className="kh-recipe-list__filter-wrapper--tags">
+                {/* Toggle Flavour Filter */}
+                <h3
+                  onClick={() => setShowFlavourFilter(!showFlavourFilter)}
+                  style={{ cursor: "pointer" }}
+                >
+                  Flavour Tags {flavourTags.length}
+                </h3>
+                <div
+                  className={`kh-recipe-list__filter ${
+                    showFlavourFilter ? "filter-popup" : ""
+                  }`}
+                >
+                  <button
+                    className="close-button"
+                    onClick={() => setShowFlavourFilter(false)}
+                  >
+                    x
+                  </button>
+                  {flavourTags.map((tag) => (
+                    <div
+                      key={tag._id || tag.name}
+                      className="kh-recipe-form__checkbox--item"
+                    >
+                      <input
+                        type="checkbox"
+                        value={tag._id || tag.name}
+                        checked={selectedFlavour.includes(tag._id || tag.name)}
+                        onChange={(e) => {
+                          e.target.checked
+                            ? setSelectedFlavour([
+                                ...selectedFlavour,
+                                e.target.value,
+                              ])
+                            : setSelectedFlavour(
+                                selectedFlavour.filter(
+                                  (t) => t !== e.target.value
+                                )
+                              );
+                        }}
+                      />
+                      <label>{tag.name}</label>
+                    </div>
+                  ))}
                 </div>
+
+                {/* <span className="kh-recipe-list__filter-wrapper--overlay"></span> */}
               </div>
-              <div>
-                <h3>Equipment Tags</h3>
-                <div className="d-flex flex-wrap gap-2">
+              <div className="kh-recipe-list__filter-wrapper--tags">
+                {/* Toggle Equipment Filter */}
+                <h3
+                  onClick={() => setShowEquipmentFilter(!showEquipmentFilter)}
+                  style={{ cursor: "pointer" }}
+                >
+                  Equipment Tags {equipmentTags.length}
+                </h3>
+                <div
+                  className={`kh-recipe-list__filter ${
+                    showEquipmentFilter ? "filter-popup" : ""
+                  }`}
+                >
+                  <button
+                    className="close-button"
+                    onClick={() => setShowEquipmentFilter(false)}
+                  >
+                    x
+                  </button>
                   {equipmentTags.map((tag) => (
                     <div
                       key={tag._id || tag.name}
@@ -246,27 +332,9 @@ export default function RecipeList() {
                     </div>
                   ))}
                 </div>
+
+                {/* <span className="kh-recipe-list__filter-wrapper--overlay"></span> */}
               </div>
-            </div>
-            <div>
-              <span>Cuisine Tags (Count: {cuisineTags.length})</span>
-              {/* <ul>
-                {cuisineTags.map((tag) => (
-                  <li key={tag._id || tag.name}>{tag.name}</li>
-                ))}
-              </ul> */}
-              <span>Ingredient Tags (Count: {ingredientTags.length})</span>
-              {/* <ul>
-                {ingredientTags.map((tag) => (
-                  <li key={tag._id || tag.name}>{tag.name}</li>
-                ))}
-              </ul> */}
-              <span>Flavour Tags (Count: {flavourTags.length})</span>
-              {/* <ul>
-                {flavourTags.map((tag) => (
-                  <li key={tag._id || tag.name}>{tag.name}</li>
-                ))}
-              </ul> */}
             </div>
           </div>
           {filteredRecipes.map((recipe) => (
@@ -295,25 +363,18 @@ export default function RecipeList() {
                     Ingredient Tags:{" "}
                     {Array.isArray(recipe.ingredientTag)
                       ? recipe.ingredientTag
-                          .map((id) => {
-                            const tag = ingredientTags.find(
-                              (t) => t._id === id
-                            );
-                            return tag ? tag.name : id;
-                          })
+                          .map((tag) => tag.tagName) // Access the tagName directly from the object
                           .join(", ")
                       : recipe.ingredientTag}
                   </p>
+
                   <p>Prep Time: {recipe.prepTime}</p>
                   <p>Portion: {recipe.portion}</p>
                   <p>
                     Flavour Tags:{" "}
                     {Array.isArray(recipe.flavourTag)
                       ? recipe.flavourTag
-                          .map((id) => {
-                            const tag = flavourTags.find((t) => t._id === id);
-                            return tag ? tag.name : id;
-                          })
+                          .map((tag) => tag.tagName) // Access the tagName directly from the object
                           .join(", ")
                       : recipe.flavourTag}
                   </p>
@@ -321,10 +382,7 @@ export default function RecipeList() {
                     Cuisine Tags:{" "}
                     {Array.isArray(recipe.cuisineTag)
                       ? recipe.cuisineTag
-                          .map((id) => {
-                            const tag = cuisineTags.find((t) => t._id === id);
-                            return tag ? tag.name : id;
-                          })
+                          .map((tag) => tag.tagName) // Access the tagName directly from the object
                           .join(", ")
                       : recipe.cuisineTag}
                   </p>
