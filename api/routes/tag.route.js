@@ -9,7 +9,8 @@ import {
   addEquipmentRef,      // NEW IMPORT for equipment reference
   removeEquipmentRef,    // NEW IMPORT for equipment reference
   updateTag,
-  getAllTags           // NEW IMPORT for fetching all tags
+  getAllTags,           // NEW IMPORT for fetching all tags
+  getTagByTypeAndId // NEW IMPORT
 } from '../controllers/tag.controller.js';
 // import { verifyToken } from '../utils/verifyUser.js'; // Temporarily disabled
 
@@ -38,5 +39,8 @@ router.patch('/removeEquipmentRef', removeEquipmentRef);
 
 // New route to update a tag
 router.patch('/update/:id', updateTag);
+
+// New route to fetch a tag by tagType and TagObjID
+router.get('/:type/:id', getTagByTypeAndId);
 
 export default router;

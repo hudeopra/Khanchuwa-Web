@@ -150,4 +150,16 @@ export const getAllTags = async (req, res, next) => {
   }
 };
 
+// New endpoint: GET /api/tag/:type/:id -> fetches a tag by tagType and TagObjID
+export const getTagByTypeAndId = async (req, res, next) => {
+  try {
+    const { type, id } = req.params; // Extract tagType and TagObjID from URL
+    const tag = await RecipeTag.findOne({ tagType: type, _id: id });
+    if (!tag) return res.status(404).json({ message: 'Tag not found' });
+    res.status(200).json(tag);
+  } catch (error) {
+    next(error);
+  }
+};
+
 
