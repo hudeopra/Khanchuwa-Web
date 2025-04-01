@@ -166,10 +166,19 @@ const EditBlog = () => {
     console.log("Form data being sent:", bodyData); // Debugging log
     try {
       const res = await fetch(`/api/blog/update/${id}`, {
-        method: "POST",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bodyData),
       });
+
+      // Check if the response is JSON
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const rawText = await res.text();
+        console.error("Non-JSON response received:", rawText); // Debugging log
+        throw new Error("Unexpected response format from server.");
+      }
+
       const data = await res.json();
       console.log("Response from update API:", data); // Debugging log
       if (!res.ok) {

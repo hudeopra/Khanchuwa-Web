@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useDispatch } from "react-redux"; // Import useDispatch
+import { addToCart } from "../redux/user/userCart"; // Import addToCart action
 
 const TagDetail = () => {
   const { id, tagType } = useParams(); // Get the tag ID and tagType from the URL
@@ -8,6 +10,8 @@ const TagDetail = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [quantity, setQuantity] = useState(1); // State for quantity
+  const dispatch = useDispatch(); // Initialize dispatch
 
   useEffect(() => {
     const fetchTag = async () => {
@@ -25,38 +29,52 @@ const TagDetail = () => {
         // Fetch recipes and blogs based on references
         const recipeFetches = data.recipeRefs.map((refId) => {
           return fetch(`http://localhost:3000/api/recipe/${refId}`, {
-            headers: { "Content-Type": "application/json" }, // Add headers
+            headers: { "Content-Type": "application/json" },
           })
-            .then((res) => {
-              if (res.status === 401) {
-                console.error("Unauthorized access to recipe:", refId);
+            .then(async (res) => {
+              const contentType = res.headers.get("content-type");
+              let recipeData;
+              if (contentType && contentType.includes("application/json")) {
+                recipeData = await res.json();
+              } else {
+                const text = await res.text();
+                throw new Error(text);
+              }
+              if (!res.ok) {
+                console.error(
+                  `Error fetching recipe ${refId}:`,
+                  res.status,
+                  res.statusText
+                );
                 return null;
               }
-              if (res.status === 404) {
-                console.error("Recipe not found:", refId);
-                return null;
-              }
-              return res.ok ? res.json() : null;
+              return recipeData;
             })
-            .catch(() => null); // Handle fetch errors gracefully
+            .catch((err) => {
+              console.error(`Fetch error for recipe ${refId}:`, err);
+              return null;
+            });
         });
 
         const blogFetches = data.blogRefs.map((refId) => {
           return fetch(`http://localhost:3000/api/blog/${refId}`, {
-            headers: { "Content-Type": "application/json" }, // Add headers
+            headers: { "Content-Type": "application/json" },
           })
             .then((res) => {
-              if (res.status === 401) {
-                console.error("Unauthorized access to blog:", refId);
+              if (!res.ok) {
+                console.error(
+                  `Error fetching blog ${refId}:`,
+                  res.status,
+                  res.statusText
+                );
                 return null;
               }
-              if (res.status === 404) {
-                console.error("Blog not found:", refId);
-                return null;
-              }
-              return res.ok ? res.json() : null;
+              return res.json();
             })
-            .catch(() => null); // Handle fetch errors gracefully
+            .catch((err) => {
+              console.error(`Fetch error for blog ${refId}:`, err);
+              return null;
+            });
         });
 
         const [fetchedRecipes, fetchedBlogs] = await Promise.all([
@@ -65,7 +83,14 @@ const TagDetail = () => {
         ]);
 
         setRecipes(fetchedRecipes.filter((recipe) => recipe)); // Filter out null values
+        if (fetchedRecipes.filter((recipe) => !recipe).length > 0) {
+          console.warn("Some recipes could not be fetched.");
+        }
+
         setBlogs(fetchedBlogs.filter((blog) => blog)); // Filter out null values
+        if (fetchedBlogs.filter((blog) => !blog).length > 0) {
+          console.warn("Some blogs could not be fetched.");
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -75,6 +100,19 @@ const TagDetail = () => {
 
     fetchTag();
   }, [id, tagType]); // Add tagType to the dependency array
+
+  const handleAddToCart = () => {
+    if (tag) {
+      dispatch(
+        addToCart({
+          _id: tag._id,
+          productName: tag.name,
+          quantity,
+          price: tag.disPrice || tag.mrkPrice || 0, // Use discounted price if available
+        })
+      );
+    }
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -145,6 +183,39 @@ const TagDetail = () => {
               <p>
                 <strong>Discounted Price:</strong> ${tag.disPrice}
               </p>
+            )}
+            {/* Add to Cart Section */}
+            {tag.tagType === "ingredientTag" && ( // Show only for ingredientTag
+              <div className="my-4">
+                <h2>Purchase</h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                    className="p-2 border"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    value={quantity}
+                    onChange={(e) => setQuantity(Number(e.target.value))}
+                    min="1"
+                    className="w-16 p-2 border text-center"
+                  />
+                  <button
+                    onClick={() => setQuantity((prev) => prev + 1)} // Removed extra closing parenthesis
+                    className="p-2 border"
+                  >
+                    +
+                  </button>
+                </div>
+                <button
+                  onClick={handleAddToCart}
+                  className="mt-2 p-3 bg-green-600 text-white rounded-lg hover:opacity-90"
+                >
+                  Add to Cart
+                </button>
+              </div>
             )}
             {tag.productLink && (
               <p>

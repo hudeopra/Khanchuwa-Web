@@ -11,7 +11,7 @@ router.delete('/delete/:id', verifyToken, deleteRecipe); // new route for deleti
 router.get('/all', getAllRecipes);
 router.get('/filter', filterRecipes); // new filtering endpoint
 router.get('/user/:userId', getRecipesByUser); // new route for getting recipes by user
-router.get('/:id', verifyToken, getRecipeById);
+router.get('/:id', getRecipeById);
 
 router.get('/:key/:value', getRecipesBykey);
 
