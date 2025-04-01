@@ -183,4 +183,15 @@ export const getRecipesByUser = async (req, res, next) => {
   }
 };
 
-
+export const getRecipesBykey = async (req, res, next) => {
+  try {
+    const { key, value } = req.params;
+    const recipes = await Recipe.find({ [`${key}.tagName`]: value });
+    if (!recipes.length) {
+      return res.status(404).json({ message: 'No recipes found' });
+    }
+    return res.status(200).json(recipes);
+  } catch (error) {
+    next(error);
+  }
+};

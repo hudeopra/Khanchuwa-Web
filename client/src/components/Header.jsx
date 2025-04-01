@@ -283,7 +283,7 @@ export default function Header() {
                 />
               </Link>
             </div>
-            <div className="kh-header__head--page-title">Current Page</div>
+            {/* <div className="kh-header__head--page-title">Current Page</div> */}
           </div>
           <div className="kh-header__search">
             <form
@@ -297,7 +297,6 @@ export default function Header() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <button></button>
             </form>
           </div>
           <div className="kh-header__account">

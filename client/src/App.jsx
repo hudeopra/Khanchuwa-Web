@@ -23,6 +23,7 @@ import BlogList from "./pages/BlogList"; // Import BlogList component
 import BlogDetail from "./pages/BlogDetail"; // Import BlogDetail component
 import UserBlog from "./pages/UserBlog"; // Import UserBlog component
 import EditBlog from "./pages/EditBlog"; // Updated import name
+import Category from "./pages/Category"; // Updated import name
 
 // 404
 import NotFound from "./pages/404"; // Import NotFound component
@@ -55,6 +56,7 @@ export default function App() {
         <Route path="/recipes/:id" element={<RecipeDetail />} />
         <Route path="/blogs" element={<BlogList />} />
         <Route path="/blogs/:id" element={<BlogDetail />} />
+        <Route path="/category/:value" element={<Category />} />
 
         <Route path="*" element={<NotFound />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />

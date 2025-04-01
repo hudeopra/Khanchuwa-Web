@@ -97,6 +97,7 @@ textarea {
 button {
   font-size: 16px;
   margin-top: 20px;
+  background-color: var(--primary-color);
 }
 .kh-signup__form,
 .kh-signin__form {
@@ -583,13 +584,6 @@ main {
   top: -84px;
   right: 0;
   padding: 10px;
-}
-
-button {
-  margin: 0 5px;
-  padding: 10px 20px;
-  background-color: #0071e3; /* Apple blue */
-  color: white;
 }
 
 button:hover {
@@ -1084,3 +1078,43 @@ li.kh-recipe-single__tags--item {
 .close-button:hover {
   color: var(--primary-color);
 }
+
+/* 404 page not found starts*/
+.page_404 {
+  padding: 40px 0;
+  font-family: "Arvo", serif;
+}
+
+.page_404 img {
+  width: 100%;
+}
+
+.four_zero_four_bg {
+  background-image: url(https://cdn.dribbble.com/users/285475/screenshots/2083086/dribbble_1.gif);
+  height: 400px;
+  background-position: center;
+}
+
+.four_zero_four_bg h1 {
+  font-size: 60px;
+}
+
+.contant_box_404 h3 {
+  font-size: 40px;
+}
+.four_zero_four_bg h1,
+.contant_box_404 h3 {
+  color: var(--primary-color);
+}
+.link_404 {
+  color: #fff !important;
+  padding: 10px 20px;
+  background: #39ac31;
+  margin: 20px 0;
+  display: inline-block;
+}
+.contant_box_404 {
+  margin-top: -50px;
+}
+
+/* 404 page not found ends */
