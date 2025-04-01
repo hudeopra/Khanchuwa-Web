@@ -26,6 +26,7 @@ const EditBlog = () => {
     cuisineTag: [],
     flavourTag: [],
     ingredientTag: [],
+    equipmentTag: [], // NEW: Initialize equipmentTag
   });
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -34,6 +35,7 @@ const EditBlog = () => {
     cuisineTag: [],
     flavourTag: [],
     ingredientTag: [],
+    equipmentTag: [], // NEW: Initialize previous equipment tags
   });
 
   useEffect(() => {
@@ -62,11 +64,13 @@ const EditBlog = () => {
           cuisineTag: data.cuisineTag || [],
           flavourTag: data.flavourTag || [],
           ingredientTag: data.ingredientTag || [],
+          equipmentTag: data.equipmentTag || [], // NEW: Initialize equipmentTag
         });
         setPreviousTags({
           cuisineTag: data.cuisineTag || [],
           flavourTag: data.flavourTag || [],
           ingredientTag: data.ingredientTag || [],
+          equipmentTag: data.equipmentTag || [], // NEW: Save original equipment tags
         });
       } catch (err) {
         console.error("Error fetching blog data:", err); // Debugging log
@@ -172,7 +176,12 @@ const EditBlog = () => {
         setError(data.message || "Failed to update blog.");
       } else {
         console.log("Blog updated successfully:", data); // Debugging log
-        const categories = ["cuisineTag", "flavourTag", "ingredientTag"];
+        const categories = [
+          "cuisineTag",
+          "flavourTag",
+          "ingredientTag",
+          "equipmentTag",
+        ]; // NEW: Include equipmentTag
         for (const cat of categories) {
           const removed = previousTags[cat].filter(
             (tagId) => !formData[cat].includes(tagId)
@@ -337,6 +346,20 @@ const EditBlog = () => {
                       ingredientTag: selected
                         .filter((t) => t != null)
                         .map((t) => (t && t._id ? t._id : t)),
+                    }))
+                  }
+                />
+              </div>
+              <div className="kh-blog-edit__form--item">
+                <span>Equipment Tags</span>{" "}
+                {/* NEW: Add equipmentTag section */}
+                <TagSelector
+                  attribute="equipmentTag"
+                  value={formData.equipmentTag}
+                  onSelect={(selected) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      equipmentTag: selected.map((t) => t._id),
                     }))
                   }
                 />

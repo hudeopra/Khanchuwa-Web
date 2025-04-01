@@ -193,19 +193,13 @@ export default function CreateRecipe() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(formData);
-    // Validation: ensure imageUrls, bannerImgUrl, favImgUrl are present.
-    // if (formData.imageUrls.length < 1)
-    //   return setError("You must upload at least one image");
-    // if (!formData.bannerImgUrl) return setError("Banner image is .");
-    // if (!formData.favImgUrl) return setError("Favorite image is .");
-    // Updated user reference validation:
+
     const userId = currentUser?._id || currentUser?.user?._id;
     if (!userId) return setError("User reference is missing.");
 
     setLoading(true);
     setError(false);
 
-    // Build the bodyData using the valid userId.
     const bodyData = {
       ...formData,
       userRef: userId,
@@ -224,34 +218,24 @@ export default function CreateRecipe() {
       if (data.success === false) {
         setError(data.message);
       } else if (data._id) {
-        // Update each ingredient tag used:
-        await Promise.all(
-          formData.ingredientTag.map((tagId) =>
-            updateIngredientTagReference(tagId, data._id)
-          )
-        );
-        // For each ingredient tag used, update the tag with the new recipe's _id.
-        await Promise.all(
-          formData.ingredientTag.map((tagId) =>
-            updateTagReference(tagId, data._id)
-          )
-        );
-        // Update for ingredientTag, cuisineTag and flavourTag
-        await Promise.all(
-          formData.ingredientTag.map((tagId) =>
-            updateTagReference(tagId, data._id)
-          )
-        );
-        await Promise.all(
-          formData.cuisineTag.map((tagId) =>
-            updateTagReference(tagId, data._id)
-          )
-        );
-        await Promise.all(
-          formData.flavourTag.map((tagId) =>
-            updateTagReference(tagId, data._id)
-          )
-        );
+        // Update recipeRefs for all relevant tags
+        const updateTagRefs = async (tags) => {
+          await Promise.all(
+            tags.map((tagId) =>
+              fetch("/api/tag/addRecipeRef", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ tagId, recipeId: data._id }),
+              })
+            )
+          );
+        };
+
+        await updateTagRefs(formData.ingredientTag.map((t) => t.tagId));
+        await updateTagRefs(formData.cuisineTag.map((t) => t.tagId));
+        await updateTagRefs(formData.flavourTag.map((t) => t.tagId));
+        await updateTagRefs(formData.equipmentTag.map((t) => t.tagId));
+
         navigate(`/recipes/${data._id}`);
       } else {
         setError("Recipe creation failed. Please try again.");

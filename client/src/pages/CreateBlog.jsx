@@ -78,7 +78,6 @@ const CreateBlog = () => {
   const updateTagBlogReference = async (tagId, blogId) => {
     try {
       await fetch("/api/tag/addBlogRef", {
-        // updated endpoint
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tagId, blogId }),
@@ -108,26 +107,24 @@ const CreateBlog = () => {
       if (!res.ok) {
         setError(data.message || "Failed to create blog.");
       } else {
-        await Promise.all(
-          formData.cuisineTag.map((tagId) =>
-            updateTagBlogReference(tagId, data._id)
-          )
-        );
-        await Promise.all(
-          formData.flavourTag.map((tagId) =>
-            updateTagBlogReference(tagId, data._id)
-          )
-        );
-        await Promise.all(
-          formData.ingredientTag.map((tagId) =>
-            updateTagBlogReference(tagId, data._id)
-          )
-        );
-        await Promise.all(
-          formData.equipmentTag.map((tagId) =>
-            updateTagBlogReference(tagId, data._id)
-          )
-        );
+        // Update blogRefs for all relevant tags
+        const updateTagRefs = async (tags) => {
+          await Promise.all(
+            tags.map((tagId) =>
+              fetch("/api/tag/addBlogRef", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ tagId, blogId: data._id }),
+              })
+            )
+          );
+        };
+
+        await updateTagRefs(formData.cuisineTag);
+        await updateTagRefs(formData.flavourTag);
+        await updateTagRefs(formData.ingredientTag);
+        await updateTagRefs(formData.equipmentTag); // NEW: Add equipment tag references
+
         console.log("Blog created successfully:", data); // Debugging log
         navigate(`/blogs/${data._id}`);
       }

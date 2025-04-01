@@ -58,6 +58,7 @@ export default function EditRecipe() {
     ingredientTag: [],
     cuisineTag: [],
     flavourTag: [],
+    equipmentTag: [], // NEW: Initialize previous equipment tags
   });
   // NEW STATE: Add toggle for preparation instructions
   const [showPrepInstructions, setShowPrepInstructions] = useState(false);
@@ -118,13 +119,14 @@ export default function EditRecipe() {
           cookingMethod: data.cookingMethod || [], // NEW: Initialize cookingMethod
           mealCourse: data.mealCourse || [],
           mealType: data.mealType || [],
-          equipmentTag: data.equipmentTag || [],
+          equipmentTag: data.equipmentTag || [], // NEW: Initialize equipmentTag
         });
         // Save the original tag arrays for future diff
         setPreviousTags({
           ingredientTag: data.ingredientTag || [],
           cuisineTag: data.cuisineTag || [],
           flavourTag: data.flavourTag || [],
+          equipmentTag: data.equipmentTag || [], // NEW: Save original equipment tags
         });
       } catch (err) {
         setError(err.message);
@@ -293,6 +295,10 @@ export default function EditRecipe() {
         const removedFlavourTags = previousTags.flavourTag.filter(
           (tagId) => !formData.flavourTag.includes(tagId)
         );
+        const removedEquipmentTags = previousTags.equipmentTag.filter(
+          (tagId) => !formData.equipmentTag.includes(tagId)
+        ); // NEW: Handle removed equipment tags
+
         // Remove tag references for removed tags
         await Promise.all(
           removedIngredientTags.map((tagId) => removeTagReference(tagId, id))
@@ -303,6 +309,10 @@ export default function EditRecipe() {
         await Promise.all(
           removedFlavourTags.map((tagId) => removeTagReference(tagId, id))
         );
+        await Promise.all(
+          removedEquipmentTags.map((tagId) => removeTagReference(tagId, id))
+        ); // NEW: Remove equipment tag references
+
         // For current tags, add recipe reference (optionally you can check new ones only)
         await Promise.all(
           formData.ingredientTag.map((tagId) => updateTagReference(tagId, id))
@@ -313,6 +323,10 @@ export default function EditRecipe() {
         await Promise.all(
           formData.flavourTag.map((tagId) => updateTagReference(tagId, id))
         );
+        await Promise.all(
+          formData.equipmentTag.map((tagId) => updateTagReference(tagId, id))
+        ); // NEW: Add equipment tag references
+
         navigate(`/recipes/${id}`);
       }
     } catch (err) {

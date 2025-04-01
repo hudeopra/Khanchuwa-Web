@@ -29,6 +29,8 @@ import Category from "./pages/Category"; // Updated import name
 import NotFound from "./pages/404"; // Import NotFound component
 import PrivacyPolicy from "./pages/PrivacyPolicy"; // Import PrivacyPolicy
 import TermsAndConditions from "./pages/TermsAndConditions"; // Import TermsAndConditions
+import TagList from "./pages/TagList"; // Import TagList component
+import TagDetail from "./pages/TagDetail"; // Import TagDetail component
 
 export default function App() {
   return (
@@ -57,7 +59,10 @@ export default function App() {
         <Route path="/blogs" element={<BlogList />} />
         <Route path="/blogs/:id" element={<BlogDetail />} />
         <Route path="/category/:value" element={<Category />} />
-
+        <Route path="/cookshop" element={<TagList />} />{" "}
+        {/* New route for TagList */}
+        <Route path="/cookshop/:tagType/:id" element={<TagDetail />} />{" "}
+        {/* Updated route for TagDetail */}
         <Route path="*" element={<NotFound />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
