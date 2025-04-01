@@ -1,5 +1,14 @@
 import mongoose from 'mongoose';
 
+// Global functions for default values
+function defaultFavImg() {
+  return (this.tagType === 'cuisineTag' || this.tagType === 'flavourTag') ? '' : undefined;
+}
+
+function defaultBannerImg() {
+  return (this.tagType === 'cuisineTag' || this.tagType === 'flavourTag') ? '' : undefined;
+}
+
 const recipeTagSchema = new mongoose.Schema({
   tagType: {
     type: String,
@@ -36,21 +45,11 @@ const recipeTagSchema = new mongoose.Schema({
   },
   favImg: {                 // favorite image for cuisine or flavor tags
     type: String,
-    default: function () {
-      return (this.tagType === 'cuisineTag' || this.tagType === 'flavourTag') ? '' : undefined;
-    }
+    default: "https://ih1.redbubble.net/image.5473466329.4258/st,small,507x507-pad,600x600,f8f8f8.jpg"
   },
   bannerImg: {              // banner image for cuisine or flavor tags
     type: String,
-    default: function () {
-      return (this.tagType === 'cuisineTag' || this.tagType === 'flavourTag') ? '' : undefined;
-    }
-  },
-  mrkPrice: {               // market price for ingredient or equipment tags
-    type: Number,
-    default: function () {
-      return (this.tagType === 'ingredientTag' || this.tagType === 'equipmentTag') ? 0 : undefined;
-    }
+    default: "https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2F16p5m5rpubp51.jpg%3Fauto%3Dwebp%26s%3D5c80b9087003f15d9f174cbb94def1419ef41a83"
   },
   inStock: {                  // stock for ingredient or equipment tags
     type: Number,
@@ -59,6 +58,12 @@ const recipeTagSchema = new mongoose.Schema({
     }
   },
   quantity: {                  // stock for ingredient or equipment tags
+    type: Number,
+    default: function () {
+      return (this.tagType === 'ingredientTag' || this.tagType === 'equipmentTag') ? 0 : undefined;
+    }
+  },
+  mrkPrice: {               // market price for ingredient or equipment tags
     type: Number,
     default: function () {
       return (this.tagType === 'ingredientTag' || this.tagType === 'equipmentTag') ? 0 : undefined;

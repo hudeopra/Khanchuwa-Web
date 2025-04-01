@@ -9,21 +9,36 @@ export default function UserBlog() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const userId = currentUser?._id;
-
   useEffect(() => {
-    if (userId) {
-      fetch(`/api/blog/user/${userId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setBlogs(data.blogs || []);
+    if (currentUser) {
+      const user = currentUser.user || currentUser;
+      const userId = user._id;
+      fetch(`http://localhost:3000/api/blog/user/${userId}?limit=5`)
+        .then((res) => {
+          if (!res.ok) {
+            return res.text().then((text) => {
+              throw new Error(`Fetch error: ${res.status} ${text}`);
+            });
+          }
+          return res.json();
         })
-        .catch((err) => setError(err.message))
-        .finally(() => setLoading(false));
+        .then((data) => {
+          if (data.success) {
+            setBlogs(data.blogs || []);
+            console.log("User Blogs: ", data.blogs);
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          setError(error.message); // Set error state
+        })
+        .finally(() => {
+          setLoading(false); // Ensure loading is set to false
+        });
     } else {
-      setLoading(false);
+      setLoading(false); // Handle case where currentUser is not defined
     }
-  }, [userId]);
+  }, [currentUser]);
 
   if (loading) return <p>Loading blogs...</p>;
   if (error) return <p>Error: {error}</p>;

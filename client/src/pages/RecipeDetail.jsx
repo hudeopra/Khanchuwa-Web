@@ -244,14 +244,23 @@ export default function RecipeDetail() {
               <h4>Ingredient Tags:</h4>
               <ul className="kh-recipe-single__tags--list">
                 {recipe.ingredientTag && recipe.ingredientTag.length > 0 ? (
-                  recipe.ingredientTag.map((tag) => (
-                    <li
-                      className="kh-recipe-single__tags--item"
-                      key={typeof tag === "object" ? tag._id : tag}
-                    >
-                      {typeof tag === "object" ? tag.tagName : tag}
-                    </li>
-                  ))
+                  recipe.ingredientTag.map((tag) => {
+                    const tagName =
+                      typeof tag === "object"
+                        ? tag.tagName || "Unknown Tag"
+                        : tag;
+                    const tagType =
+                      typeof tag === "object" && tag.tagType
+                        ? tag.tagType
+                        : "ingredientTag"; // Use "ingredient" as a meaningful fallback
+                    const tagId = typeof tag === "object" ? tag._id : tag;
+
+                    return (
+                      <li className="kh-recipe-single__tags--item" key={tagId}>
+                        <a href={`/${tagType}/${tagId}`}>{tagName}</a>
+                      </li>
+                    );
+                  })
                 ) : (
                   <li>N/A</li>
                 )}
