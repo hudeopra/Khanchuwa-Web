@@ -325,6 +325,7 @@ main {
   overflow: hidden;
   min-height: 300px;
 }
+
 .kh-recipe-block__item:hover .kh-recipe-block__info {
   bottom: 0;
 }
@@ -341,6 +342,15 @@ main {
 .kh-recipe-block__content h3 {
   font-size: 28px;
   margin-bottom: 10px;
+}
+.kh-recipe-block__content p {
+  opacity: 0;
+  position: absolute;
+  transition: all 0.3s cubic-bezier(0, 0, 0, 1);
+}
+.kh-recipe-block__item:hover p {
+  opacity: 1;
+  position: relative;
 }
 .kh-recipe-block__info {
   position: absolute;
@@ -398,18 +408,24 @@ main {
   margin-left: 20px;
 }
 .left.kh-scrolling-image1 {
-  animation: leftmarquee1 350s linear infinite;
+  animation: leftmarquee1 500s linear infinite;
 }
 .left.kh-scrolling-image2 {
-  animation: leftmarquee2 350s linear infinite;
+  animation: leftmarquee2 500s linear infinite;
 }
 .right.kh-scrolling-image1 {
-  animation: rightmarquee1 350s linear infinite;
+  animation: rightmarquee1 500s linear infinite;
 }
 .right.kh-scrolling-image2 {
-  animation: rightmarquee2 350s linear infinite;
+  animation: rightmarquee2 500s linear infinite;
 }
-
+/* Pause animation on hover */
+.left.kh-scrolling-image1:hover,
+.left.kh-scrolling-image2:hover,
+.right.kh-scrolling-image1:hover,
+.right.kh-scrolling-image2:hover {
+  animation-play-state: paused;
+}
 @keyframes leftmarquee1 {
   0% {
     transform: translateX(-200%);

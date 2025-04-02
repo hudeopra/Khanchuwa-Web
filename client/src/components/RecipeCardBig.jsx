@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import * as images from "../assets/js/images.js";
 
 const RecipeCardBig = () => {
@@ -38,8 +39,9 @@ const RecipeCardBig = () => {
     <div className="kh-recipe-block__wrapper">
       {/* Render horizontal cards */}
       {horizontalCards.map((item, index) => (
-        <div
+        <Link
           key={index}
+          to={`/recipes/${item._id}`}
           className="kh-recipe-block__item kh-recipe__item--horizontal"
         >
           <div className="kh-recipe-block__item--img">
@@ -55,22 +57,30 @@ const RecipeCardBig = () => {
           </div>
           <div className="kh-recipe-block__content">
             <h3>{item.recipeName}</h3>
-            <span>{item.description} Recipes</span>
+            <p>
+              {item.description.length > 300
+                ? `${item.description.slice(0, 150)}...`
+                : item.description}
+            </p>{" "}
           </div>
           <div className="kh-recipe-block__info">
             <span>{item.cookTime} </span>
-            <span>{item.portion} </span>
+            <span>{item.servings} </span>
             <span>{item.difficulty} </span>
           </div>
-        </div>
+        </Link>
       ))}
 
       {/* Render vertical cards */}
       {verticalCards.map((item, index) => (
-        <div key={index} className="kh-recipe-block__item">
+        <Link
+          key={index}
+          to={`/recipes/${item._id}`}
+          className="kh-recipe-block__item"
+        >
           <div className="kh-recipe-block__content">
             <h3>{item.recipeName}</h3>
-            <span>{item.description} Recipes</span>
+            <p>{item.description} Recipes</p>
           </div>
           <div className="kh-recipe-block__item--img">
             <img
@@ -84,10 +94,10 @@ const RecipeCardBig = () => {
           </div>
           <div className="kh-recipe-block__info">
             <span>{item.cookTime} </span>
-            <span>{item.portion} </span>
+            <span>{item.servings} </span>
             <span>{item.difficulty} </span>
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );

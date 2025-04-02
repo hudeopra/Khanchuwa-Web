@@ -1,0 +1,113 @@
+[{
+  "_id": {
+    "$oid": "67ed490f3f16b05bd8f9bb16"
+  },
+  "recipeName": "Firecracker Beef",
+  "description": "A thrifty yet excellent dinner to satis",
+  "diet": "Non-Vegetarian",
+  "ingredients": [
+    {
+      "name": "Vegetable oil",
+      "quantity": "1½ tbsp",
+      "_id": {
+        "$oid": "67ed490f3f16b05bd8f9bb17"
+      }
+    }
+  ],
+  "prepTime": 3,
+  "cookTime": 15,
+  "servings": 4,
+  "difficulty": "Easy",
+  "chefName": "prabinhudeo",
+  "cuisineTag": [
+    {
+      "tagId": {
+        "$oid": "67ed49073f16b05bd8f9bb0d"
+      },
+      "tagName": "Asian",
+      "_id": {
+        "$oid": "67ed490f3f16b05bd8f9bb18"
+      }
+    }
+  ],
+  "imageUrls": [],
+  "flavourTag": [
+    {
+      "tagId": {
+        "$oid": "67ed49053f16b05bd8f9bb0a"
+      },
+      "tagName": "Spicy",
+      "_id": {
+        "$oid": "67ed490f3f16b05bd8f9bb19"
+      }
+    }
+  ],
+  "videoUrl": "",
+  "bannerImgUrl": "",
+  "favImgUrl": "",
+  "userRef": {
+    "$oid": "67ed1eb6c47c2afa51147aca"
+  },
+  "shortDescription": "",
+  "nutritionalInfo": [
+    {
+      "name": "Calories",
+      "value": "326"
+    },
+    {
+      "name": "Carbohydrates",
+      "value": "3"
+    },
+    {
+      "name": "Protein",
+      "value": "26"
+    },
+    {
+      "name": "Fat",
+      "value": "18"
+    }
+  ],
+  "cookInstructions": "<p>asdgfhgj</p>",
+  "prepInstructions": "",
+  "ingredientTag": [
+    {
+      "tagId": {
+        "$oid": "67ed48fc3f16b05bd8f9bb07"
+      },
+      "tagName": "Vegetable oil",
+      "_id": {
+        "$oid": "67ed490f3f16b05bd8f9bb1a"
+      }
+    }
+  ],
+  "equipmentTag": [
+    {
+      "tagId": {
+        "$oid": "67ed490d3f16b05bd8f9bb10"
+      },
+      "tagName": "Pan",
+      "_id": {
+        "$oid": "67ed490f3f16b05bd8f9bb1b"
+      }
+    }
+  ],
+  "mealCourse": "Main Course (Entrée)",
+  "mealType": [
+    "breakfast",
+    "dinner",
+    "lunch"
+  ],
+  "cookingMethod": [
+    "Fried"
+  ],
+  "recipeFav": 0,
+  "recipeViews": [],
+  "reviews": [],
+  "createdAt": {
+    "$date": "2025-04-02T14:26:23.788Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-02T14:26:23.788Z"
+  },
+  "__v": 0
+}]

@@ -1,4 +1,5 @@
 import RecipeTag from '../models/recipeTag.model.js';
+import mongoose from 'mongoose';
 
 // GET /api/tag/:type -> fetches tags by type, e.g. "flavourTag"
 export const getTagsByType = async (req, res, next) => {
@@ -132,7 +133,34 @@ export const removeEquipmentRef = async (req, res, next) => {
 export const updateTag = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const updatedTag = await RecipeTag.findByIdAndUpdate(id, req.body, { new: true });
+    const updateData = req.body;
+
+    // Convert _id to a valid ObjectId if it exists in the request body
+    if (updateData._id && updateData._id.$oid) {
+      updateData._id = new mongoose.Types.ObjectId(updateData._id.$oid);
+    }
+
+    // Convert recipeRefs array to valid ObjectId instances if necessary
+    if (Array.isArray(updateData.recipeRefs)) {
+      updateData.recipeRefs = updateData.recipeRefs.map(ref =>
+        ref.$oid ? new mongoose.Types.ObjectId(ref.$oid) : ref
+      );
+    }
+
+    // Similarly, handle other fields like blogRefs, equipmentRefs, etc., if needed
+    if (Array.isArray(updateData.blogRefs)) {
+      updateData.blogRefs = updateData.blogRefs.map(ref =>
+        ref.$oid ? new mongoose.Types.ObjectId(ref.$oid) : ref
+      );
+    }
+
+    if (Array.isArray(updateData.equipmentRefs)) {
+      updateData.equipmentRefs = updateData.equipmentRefs.map(ref =>
+        ref.$oid ? new mongoose.Types.ObjectId(ref.$oid) : ref
+      );
+    }
+
+    const updatedTag = await RecipeTag.findByIdAndUpdate(id, updateData, { new: true });
     if (!updatedTag) return res.status(404).json({ message: 'Tag not found' });
     res.status(200).json(updatedTag);
   } catch (error) {

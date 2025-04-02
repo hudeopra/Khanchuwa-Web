@@ -1,0 +1,200 @@
+[{
+  "_id": {
+    "$oid": "67ed46ecdcfbd974854a2110"
+  },
+  "recipeName": "Firecracker Beef",
+  "description": "A thrifty yet excellent dinner to satisfy",
+  "diet": "Non-Vegetarian",
+  "ingredients": [
+    {
+      "name": "Vegetable oil",
+      "quantity": "",
+      "_id": {
+        "$oid": "67ed46ecdcfbd974854a2111"
+      }
+    },
+    {
+      "name": "emptyinput box",
+      "quantity": "",
+      "_id": {
+        "$oid": "67ed474dd4bb4b5b63a31f79"
+      }
+    },
+    {
+      "name": "Beef mince",
+      "quantity": "",
+      "_id": {
+        "$oid": "67ed474dd4bb4b5b63a31f7a"
+      }
+    }
+  ],
+  "prepTime": 3,
+  "cookTime": 15,
+  "servings": 4,
+  "difficulty": "Easy",
+  "chefName": "prabinhudeo",
+  "cuisineTag": [
+    {
+      "tagId": {
+        "$oid": "67ed46dfdcfbd974854a2104"
+      },
+      "tagName": "Asian",
+      "_id": {
+        "$oid": "67ed46ecdcfbd974854a2112"
+      }
+    },
+    {
+      "tagId": {
+        "$oid": "67ed46ecdcfbd974854a2112"
+      },
+      "tagName": "Asian",
+      "_id": {
+        "$oid": "67ed474dd4bb4b5b63a31f82"
+      }
+    },
+    {
+      "tagId": {
+        "$oid": "67ed473bd4bb4b5b63a31f6d"
+      },
+      "tagName": "Indian",
+      "_id": {
+        "$oid": "67ed474dd4bb4b5b63a31f83"
+      }
+    }
+  ],
+  "imageUrls": [],
+  "flavourTag": [
+    {
+      "tagId": {
+        "$oid": "67ed46e4dcfbd974854a2107"
+      },
+      "tagName": "Spicy",
+      "_id": {
+        "$oid": "67ed46ecdcfbd974854a2113"
+      }
+    },
+    {
+      "tagId": {
+        "$oid": "67ed46ecdcfbd974854a2113"
+      },
+      "tagName": "Spicy",
+      "_id": {
+        "$oid": "67ed474dd4bb4b5b63a31f85"
+      }
+    },
+    {
+      "tagId": {
+        "$oid": "67ed4735d4bb4b5b63a31f6a"
+      },
+      "tagName": "Sweet",
+      "_id": {
+        "$oid": "67ed474dd4bb4b5b63a31f86"
+      }
+    }
+  ],
+  "videoUrl": "",
+  "bannerImgUrl": "",
+  "favImgUrl": "",
+  "userRef": {
+    "$oid": "67ed1eb6c47c2afa51147aca"
+  },
+  "shortDescription": "",
+  "nutritionalInfo": [
+    {
+      "name": "Calories",
+      "value": "326"
+    },
+    {
+      "name": "Carbohydrates",
+      "value": "3"
+    },
+    {
+      "name": "Protein",
+      "value": "26"
+    },
+    {
+      "name": "Fat",
+      "value": "18"
+    }
+  ],
+  "cookInstructions": "<p>assdghjk.lj</p>",
+  "prepInstructions": "",
+  "ingredientTag": [
+    {
+      "tagId": {
+        "$oid": "67ed46dbdcfbd974854a2101"
+      },
+      "tagName": "Vegetable oil",
+      "_id": {
+        "$oid": "67ed46ecdcfbd974854a2114"
+      }
+    },
+    {
+      "tagId": {
+        "$oid": "67ed46ecdcfbd974854a2114"
+      },
+      "tagName": "Vegetable oil",
+      "_id": {
+        "$oid": "67ed474dd4bb4b5b63a31f7c"
+      }
+    },
+    {
+      "tagId": {
+        "$oid": "67ed4741d4bb4b5b63a31f70"
+      },
+      "tagName": "Beef mince",
+      "_id": {
+        "$oid": "67ed474dd4bb4b5b63a31f7d"
+      }
+    }
+  ],
+  "equipmentTag": [
+    {
+      "tagId": {
+        "$oid": "67ed46e9dcfbd974854a210a"
+      },
+      "tagName": "Knife",
+      "_id": {
+        "$oid": "67ed46ecdcfbd974854a2115"
+      }
+    },
+    {
+      "tagId": {
+        "$oid": "67ed46ecdcfbd974854a2115"
+      },
+      "tagName": "Knife",
+      "_id": {
+        "$oid": "67ed474dd4bb4b5b63a31f7f"
+      }
+    },
+    {
+      "tagId": {
+        "$oid": "67ed472fd4bb4b5b63a31f67"
+      },
+      "tagName": "Pan",
+      "_id": {
+        "$oid": "67ed474dd4bb4b5b63a31f80"
+      }
+    }
+  ],
+  "mealCourse": "M",
+  "mealType": [
+    "breakfast",
+    "lunch",
+    "dinner"
+  ],
+  "cookingMethod": [
+    "Fried",
+    "Stir-fried"
+  ],
+  "recipeFav": 0,
+  "recipeViews": [],
+  "reviews": [],
+  "createdAt": {
+    "$date": "2025-04-02T14:17:16.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-02T14:18:53.164Z"
+  },
+  "__v": 0
+}]

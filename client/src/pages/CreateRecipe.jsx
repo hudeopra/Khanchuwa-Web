@@ -200,8 +200,13 @@ export default function CreateRecipe() {
     setLoading(true);
     setError(false);
 
+    // Convert video URL to embed format
+    const videoUrl = formData.videoUrl.replace("watch?v=", "embed/");
+
     const bodyData = {
       ...formData,
+      videoUrl, // Use the converted video URL
+      mealCourse: formData.mealCourse[0] || "", // Convert to string
       userRef: userId,
     };
 
@@ -368,14 +373,13 @@ export default function CreateRecipe() {
                         <label>Meal Type</label>
                         <div className="d-flex flex-wrap gap-2">
                           {[
-                            "Snack",
-                            "Breakfast",
-                            "Brunch",
-                            "Afternoon Tea",
-                            "Lunch",
-                            "Dinner",
-                            "Supper",
-                            "Late Night Snack",
+                            "snack",
+                            "breakfast",
+                            "brunch",
+                            "lunch",
+                            "dinner",
+                            "supper",
+                            "night-snack",
                           ].map((opt) => (
                             <div
                               className="kh-recipe-form__checkbox--item"
@@ -520,37 +524,20 @@ export default function CreateRecipe() {
                       />
                     </div>
                     <div className="kh-recipe-form__form--item">
-                      <p>Servings:</p>
-                      <label>
-                        <input
-                          type="radio"
-                          name="servings"
-                          value="1"
-                          checked={formData.servings === "1"}
-                          onChange={handleChange}
-                        />
-                        1
-                      </label>
-                      <label>
-                        <input
-                          type="radio"
-                          name="servings"
-                          value="2"
-                          checked={formData.servings === "2"}
-                          onChange={handleChange}
-                        />
-                        2
-                      </label>
-                      <label>
-                        <input
-                          type="radio"
-                          name="servings"
-                          value="4"
-                          checked={formData.servings === "4"}
-                          onChange={handleChange}
-                        />
-                        4
-                      </label>
+                      <label htmlFor="servings">Servings</label>
+                      <select
+                        id="servings"
+                        className="border rounded-lg"
+                        onChange={handleChange}
+                        value={formData.servings}
+                      >
+                        <option value="">Select Servings</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="4">4</option>
+                        <option value="6">6</option>
+                        <option value="8">8</option>
+                      </select>
                     </div>
                     <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                       <label>Cooking Method</label>

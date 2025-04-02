@@ -37,14 +37,11 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
         if (!tag || !tag.name) return false;
         return (
           tag.name.toLowerCase().includes(val.toLowerCase()) &&
-          !selectedTags.some((sel) => {
-            if (sel && sel.name) {
-              return sel.name.toLowerCase() === tag.name.toLowerCase();
-            } else if (typeof sel === "string") {
-              return sel.toLowerCase() === tag.name.toLowerCase();
-            }
-            return false;
-          })
+          !selectedTags.some(
+            (sel) =>
+              sel.tagId === tag._id ||
+              sel.name.toLowerCase() === tag.name.toLowerCase()
+          )
         );
       })
       .map((tag) => tag.name);

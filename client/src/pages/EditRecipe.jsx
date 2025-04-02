@@ -275,58 +275,34 @@ export default function EditRecipe() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Ensure tags are properly formatted before submission
+    const formatTags = (tags) =>
+      tags.map((tag) => ({
+        tagId: tag.tagId || tag._id,
+        tagName: tag.tagName || "Unknown",
+      }));
+
+    const bodyData = {
+      ...formData,
+      videoUrl: formData.videoUrl.replace("watch?v=", "embed/"), // Convert video URL
+      mealCourse: formData.mealCourse[0] || "", // Ensure mealCourse is a string
+      ingredientTag: formatTags(formData.ingredientTag),
+      cuisineTag: formatTags(formData.cuisineTag),
+      flavourTag: formatTags(formData.flavourTag), // Format flavourTag
+      equipmentTag: formatTags(formData.equipmentTag), // Format equipmentTag
+    };
+
     try {
       const res = await fetch(`/api/recipe/update/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(bodyData),
       });
       const data = await res.json();
       if (data.success === false) {
         setError(data.message);
       } else {
-        // Compute removed tags per type
-        const removedIngredientTags = previousTags.ingredientTag.filter(
-          (tagId) => !formData.ingredientTag.includes(tagId)
-        );
-        const removedCuisineTags = previousTags.cuisineTag.filter(
-          (tagId) => !formData.cuisineTag.includes(tagId)
-        );
-        const removedFlavourTags = previousTags.flavourTag.filter(
-          (tagId) => !formData.flavourTag.includes(tagId)
-        );
-        const removedEquipmentTags = previousTags.equipmentTag.filter(
-          (tagId) => !formData.equipmentTag.includes(tagId)
-        ); // NEW: Handle removed equipment tags
-
-        // Remove tag references for removed tags
-        await Promise.all(
-          removedIngredientTags.map((tagId) => removeTagReference(tagId, id))
-        );
-        await Promise.all(
-          removedCuisineTags.map((tagId) => removeTagReference(tagId, id))
-        );
-        await Promise.all(
-          removedFlavourTags.map((tagId) => removeTagReference(tagId, id))
-        );
-        await Promise.all(
-          removedEquipmentTags.map((tagId) => removeTagReference(tagId, id))
-        ); // NEW: Remove equipment tag references
-
-        // For current tags, add recipe reference (optionally you can check new ones only)
-        await Promise.all(
-          formData.ingredientTag.map((tagId) => updateTagReference(tagId, id))
-        );
-        await Promise.all(
-          formData.cuisineTag.map((tagId) => updateTagReference(tagId, id))
-        );
-        await Promise.all(
-          formData.flavourTag.map((tagId) => updateTagReference(tagId, id))
-        );
-        await Promise.all(
-          formData.equipmentTag.map((tagId) => updateTagReference(tagId, id))
-        ); // NEW: Add equipment tag references
-
         navigate(`/recipes/${id}`);
       }
     } catch (err) {
@@ -412,31 +388,29 @@ export default function EditRecipe() {
                           value={formData.description || ""} // updated fallback
                         />
                       </div>
-                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
-                        <label>Meal Course</label>
-                        <div className="d-flex flex-wrap gap-2">
-                          {[
-                            "Appetizer",
-                            "Soup",
-                            "Main Course (Entrée)",
-                            "Side Dish",
-                            "Dessert",
-                          ].map((opt) => (
-                            <div
-                              className="kh-recipe-form__checkbox--item"
-                              key={opt}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={
-                                  formData.mealCourse?.includes(opt) || false
-                                }
-                                onChange={() => toggleOption("mealCourse", opt)}
-                              />
-                              <label>{opt}</label>
-                            </div>
-                          ))}
-                        </div>
+                      <div className="kh-recipe-form__form--item">
+                        <label htmlFor="mealCourse">Meal Course</label>
+                        <select
+                          id="mealCourse"
+                          className="border rounded-lg"
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              mealCourse: [e.target.value], // Allow only one selection
+                            }))
+                          }
+                          value={formData.mealCourse[0] || ""}
+                        >
+                          <option value="">Select Meal Course</option>
+                          <option value="appetizer">Appetizer</option>
+                          <option value="soup">Soup</option>
+                          <option value="curry">Curry</option>
+                          <option value="main-course">
+                            Main Course (Entrée)
+                          </option>
+                          <option value="side-dish">Side Dish</option>
+                          <option value="dessert">Dessert</option>
+                        </select>
                       </div>
                       <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                         <label>Meal Type</label>
@@ -589,37 +563,20 @@ export default function EditRecipe() {
                       />
                     </div>
                     <div className="kh-recipe-form__form--item">
-                      <p>Servings:</p>
-                      <label>
-                        <input
-                          type="radio"
-                          name="servings"
-                          value="1"
-                          checked={formData.servings === "1"}
-                          onChange={handleChange}
-                        />
-                        1
-                      </label>
-                      <label>
-                        <input
-                          type="radio"
-                          name="servings"
-                          value="2"
-                          checked={formData.servings === "2"}
-                          onChange={handleChange}
-                        />
-                        2
-                      </label>
-                      <label>
-                        <input
-                          type="radio"
-                          name="servings"
-                          value="4"
-                          checked={formData.servings === "4"}
-                          onChange={handleChange}
-                        />
-                        4
-                      </label>
+                      <label htmlFor="servings">Servings</label>
+                      <select
+                        id="servings"
+                        className="border rounded-lg"
+                        onChange={handleChange}
+                        value={formData.servings}
+                      >
+                        <option value="">Select Servings</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="4">4</option>
+                        <option value="6">6</option>
+                        <option value="8">8</option>
+                      </select>
                     </div>
                   </div>
                   <div className="kh-recipe-form__form--item">
@@ -921,10 +878,20 @@ export default function EditRecipe() {
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          cuisineTag: selected.map((t) => ({
-                            tagId: t._id,
-                            tagName: t.name,
-                          })),
+                          cuisineTag: [
+                            ...prev.cuisineTag.filter(
+                              (existing) =>
+                                !selected.some(
+                                  (newTag) =>
+                                    (newTag._id || newTag.tagId) ===
+                                    existing.tagId
+                                )
+                            ),
+                            ...selected.map((t) => ({
+                              tagId: t._id || t.tagId,
+                              tagName: t.name || t.tagName || "Unknown",
+                            })),
+                          ],
                         }))
                       }
                     />
@@ -937,10 +904,20 @@ export default function EditRecipe() {
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          flavourTag: selected.map((t) => ({
-                            tagId: t._id,
-                            tagName: t.name,
-                          })),
+                          flavourTag: [
+                            ...prev.flavourTag.filter(
+                              (existing) =>
+                                !selected.some(
+                                  (newTag) =>
+                                    (newTag._id || newTag.tagId) ===
+                                    existing.tagId
+                                )
+                            ),
+                            ...selected.map((t) => ({
+                              tagId: t._id || t.tagId,
+                              tagName: t.name || t.tagName || "Unknown",
+                            })),
+                          ],
                         }))
                       }
                     />
@@ -953,10 +930,31 @@ export default function EditRecipe() {
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          ingredientTag: selected.map((t) => ({
-                            tagId: t._id,
-                            tagName: t.name,
-                          })),
+                          ingredientTag: [
+                            ...prev.ingredientTag.filter(
+                              (existing) =>
+                                !selected.some(
+                                  (newTag) =>
+                                    (newTag._id || newTag.tagId) ===
+                                    existing.tagId
+                                )
+                            ),
+                            ...selected.map((t) => ({
+                              tagId: t._id || t.tagId,
+                              tagName: t.name || t.tagName || "Unknown",
+                            })),
+                          ],
+                          ingredients: [
+                            ...prev.ingredients,
+                            ...selected
+                              .filter(
+                                (newTag) =>
+                                  !prev.ingredients.some(
+                                    (ing) => ing.name === newTag.name
+                                  )
+                              )
+                              .map((t) => ({ name: t.name, quantity: "" })),
+                          ],
                         }))
                       }
                     />
@@ -969,10 +967,20 @@ export default function EditRecipe() {
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          equipmentTag: selected.map((t) => ({
-                            tagId: t._id,
-                            tagName: t.name,
-                          })),
+                          equipmentTag: [
+                            ...prev.equipmentTag.filter(
+                              (existing) =>
+                                !selected.some(
+                                  (newTag) =>
+                                    (newTag._id || newTag.tagId) ===
+                                    existing.tagId
+                                )
+                            ),
+                            ...selected.map((t) => ({
+                              tagId: t._id || t.tagId,
+                              tagName: t.name || t.tagName || "Unknown",
+                            })),
+                          ],
                         }))
                       }
                     />

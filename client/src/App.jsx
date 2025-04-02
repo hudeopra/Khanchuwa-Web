@@ -31,6 +31,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy"; // Import PrivacyPolicy
 import TermsAndConditions from "./pages/TermsAndConditions"; // Import TermsAndConditions
 import TagList from "./pages/TagList"; // Import TagList component
 import TagDetail from "./pages/TagDetail"; // Import TagDetail component
+import ProductEdit from "./pages/ProductEdit"; // Import ProductEdit component
 
 export default function App() {
   return (
@@ -52,6 +53,8 @@ export default function App() {
           <Route path="/blog/edit/:id" element={<EditBlog />} />
           <Route path="/user-blog" element={<UserBlog />} />
           {/* Updated route for editing */}
+          <Route path="/product/edit/:id" element={<ProductEdit />} />{" "}
+          {/* New route for ProductEdit */}
         </Route>
         <Route path="/recipes" element={<RecipeList />} />
         <Route path="/search" element={<RecipeList />} />

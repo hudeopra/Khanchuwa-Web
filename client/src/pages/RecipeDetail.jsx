@@ -215,7 +215,9 @@ export default function RecipeDetail() {
                       className="kh-recipe-single__tags--item"
                       key={typeof tag === "object" ? tag._id : tag}
                     >
-                      {typeof tag === "object" ? tag.tagName : tag}
+                      {typeof tag === "object"
+                        ? tag.tagName || "Unknown Tag"
+                        : tag}
                     </li>
                   ))
                 ) : (
@@ -232,7 +234,9 @@ export default function RecipeDetail() {
                       className="kh-recipe-single__tags--item"
                       key={typeof tag === "object" ? tag._id : tag}
                     >
-                      {typeof tag === "object" ? tag.tagName : tag}
+                      {typeof tag === "object"
+                        ? tag.tagName || "Unknown Tag"
+                        : tag}
                     </li>
                   ))
                 ) : (
@@ -252,12 +256,12 @@ export default function RecipeDetail() {
                     const tagType =
                       typeof tag === "object" && tag.tagType
                         ? tag.tagType
-                        : "ingredientTag"; // Use "ingredient" as a meaningful fallback
-                    const tagId = typeof tag === "object" ? tag._id : tag;
+                        : "ingredientTag"; // Fallback to "ingredientTag"
+                    const tagId = typeof tag === "object" ? tag.tagId : tag; // Use tagId instead of _id
 
                     return (
                       <li className="kh-recipe-single__tags--item" key={tagId}>
-                        <a href={`/${tagType}/${tagId}`}>{tagName}</a>
+                        <a href={`/cookshop/${tagType}/${tagId}`}>{tagName}</a>
                       </li>
                     );
                   })
@@ -267,15 +271,17 @@ export default function RecipeDetail() {
               </ul>
             </div>
             <div className="kh-recipe-single__tags">
-              <h4>equipmentTag Tags:</h4>
+              <h4>Equipment Tags:</h4>
               <ul className="kh-recipe-single__tags--list">
                 {recipe.equipmentTag && recipe.equipmentTag.length > 0 ? (
-                  recipe.ingredientTag.map((tag) => (
+                  recipe.equipmentTag.map((tag) => (
                     <li
                       className="kh-recipe-single__tags--item"
                       key={typeof tag === "object" ? tag._id : tag}
                     >
-                      {typeof tag === "object" ? tag.tagName : tag}
+                      {typeof tag === "object"
+                        ? tag.tagName || "Unknown Tag"
+                        : tag}
                     </li>
                   ))
                 ) : (

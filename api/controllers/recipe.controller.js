@@ -1,10 +1,35 @@
 import Recipe from '../models/recipe.model.js';
 import User from '../models/user.model.js';
+import RecipeTag from '../models/recipeTag.model.js';
 
 // Create a recipe using properly formatted data from the client.
 export const createRecipe = async (req, res, next) => {
   try {
-    const recipe = await Recipe.create(req.body);
+    const { ingredientTag, equipmentTag, cuisineTag, flavourTag, ...otherData } = req.body;
+
+    // Fetch tag names for each tag type
+    const fetchTags = async (tags) => {
+      return Promise.all(
+        tags.map(async (tag) => {
+          const tagData = await RecipeTag.findById(tag.tagId || tag._id); // Ensure compatibility with both tagId and _id
+          return { tagId: tagData?._id, tagName: tagData?.name || 'Unknown' }; // Use tagData._id for consistency
+        })
+      );
+    };
+
+    const populatedIngredientTags = await fetchTags(ingredientTag || []);
+    const populatedEquipmentTags = await fetchTags(equipmentTag || []);
+    const populatedCuisineTags = await fetchTags(cuisineTag || []);
+    const populatedFlavourTags = await fetchTags(flavourTag || []);
+
+    const recipe = await Recipe.create({
+      ...otherData,
+      ingredientTag: populatedIngredientTags,
+      equipmentTag: populatedEquipmentTags,
+      cuisineTag: populatedCuisineTags,
+      flavourTag: populatedFlavourTags,
+    });
+
     return res.status(201).json(recipe);
   } catch (error) {
     next(error);
@@ -14,10 +39,45 @@ export const createRecipe = async (req, res, next) => {
 // Update a recipe with new data from the client (used by EditRecipe page)
 export const updateRecipe = async (req, res, next) => {
   try {
-    // Assuming client sends correct array formats and other fields
-    const recipe = await Recipe.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!recipe) return res.status(404).json({ message: 'Recipe not found' });
-    return res.status(200).json(recipe);
+    const { ingredientTag, equipmentTag, cuisineTag, flavourTag, ...otherData } = req.body;
+
+    // Helper function to merge existing and new tags
+    const mergeTags = async (existingTags, newTags) => {
+      const existingMap = new Map(existingTags.map(tag => [tag.tagId.toString(), tag]));
+      for (const tag of newTags) {
+        const tagId = tag.tagId || tag._id;
+        if (!existingMap.has(tagId.toString())) {
+          // Fetch the tag from the database to ensure consistency
+          const tagData = await RecipeTag.findById(tagId);
+          if (tagData) {
+            existingMap.set(tagId.toString(), {
+              tagId: tagData._id,
+              tagName: tagData.name,
+            });
+          }
+        }
+      }
+      return Array.from(existingMap.values());
+    };
+
+    // Fetch existing recipe to merge tags
+    const existingRecipe = await Recipe.findById(req.params.id);
+    if (!existingRecipe) return res.status(404).json({ message: "Recipe not found" });
+
+    const updatedRecipe = await Recipe.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...otherData,
+        ingredientTag: await mergeTags(existingRecipe.ingredientTag, ingredientTag || []),
+        equipmentTag: await mergeTags(existingRecipe.equipmentTag, equipmentTag || []),
+        cuisineTag: await mergeTags(existingRecipe.cuisineTag, cuisineTag || []),
+        flavourTag: await mergeTags(existingRecipe.flavourTag, flavourTag || []),
+      },
+      { new: true }
+    );
+
+    if (!updatedRecipe) return res.status(404).json({ message: "Recipe not found" });
+    return res.status(200).json(updatedRecipe);
   } catch (error) {
     next(error);
   }

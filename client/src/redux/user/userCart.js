@@ -12,14 +12,20 @@ const userCartSlice = createSlice({
       state.items = [];
     },
     addToCart: (state, action) => {
-      // Expect action.payload to be a single product object with _id, productName, quantity, price
-      const { _id, productName, quantity, price } = action.payload;
+      // Expect action.payload to be a single product object with _id, productName, quantity, price, objId
+      const { _id, productName, quantity, price, objId } = action.payload;
       const existing = state.items.find(item => item.id === _id);
       if (existing) {
-        existing.quantity += quantity;
-        existing.price = price || existing.price || 0; // update price if defined or keep existing
+        existing.quantity += quantity; // Increment quantity
+        existing.price = price || existing.price || 0; // Update price if defined or keep existing
       } else {
-        state.items.push({ id: _id, productName, quantity, price: price || 0 });
+        state.items.push({
+          id: _id,
+          productName,
+          quantity,
+          price: price || 0,
+          objId: objId || null, // Handle undefined objId by setting it to null
+        });
       }
     },
     updateQuantity: (state, action) => {

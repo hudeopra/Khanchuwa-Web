@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Add useNavigate import
 import { useDispatch } from "react-redux"; // Import useDispatch
 import { addToCart } from "../redux/user/userCart"; // Import addToCart action
 
@@ -12,22 +12,36 @@ const TagDetail = () => {
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1); // State for quantity
   const dispatch = useDispatch(); // Initialize dispatch
+  const navigate = useNavigate(); // Initialize navigate
 
   useEffect(() => {
     const fetchTag = async () => {
       try {
+        console.log("Fetching tag details for:", tagType, id); // Debugging log
         const response = await fetch(
           `http://localhost:3000/api/tag/${tagType}/${id}`,
           {
             headers: { "Content-Type": "application/json" }, // Add headers if needed
           }
         );
-        if (!response.ok) throw new Error("Failed to fetch tag details");
-        const data = await response.json();
-        setTag(data);
+        console.log("API Response Status:", response.status); // Debugging log
+        if (!response.ok) {
+          console.error(
+            "Failed to fetch tag details",
+            response.status,
+            response.statusText
+          );
+          setError("Tag not found. Please check the URL or try again later."); // Set a user-friendly error message
+          return;
+        }
+
+        const data = await response.json(); // Parse the response JSON
+        console.log("Fetched Tag Data:", data); // Debugging log
+        setTag(data); // Set the tag state with the fetched data
 
         // Fetch recipes and blogs based on references
         const recipeFetches = data.recipeRefs.map((refId) => {
+          console.log("Fetching recipe with ID:", refId); // Debugging log
           return fetch(`http://localhost:3000/api/recipe/${refId}`, {
             headers: { "Content-Type": "application/json" },
           })
@@ -57,6 +71,7 @@ const TagDetail = () => {
         });
 
         const blogFetches = data.blogRefs.map((refId) => {
+          console.log("Fetching blog with ID:", refId); // Debugging log
           return fetch(`http://localhost:3000/api/blog/${refId}`, {
             headers: { "Content-Type": "application/json" },
           })
@@ -92,17 +107,29 @@ const TagDetail = () => {
           console.warn("Some blogs could not be fetched.");
         }
       } catch (err) {
-        setError(err.message);
+        console.error("Error fetching tag details:", err.message); // Debugging log
+        setError("An unexpected error occurred. Please try again later."); // Set a fallback error message
       } finally {
         setLoading(false);
       }
     };
 
     fetchTag();
-  }, [id, tagType]); // Add tagType to the dependency array
+  }, [id, tagType]); // Removed navigate from dependency array as it's not directly used
 
   const handleAddToCart = () => {
     if (tag) {
+      if (!tag.objId) {
+        console.warn(
+          `Warning: objId is null or undefined for tag: ${tag.name}. Using fallback value.`
+        );
+      }
+      console.log(
+        "Adding tag with _id:",
+        tag._id,
+        "price:",
+        tag.disPrice || tag.mrkPrice || 0
+      );
       dispatch(
         addToCart({
           _id: tag._id,
@@ -215,19 +242,14 @@ const TagDetail = () => {
                 >
                   Add to Cart
                 </button>
-              </div>
-            )}
-            {tag.productLink && (
-              <p>
-                <strong>Product Link:</strong>{" "}
+                {/* New Edit Product Link */}
                 <a
-                  href={tag.productLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={`/product/edit/${tag._id}`}
+                  className="mt-2 ml-4 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
                 >
-                  {tag.productLink}
+                  Edit Product
                 </a>
-              </p>
+              </div>
             )}
             {tag.category && tag.category.length > 0 && (
               <p>
@@ -239,7 +261,17 @@ const TagDetail = () => {
                 <strong>Recipe References:</strong>
                 <ul>
                   {tag.recipeRefs.map((ref, index) => (
-                    <li key={`recipe-ref-${index}`}>{ref}</li>
+                    <li key={`recipe-ref-${index}`}>
+                      <a
+                        href={`/cookshop/${tag.tagType}/${
+                          ref.tagId || ref._id
+                        }`} // Use tagId if available, fallback to _id
+                        className="kh-recipe-single__tags--item"
+                      >
+                        {ref.tagName || "Unnamed Tag"} // Fallback to a default
+                        name if tagName is missing
+                      </a>
+                    </li>
                   ))}
                 </ul>
               </div>

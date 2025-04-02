@@ -46,6 +46,10 @@ export default function Header() {
         return;
       }
       const data = JSON.parse(text); // parse only if text exists
+      if (data.length === 0) {
+        console.error("No recipes available in the data");
+        return;
+      }
       const randomIndex = Math.floor(Math.random() * data.length);
       setRandomRecipeId(data[randomIndex]._id);
     } catch (error) {
