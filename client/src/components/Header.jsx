@@ -2,7 +2,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux"; // added import
 import { useEffect, useState } from "react";
 import { SignOut } from "./SignOut"; // Changed to named import
-import { clearCart, removeFromCart } from "../redux/user/userCart"; // ensure correct relative path
+import {
+  clearCart,
+  removeFromCart,
+  updateCartItem,
+} from "../redux/user/userCart"; // ensure correct import
 
 export default function Header() {
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -81,6 +85,11 @@ export default function Header() {
 
   const handleLinkClick = () => {
     setIsMenuActive(false);
+  };
+
+  const handleQuantityChange = (itemId, newQuantity) => {
+    if (newQuantity < 1) return; // Prevent quantity from being less than 1
+    dispatch(updateCartItem({ id: itemId, quantity: newQuantity })); // Use updateCartItem action
   };
 
   useEffect(() => {
@@ -325,21 +334,50 @@ export default function Header() {
                       {cartItems.map((item) => (
                         <li className="kh-header__cart--item" key={item.id}>
                           <div className="kh-header__cart--item--wrapper">
-                            {/* <img
-                              src={item.imageUrls[0]}
-                              alt={item.recipeName}
-                              className="kh-header__cart--item--img"
-                            /> */}
                             <div className="kh-header__cart--item--details">
                               <p className="kh-header__cart--item--name">
                                 {item.productName}
                               </p>
                               <p className="kh-header__cart--item--price">
-                                {item.price}
+                                ${(item.price || 0).toFixed(2)}{" "}
+                                {/* Ensure price is not NaN */}
                               </p>
-                              <p className="kh-header__cart--item--price">
-                                {item.quantity}
-                              </p>
+                              <div className="kh-header__cart--item--quantity">
+                                <button
+                                  onClick={() =>
+                                    handleQuantityChange(
+                                      item.id,
+                                      item.quantity - 1
+                                    )
+                                  }
+                                  className="p-2 border"
+                                >
+                                  -
+                                </button>
+                                <input
+                                  type="number"
+                                  value={item.quantity}
+                                  onChange={(e) =>
+                                    handleQuantityChange(
+                                      item.id,
+                                      Number(e.target.value)
+                                    )
+                                  }
+                                  min="1"
+                                  className="w-16 p-2 border text-center"
+                                />
+                                <button
+                                  onClick={() =>
+                                    handleQuantityChange(
+                                      item.id,
+                                      item.quantity + 1
+                                    )
+                                  }
+                                  className="p-2 border"
+                                >
+                                  +
+                                </button>
+                              </div>
                             </div>
                             <button
                               onClick={() => handleRemoveFromCart(item.id)}

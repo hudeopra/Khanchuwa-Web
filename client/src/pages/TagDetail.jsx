@@ -31,7 +31,9 @@ const TagDetail = () => {
             response.status,
             response.statusText
           );
-          setError("Tag not found. Please check the URL or try again later."); // Set a user-friendly error message
+          setError(
+            `Failed to fetch tag details. Status: ${response.status} ${response.statusText}`
+          ); // Provide detailed error message
           return;
         }
 
@@ -65,7 +67,7 @@ const TagDetail = () => {
               return recipeData;
             })
             .catch((err) => {
-              console.error(`Fetch error for recipe ${refId}:`, err);
+              console.error(`Fetch error for recipe ${refId}:`, err.message); // Improved error message
               return null;
             });
         });
@@ -87,7 +89,7 @@ const TagDetail = () => {
               return res.json();
             })
             .catch((err) => {
-              console.error(`Fetch error for blog ${refId}:`, err);
+              console.error(`Fetch error for blog ${refId}:`, err.message); // Improved error message
               return null;
             });
         });
@@ -107,8 +109,10 @@ const TagDetail = () => {
           console.warn("Some blogs could not be fetched.");
         }
       } catch (err) {
-        console.error("Error fetching tag details:", err.message); // Debugging log
-        setError("An unexpected error occurred. Please try again later."); // Set a fallback error message
+        console.error("Error fetching tag details:", err.message); // Improved error message
+        setError(
+          "An unexpected error occurred while fetching tag details. Please check your network connection and try again."
+        ); // Provide user-friendly error message
       } finally {
         setLoading(false);
       }
@@ -119,25 +123,15 @@ const TagDetail = () => {
 
   const handleAddToCart = () => {
     if (tag) {
-      if (!tag.objId) {
-        console.warn(
-          `Warning: objId is null or undefined for tag: ${tag.name}. Using fallback value.`
-        );
-      }
-      console.log(
-        "Adding tag with _id:",
-        tag._id,
-        "price:",
-        tag.disPrice || tag.mrkPrice || 0
-      );
-      dispatch(
-        addToCart({
-          _id: tag._id,
-          productName: tag.name,
-          quantity,
-          price: tag.disPrice || tag.mrkPrice || 0, // Use discounted price if available
-        })
-      );
+      const unitPrice = tag.disPrice || tag.mrkPrice || 0; // Calculate unit price
+      const cartItem = {
+        _id: tag._id,
+        productName: tag.name,
+        quantity,
+        price: unitPrice * quantity, // Calculate total price
+      };
+      console.log("Dispatching addToCart with:", cartItem); // Debugging log
+      dispatch(addToCart(cartItem));
     }
   };
 
@@ -160,12 +154,6 @@ const TagDetail = () => {
             <p>
               <strong>Used in Blogs:</strong> {tag.usedIn.blog}
             </p>
-            {tag.equipmentRefs && (
-              <p>
-                <strong>Equipment References:</strong>{" "}
-                {tag.equipmentRefs.length}
-              </p>
-            )}
             {tag.favImg && (
               <div>
                 <strong>Favorite Image:</strong>
@@ -286,16 +274,6 @@ const TagDetail = () => {
                 </ul>
               </div>
             )}
-            {tag.equipmentRefs && tag.equipmentRefs.length > 0 && (
-              <div>
-                <strong>Equipment References:</strong>
-                <ul>
-                  {tag.equipmentRefs.map((ref, index) => (
-                    <li key={`equipment-ref-${index}`}>{ref}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         </div>
         <div className="row">
@@ -319,7 +297,7 @@ const TagDetail = () => {
                           {recipe.description || "No description available."}
                         </p>
                         <a
-                          href={`/recipe/${recipe._id}`}
+                          href={`/recipes/${recipe._id}`}
                           className="btn btn-primary"
                         >
                           View Recipe
@@ -356,7 +334,7 @@ const TagDetail = () => {
                           ...
                         </p>
                         <a
-                          href={`/blog/${blog._id}`}
+                          href={`/blogs/${blog._id}`}
                           className="btn btn-primary"
                         >
                           View Blog

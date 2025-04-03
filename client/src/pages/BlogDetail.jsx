@@ -51,26 +51,19 @@ export default function BlogDetail() {
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    const rating = Number(commentRating);
-    if (isNaN(rating) || rating < 0 || rating > 5) {
-      setCommentError("Rating must be a number between 0 and 5");
-      console.error("Invalid rating value submitted:", commentRating);
-      return;
-    }
     try {
       const res = await fetch(`/api/blog/comment/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: userData.currentUser._id,
-          rating,
+          rating: commentRating,
           comment: commentText,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
         setCommentError(data.message || "Failed to add comment");
-        console.error("Error adding comment:", data);
       } else {
         setBlog({ ...blog, reviews: data.reviews });
         setCommentRating("");
@@ -78,7 +71,6 @@ export default function BlogDetail() {
         setCommentError(null);
       }
     } catch (err) {
-      console.error("Exception in handleCommentSubmit:", err);
       setCommentError(err.message);
     }
   };
@@ -127,7 +119,7 @@ export default function BlogDetail() {
 
       {/* Blog Content */}
       <section className="my-4">
-        <div>{blog.blogBody || "No content available."}</div>
+        <div>{blog.content || "No content available."}</div>
       </section>
 
       {/* Comments Section */}

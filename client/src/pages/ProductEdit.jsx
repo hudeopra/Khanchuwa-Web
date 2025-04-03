@@ -150,8 +150,7 @@ export default function ProductEdit() {
             </div>
           )}
         </div>
-        {formData.tagType === "ingredientTag" ||
-        formData.tagType === "equipmentTag" ? (
+        {formData.tagType === "ingredientTag" ? (
           <>
             <div>
               <label htmlFor="inStock">In Stock</label>

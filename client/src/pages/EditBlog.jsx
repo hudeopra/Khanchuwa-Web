@@ -26,7 +26,6 @@ const EditBlog = () => {
     cuisineTag: [],
     flavourTag: [],
     ingredientTag: [],
-    equipmentTag: [], // NEW: Initialize equipmentTag
   });
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -35,7 +34,6 @@ const EditBlog = () => {
     cuisineTag: [],
     flavourTag: [],
     ingredientTag: [],
-    equipmentTag: [], // NEW: Initialize previous equipment tags
   });
 
   useEffect(() => {
@@ -64,13 +62,11 @@ const EditBlog = () => {
           cuisineTag: data.cuisineTag || [],
           flavourTag: data.flavourTag || [],
           ingredientTag: data.ingredientTag || [],
-          equipmentTag: data.equipmentTag || [], // NEW: Initialize equipmentTag
         });
         setPreviousTags({
           cuisineTag: data.cuisineTag || [],
           flavourTag: data.flavourTag || [],
           ingredientTag: data.ingredientTag || [],
-          equipmentTag: data.equipmentTag || [], // NEW: Save original equipment tags
         });
       } catch (err) {
         console.error("Error fetching blog data:", err); // Debugging log
@@ -166,31 +162,17 @@ const EditBlog = () => {
     console.log("Form data being sent:", bodyData); // Debugging log
     try {
       const res = await fetch(`/api/blog/update/${id}`, {
-        method: "PATCH",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bodyData),
       });
-
-      // Check if the response is JSON
-      const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const rawText = await res.text();
-        console.error("Non-JSON response received:", rawText); // Debugging log
-        throw new Error("Unexpected response format from server.");
-      }
-
       const data = await res.json();
       console.log("Response from update API:", data); // Debugging log
       if (!res.ok) {
         setError(data.message || "Failed to update blog.");
       } else {
         console.log("Blog updated successfully:", data); // Debugging log
-        const categories = [
-          "cuisineTag",
-          "flavourTag",
-          "ingredientTag",
-          "equipmentTag",
-        ]; // NEW: Include equipmentTag
+        const categories = ["cuisineTag", "flavourTag", "ingredientTag"];
         for (const cat of categories) {
           const removed = previousTags[cat].filter(
             (tagId) => !formData[cat].includes(tagId)
@@ -355,20 +337,6 @@ const EditBlog = () => {
                       ingredientTag: selected
                         .filter((t) => t != null)
                         .map((t) => (t && t._id ? t._id : t)),
-                    }))
-                  }
-                />
-              </div>
-              <div className="kh-blog-edit__form--item">
-                <span>Equipment Tags</span>{" "}
-                {/* NEW: Add equipmentTag section */}
-                <TagSelector
-                  attribute="equipmentTag"
-                  value={formData.equipmentTag}
-                  onSelect={(selected) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      equipmentTag: selected.map((t) => t._id),
                     }))
                   }
                 />

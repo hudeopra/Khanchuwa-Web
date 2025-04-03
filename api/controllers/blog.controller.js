@@ -15,8 +15,7 @@ export const updateBlog = async (req, res, next) => {
     if (!blog) return res.status(404).json({ message: 'Blog not found' });
     return res.status(200).json(blog);
   } catch (error) {
-    console.error("Error in updateBlog:", error); // Debugging log
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    next(error);
   }
 };
 

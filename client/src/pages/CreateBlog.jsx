@@ -25,7 +25,6 @@ const CreateBlog = () => {
     cuisineTag: [],
     flavourTag: [],
     ingredientTag: [],
-    equipmentTag: [], // added new equipmentTag state
   });
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
@@ -78,6 +77,7 @@ const CreateBlog = () => {
   const updateTagBlogReference = async (tagId, blogId) => {
     try {
       await fetch("/api/tag/addBlogRef", {
+        // updated endpoint
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tagId, blogId }),
@@ -107,24 +107,21 @@ const CreateBlog = () => {
       if (!res.ok) {
         setError(data.message || "Failed to create blog.");
       } else {
-        // Update blogRefs for all relevant tags
-        const updateTagRefs = async (tags) => {
-          await Promise.all(
-            tags.map((tagId) =>
-              fetch("/api/tag/addBlogRef", {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tagId, blogId: data._id }),
-              })
-            )
-          );
-        };
-
-        await updateTagRefs(formData.cuisineTag);
-        await updateTagRefs(formData.flavourTag);
-        await updateTagRefs(formData.ingredientTag);
-        await updateTagRefs(formData.equipmentTag); // NEW: Add equipment tag references
-
+        await Promise.all(
+          formData.cuisineTag.map((tagId) =>
+            updateTagBlogReference(tagId, data._id)
+          )
+        );
+        await Promise.all(
+          formData.flavourTag.map((tagId) =>
+            updateTagBlogReference(tagId, data._id)
+          )
+        );
+        await Promise.all(
+          formData.ingredientTag.map((tagId) =>
+            updateTagBlogReference(tagId, data._id)
+          )
+        );
         console.log("Blog created successfully:", data); // Debugging log
         navigate(`/blogs/${data._id}`);
       }
@@ -273,19 +270,6 @@ const CreateBlog = () => {
                       ingredientTag: selected
                         .filter((t) => t != null)
                         .map((t) => (t && t._id ? t._id : t)),
-                    }))
-                  }
-                />
-              </div>
-              <div className="kh-blog-create__form--item">
-                <span>Equipment Tags</span> {/* added equipmentTag section */}
-                <TagSelector
-                  attribute="equipmentTag"
-                  value={formData.equipmentTag}
-                  onSelect={(selected) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      equipmentTag: selected.map((t) => t._id),
                     }))
                   }
                 />

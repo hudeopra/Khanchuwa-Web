@@ -10,33 +10,26 @@ export default function UserBlog() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (currentUser) {
-      const user = currentUser.user || currentUser;
-      const userId = user._id;
-      fetch(`http://localhost:3000/api/blog/user/${userId}?limit=5`)
-        .then((res) => {
-          if (!res.ok) {
-            return res.text().then((text) => {
-              throw new Error(`Fetch error: ${res.status} ${text}`);
-            });
-          }
-          return res.json();
-        })
-        .then((data) => {
-          if (data.success) {
-            setBlogs(data.blogs || []);
-            console.log("User Blogs: ", data.blogs);
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-          setError(error.message); // Set error state
-        })
-        .finally(() => {
-          setLoading(false); // Ensure loading is set to false
-        });
+    async function fetchBlogs() {
+      try {
+        const res = await fetch("/api/blog/all");
+        const data = await res.json();
+        console.log(data);
+        // Compare blog.userRef with currentUser._id by converting to string
+        const userBlogs = data.filter(
+          (blog) => blog.userRef?.toString() === currentUser?._id?.toString()
+        );
+        setBlogs(userBlogs);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (currentUser?._id) {
+      fetchBlogs();
     } else {
-      setLoading(false); // Handle case where currentUser is not defined
+      setLoading(false);
     }
   }, [currentUser]);
 

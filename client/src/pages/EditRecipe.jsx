@@ -17,39 +17,7 @@ export default function EditRecipe() {
   const navigate = useNavigate();
   const { currentUser } = useSelector((state) => state.user);
   const [recipe, setRecipe] = useState(null);
-  // Change initial formData from {} to an object with default values
-  const [formData, setFormData] = useState({
-    imageUrls: [],
-    recipeName: "",
-    description: "",
-    diet: "",
-    ingredients: [{ name: "", quantity: "" }],
-    prepTime: "",
-    cookTime: "",
-    servings: "",
-    difficulty: "",
-    chefName: "",
-    videoUrl: "",
-    flavourTag: [],
-    cuisineTag: [],
-    ingredientTag: [],
-    bannerImgUrl: "",
-    favImgUrl: "",
-    shortDescription: "",
-    nutritionalInfo: [
-      { name: "Calories", value: "" },
-      { name: "Carbohydrates", value: "" },
-      { name: "Protein", value: "" },
-      { name: "Fat", value: "" },
-    ],
-    cookInstructions: "",
-    prepInstructions: "",
-    tags: [],
-    cookingMethod: [],
-    mealCourse: [],
-    mealType: [],
-    equipmentTag: [],
-  });
+  const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
@@ -58,17 +26,7 @@ export default function EditRecipe() {
     ingredientTag: [],
     cuisineTag: [],
     flavourTag: [],
-    equipmentTag: [], // NEW: Initialize previous equipment tags
   });
-  // NEW STATE: Add toggle for preparation instructions
-  const [showPrepInstructions, setShowPrepInstructions] = useState(false);
-
-  const handleRemoveImage = (index) => {
-    setFormData({
-      ...formData,
-      imageUrls: formData.imageUrls.filter((_, i) => i !== index),
-    });
-  };
 
   useEffect(() => {
     async function fetchRecipe() {
@@ -76,6 +34,7 @@ export default function EditRecipe() {
         const res = await fetch(`/api/recipe/${id}`);
         const data = await res.json();
         // Authorization check: make sure current user is allowed to edit
+        console.log("recipedetail:", data);
         if (
           !data ||
           data.userRef !== (currentUser._id || currentUser.user?._id)
@@ -91,7 +50,7 @@ export default function EditRecipe() {
           description: data.description || "",
           diet: data.diet || "",
           ingredients:
-            data.ingredients && data.ingredients.length > 0
+            data.ingredients?.length > 0
               ? data.ingredients
               : [{ name: "", quantity: "" }],
           prepTime: data.prepTime || "",
@@ -106,27 +65,21 @@ export default function EditRecipe() {
           bannerImgUrl: data.bannerImgUrl || "",
           favImgUrl: data.favImgUrl || "",
           shortDescription: data.shortDescription || "",
-          nutritionalInfo:
-            data.nutritionalInfo && Array.isArray(data.nutritionalInfo)
-              ? data.nutritionalInfo
-              : [
-                  { name: "", value: "" },
-                  { name: "", value: "" },
-                ],
+          nutritionalInfo: Array.isArray(data.nutritionalInfo)
+            ? data.nutritionalInfo
+            : [{ name: "", value: "" }],
           cookInstructions: data.cookInstructions || "",
           prepInstructions: data.prepInstructions || "",
           tags: data.tags || [],
-          cookingMethod: data.cookingMethod || [], // NEW: Initialize cookingMethod
-          mealCourse: data.mealCourse || [],
-          mealType: data.mealType || [],
-          equipmentTag: data.equipmentTag || [], // NEW: Initialize equipmentTag
+          cookingMethod: data.cookingMethod || [],
+          mealCourse: data.mealCourse || [], // Ensure default array
+          mealType: data.mealType || [], // Ensure default array
         });
         // Save the original tag arrays for future diff
         setPreviousTags({
           ingredientTag: data.ingredientTag || [],
           cuisineTag: data.cuisineTag || [],
           flavourTag: data.flavourTag || [],
-          equipmentTag: data.equipmentTag || [], // NEW: Save original equipment tags
         });
       } catch (err) {
         setError(err.message);
@@ -275,34 +228,46 @@ export default function EditRecipe() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Ensure tags are properly formatted before submission
-    const formatTags = (tags) =>
-      tags.map((tag) => ({
-        tagId: tag.tagId || tag._id,
-        tagName: tag.tagName || "Unknown",
-      }));
-
-    const bodyData = {
-      ...formData,
-      videoUrl: formData.videoUrl.replace("watch?v=", "embed/"), // Convert video URL
-      mealCourse: formData.mealCourse[0] || "", // Ensure mealCourse is a string
-      ingredientTag: formatTags(formData.ingredientTag),
-      cuisineTag: formatTags(formData.cuisineTag),
-      flavourTag: formatTags(formData.flavourTag), // Format flavourTag
-      equipmentTag: formatTags(formData.equipmentTag), // Format equipmentTag
-    };
-
     try {
       const res = await fetch(`/api/recipe/update/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bodyData),
+        body: JSON.stringify(formData),
       });
       const data = await res.json();
       if (data.success === false) {
         setError(data.message);
       } else {
+        // Compute removed tags per type
+        const removedIngredientTags = previousTags.ingredientTag.filter(
+          (tagId) => !formData.ingredientTag.includes(tagId)
+        );
+        const removedCuisineTags = previousTags.cuisineTag.filter(
+          (tagId) => !formData.cuisineTag.includes(tagId)
+        );
+        const removedFlavourTags = previousTags.flavourTag.filter(
+          (tagId) => !formData.flavourTag.includes(tagId)
+        );
+        // Remove tag references for removed tags
+        await Promise.all(
+          removedIngredientTags.map((tagId) => removeTagReference(tagId, id))
+        );
+        await Promise.all(
+          removedCuisineTags.map((tagId) => removeTagReference(tagId, id))
+        );
+        await Promise.all(
+          removedFlavourTags.map((tagId) => removeTagReference(tagId, id))
+        );
+        // For current tags, add recipe reference (optionally you can check new ones only)
+        await Promise.all(
+          formData.ingredientTag.map((tagId) => updateTagReference(tagId, id))
+        );
+        await Promise.all(
+          formData.cuisineTag.map((tagId) => updateTagReference(tagId, id))
+        );
+        await Promise.all(
+          formData.flavourTag.map((tagId) => updateTagReference(tagId, id))
+        );
         navigate(`/recipes/${id}`);
       }
     } catch (err) {
@@ -359,7 +324,7 @@ export default function EditRecipe() {
                               minLength="10"
                               required
                               onChange={handleChange}
-                              value={formData.recipeName || ""} // updated value fallback
+                              value={formData.recipeName}
                             />
                           </div>
                         </div>
@@ -372,7 +337,7 @@ export default function EditRecipe() {
                               placeholder="Video URL"
                               className="border  rounded-lg"
                               onChange={handleChange}
-                              value={formData.videoUrl || ""} // updated value fallback
+                              value={formData.videoUrl}
                             />
                           </div>
                         </div>
@@ -385,35 +350,41 @@ export default function EditRecipe() {
                           className="border  rounded-lg"
                           required
                           onChange={handleChange}
-                          value={formData.description || ""} // updated fallback
+                          value={formData.description}
                         />
                       </div>
-                      <div className="kh-recipe-form__form--item">
-                        <label htmlFor="mealCourse">Meal Course</label>
-                        <select
-                          id="mealCourse"
-                          className="border rounded-lg"
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              mealCourse: [e.target.value], // Allow only one selection
-                            }))
-                          }
-                          value={formData.mealCourse[0] || ""}
-                        >
-                          <option value="">Select Meal Course</option>
-                          <option value="appetizer">Appetizer</option>
-                          <option value="soup">Soup</option>
-                          <option value="curry">Curry</option>
-                          <option value="main-course">
-                            Main Course (Entrée)
-                          </option>
-                          <option value="side-dish">Side Dish</option>
-                          <option value="dessert">Dessert</option>
-                        </select>
+                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
+                        <label>Meal Course</label>
+                        <div className="d-flex flex-wrap gap-2">
+                          {[
+                            "Appetizer",
+                            "Soup",
+                            "Main Course (Entrée)",
+                            "Side Dish",
+                            "Dessert",
+                          ].map((opt) => (
+                            <div
+                              className={`kh-recipe-form__checkbox--item ${
+                                formData.mealCourse?.includes(opt)
+                                  ? "checked"
+                                  : ""
+                              }`}
+                              key={opt}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.mealCourse?.includes(opt) || false
+                                } // Ensure checked state
+                                onChange={() => toggleOption("mealCourse", opt)}
+                              />
+                              <label>{opt}</label>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                       <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
-                        <label>Meal Type</label>
+                        <label>Meal Time</label>
                         <div className="d-flex flex-wrap gap-2">
                           {[
                             "Snack",
@@ -426,14 +397,18 @@ export default function EditRecipe() {
                             "Late Night Snack",
                           ].map((opt) => (
                             <div
-                              className="kh-recipe-form__checkbox--item"
+                              className={`kh-recipe-form__checkbox--item ${
+                                formData.mealType?.includes(opt)
+                                  ? "checked"
+                                  : ""
+                              }`}
                               key={opt}
                             >
                               <input
                                 type="checkbox"
                                 checked={
                                   formData.mealType?.includes(opt) || false
-                                }
+                                } // Ensure checked state
                                 onChange={() => toggleOption("mealType", opt)}
                               />
                               <label>{opt}</label>
@@ -452,7 +427,7 @@ export default function EditRecipe() {
                           placeholder="Short description"
                           className="border  rounded-lg"
                           onChange={handleChange}
-                          value={formData.shortDescription || ""} // updated fallback
+                          value={formData.shortDescription}
                         />
                       </div>
                     </div>
@@ -478,7 +453,7 @@ export default function EditRecipe() {
                           id={`nutritional-info-${idx}`}
                           name={`nutritional-info-${idx}`}
                           type="text"
-                          value={item.value || ""} // updated fallback
+                          value={item.value}
                           onChange={(e) => {
                             const newInfo = formData.nutritionalInfo.map(
                               (info, i) =>
@@ -516,7 +491,7 @@ export default function EditRecipe() {
                         <option value="">Select Diet</option>
                         <option value="Vegetarian">Vegetarian</option>
                         <option value="Vegan">Vegan</option>
-                        <option value="Non-Vegetarian">Non-Vegetarian</option>m
+                        <option value="Non-Vegetarian">Non-Vegetarian</option>
                         <option value="Gluten-Free">Gluten-Free</option>
                         <option value="High Protein">High Protein</option>
                       </select>
@@ -547,7 +522,7 @@ export default function EditRecipe() {
                         id="prepTime"
                         required
                         onChange={handleChange}
-                        value={formData.prepTime || ""} // updated fallback
+                        value={formData.prepTime}
                       />
                     </div>
                     <div className="kh-recipe-form__form--item">
@@ -559,24 +534,41 @@ export default function EditRecipe() {
                         id="cookTime"
                         required
                         onChange={handleChange}
-                        value={formData.cookTime || ""} // updated fallback
+                        value={formData.cookTime}
                       />
                     </div>
                     <div className="kh-recipe-form__form--item">
-                      <label htmlFor="servings">Servings</label>
-                      <select
-                        id="servings"
-                        className="border rounded-lg"
-                        onChange={handleChange}
-                        value={formData.servings}
-                      >
-                        <option value="">Select Servings</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="4">4</option>
-                        <option value="6">6</option>
-                        <option value="8">8</option>
-                      </select>
+                      <p>Servings:</p>
+                      <label>
+                        <input
+                          type="radio"
+                          name="servings"
+                          value="1"
+                          checked={formData.servings === "1"}
+                          onChange={handleChange}
+                        />
+                        1
+                      </label>
+                      <label>
+                        <input
+                          type="radio"
+                          name="servings"
+                          value="2"
+                          checked={formData.servings === "2"}
+                          onChange={handleChange}
+                        />
+                        2
+                      </label>
+                      <label>
+                        <input
+                          type="radio"
+                          name="servings"
+                          value="4"
+                          checked={formData.servings === "4"}
+                          onChange={handleChange}
+                        />
+                        4
+                      </label>
                     </div>
                   </div>
                   <div className="kh-recipe-form__form--item">
@@ -592,7 +584,7 @@ export default function EditRecipe() {
                             type="text"
                             placeholder="Ingredient name"
                             className="border  rounded-lg my-1"
-                            value={ingredient.name || ""}
+                            value={ingredient.name || ""} // Ensure default value
                             onChange={(e) => {
                               const newIngredients = formData.ingredients.map(
                                 (ing, idx) =>
@@ -618,7 +610,7 @@ export default function EditRecipe() {
                             type="text"
                             placeholder="Quantity"
                             className="border  rounded-lg my-1"
-                            value={ingredient.quantity}
+                            value={ingredient.quantity || ""} // Ensure default value
                             onChange={(e) => {
                               const newIngredients = formData.ingredients.map(
                                 (ing, idx) =>
@@ -631,6 +623,7 @@ export default function EditRecipe() {
                                 ingredients: newIngredients,
                               });
                             }}
+                            required
                           />
                         </div>
                         <div className="kh-recipe-form__ingredient--item">
@@ -684,14 +677,18 @@ export default function EditRecipe() {
                         "Fresh",
                       ].map((opt) => (
                         <div
-                          className="kh-recipe-form__checkbox--item"
+                          className={`kh-recipe-form__checkbox--item ${
+                            formData.cookingMethod?.includes(opt)
+                              ? "checked"
+                              : ""
+                          }`}
                           key={opt}
                         >
                           <input
                             type="checkbox"
                             checked={
                               formData.cookingMethod?.includes(opt) || false
-                            }
+                            } // Ensure checked state
                             onChange={() => toggleOption("cookingMethod", opt)}
                           />
                           <label>{opt}</label>
@@ -703,34 +700,16 @@ export default function EditRecipe() {
               </AccordionItem>
               <AccordionItem title="Instructions">
                 <div className="div-input-wrapper">
-                  <div className="kh-recipe-form__form--item">
-                    <input
-                      type="checkbox"
-                      id="togglePrepInstructions"
-                      checked={showPrepInstructions}
-                      onChange={() => setShowPrepInstructions((prev) => !prev)}
-                    />
-                    <label htmlFor="togglePrepInstructions">
-                      Include Preparation Instructions
-                    </label>
-                  </div>
-                  {showPrepInstructions && (
-                    <>
-                      <label>Preparation Instructions:</label>
-                      <TextEditor
-                        value={formData.prepInstructions || ""}
-                        onChange={(val) =>
-                          setFormData({
-                            ...formData,
-                            prepInstructions: val,
-                          })
-                        }
-                      />
-                    </>
-                  )}
+                  <label>Preparation Instructions:</label>
+                  <TextEditor
+                    value={formData.prepInstructions || ""} // Ensure default value
+                    onChange={(val) =>
+                      setFormData({ ...formData, prepInstructions: val })
+                    }
+                  />
                   <label>Cooking Instructions:</label>
                   <TextEditor
-                    value={formData.cookInstructions || ""}
+                    value={formData.cookInstructions || ""} // Ensure default value
                     onChange={(val) =>
                       setFormData({ ...formData, cookInstructions: val })
                     }
@@ -745,7 +724,7 @@ export default function EditRecipe() {
                   type="text"
                   id="chefName"
                   className="border rounded-lg"
-                  value={formData.chefName || ""}
+                  value={formData.chefName}
                   onChange={handleChange}
                 />
                 <div className="submitwrapper">
@@ -772,11 +751,11 @@ export default function EditRecipe() {
                       id="bannerImg"
                       onChange={handleBannerSelect}
                     />
-                    {formData.bannerImgUrl ? (
+                    {formData.bannerImgUrl && (
                       <div className="flex items-center gap-2">
                         <img
                           src={formData.bannerImgUrl}
-                          alt="Current Banner"
+                          alt="Banner"
                           className="w-20 h-20 object-contain rounded-lg"
                         />
                         <button
@@ -792,8 +771,6 @@ export default function EditRecipe() {
                           Delete
                         </button>
                       </div>
-                    ) : (
-                      <p>No banner image uploaded</p>
                     )}
                   </div>
                   <div className="kh-recipe-form__form--item">
@@ -804,11 +781,11 @@ export default function EditRecipe() {
                       id="favImg"
                       onChange={handleFavSelect}
                     />
-                    {formData.favImgUrl ? (
+                    {formData.favImgUrl && (
                       <div className="flex items-center gap-2">
                         <img
                           src={formData.favImgUrl}
-                          alt="Current Favorite"
+                          alt="Favorite"
                           className="w-20 h-20 object-contain rounded-lg"
                         />
                         <button
@@ -824,15 +801,13 @@ export default function EditRecipe() {
                           Delete
                         </button>
                       </div>
-                    ) : (
-                      <p>No favorite image uploaded</p>
                     )}
                   </div>
                   <div className="kh-recipe-form__form--item">
                     <label htmlFor="images">Gallery Images:</label>
                     <input
                       onChange={handleFileSelect}
-                      className="border border-gray-300 rounded w-full"
+                      className=" border border-gray-300 rounded w-full"
                       type="file"
                       id="images"
                       accept="image/*"
@@ -841,29 +816,26 @@ export default function EditRecipe() {
                     <p className="text-red-700 text-sm">
                       {imageUploadError && imageUploadError}
                     </p>
-                    {formData.imageUrls && formData.imageUrls.length > 0 ? (
+                    {formData.imageUrls.length > 0 &&
                       formData.imageUrls.map((url, index) => (
                         <div
                           key={url}
-                          className="flex justify-between border items-center"
+                          className="flex justify-between  border items-center"
                         >
                           <img
                             src={url}
-                            alt={`Gallery Image ${index + 1}`}
+                            alt="recipe image"
                             className="w-20 h-20 object-contain rounded-lg"
                           />
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(index)}
-                            className="text-red-700 rounded-lg uppercase hover:opacity-75"
+                            className=" text-red-700 rounded-lg uppercase hover:opacity-75"
                           >
                             Delete
                           </button>
                         </div>
-                      ))
-                    ) : (
-                      <p>No gallery images uploaded</p>
-                    )}
+                      ))}
                   </div>
                 </div>
               </AccordionItem>
@@ -874,25 +846,26 @@ export default function EditRecipe() {
                     <span>Cuisine Tags</span>
                     <TagSelector
                       attribute="cuisineTag"
-                      value={formData.cuisineTag}
+                      value={formData.cuisineTag.map((t) => t.tagName)} // Map to tagName
                       onSelect={(selected) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          cuisineTag: [
-                            ...prev.cuisineTag.filter(
-                              (existing) =>
-                                !selected.some(
-                                  (newTag) =>
-                                    (newTag._id || newTag.tagId) ===
-                                    existing.tagId
-                                )
-                            ),
-                            ...selected.map((t) => ({
-                              tagId: t._id || t.tagId,
-                              tagName: t.name || t.tagName || "Unknown",
-                            })),
-                          ],
-                        }))
+                        setFormData((prev) => {
+                          const existingTags = prev.cuisineTag || [];
+                          const updatedTags = selected.map((t) => ({
+                            tagId: t.tagId || t._id, // Preserve tagId or fallback to _id
+                            tagName: t.tagName,
+                          }));
+                          return {
+                            ...prev,
+                            cuisineTag: [
+                              ...existingTags,
+                              ...updatedTags,
+                            ].filter(
+                              (tag, index, self) =>
+                                index ===
+                                self.findIndex((t) => t.tagId === tag.tagId)
+                            ), // Ensure no duplicates
+                          };
+                        })
                       }
                     />
                   </div>
@@ -900,25 +873,26 @@ export default function EditRecipe() {
                     <span>Flavour Tags</span>
                     <TagSelector
                       attribute="flavourTag"
-                      value={formData.flavourTag}
+                      value={formData.flavourTag.map((t) => t.tagName)} // Map to tagName
                       onSelect={(selected) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          flavourTag: [
-                            ...prev.flavourTag.filter(
-                              (existing) =>
-                                !selected.some(
-                                  (newTag) =>
-                                    (newTag._id || newTag.tagId) ===
-                                    existing.tagId
-                                )
-                            ),
-                            ...selected.map((t) => ({
-                              tagId: t._id || t.tagId,
-                              tagName: t.name || t.tagName || "Unknown",
-                            })),
-                          ],
-                        }))
+                        setFormData((prev) => {
+                          const existingTags = prev.flavourTag || [];
+                          const updatedTags = selected.map((t) => ({
+                            tagId: t.tagId || t._id, // Preserve tagId or fallback to _id
+                            tagName: t.tagName,
+                          }));
+                          return {
+                            ...prev,
+                            flavourTag: [
+                              ...existingTags,
+                              ...updatedTags,
+                            ].filter(
+                              (tag, index, self) =>
+                                index ===
+                                self.findIndex((t) => t.tagId === tag.tagId)
+                            ), // Ensure no duplicates
+                          };
+                        })
                       }
                     />
                   </div>
@@ -926,62 +900,39 @@ export default function EditRecipe() {
                     <span>Ingredient Tags</span>
                     <TagSelector
                       attribute="ingredientTag"
-                      value={formData.ingredientTag}
+                      value={formData.ingredientTag.map((t) => t.tagName)} // Map to tagName
                       onSelect={(selected) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          ingredientTag: [
-                            ...prev.ingredientTag.filter(
-                              (existing) =>
-                                !selected.some(
-                                  (newTag) =>
-                                    (newTag._id || newTag.tagId) ===
-                                    existing.tagId
+                        setFormData((prev) => {
+                          const existingTags = prev.ingredientTag || [];
+                          const updatedTags = selected.map((t) => ({
+                            tagId: t.tagId || t._id, // Preserve tagId or fallback to _id
+                            tagName: t.tagName,
+                          }));
+                          return {
+                            ...prev,
+                            ingredientTag: [
+                              ...existingTags,
+                              ...updatedTags,
+                            ].filter(
+                              (tag, index, self) =>
+                                index ===
+                                self.findIndex((t) => t.tagId === tag.tagId)
+                            ), // Ensure no duplicates
+                            ingredients: [
+                              ...prev.ingredients,
+                              ...selected.map((t) => ({
+                                name: t.tagName,
+                                quantity: "",
+                              })),
+                            ].filter(
+                              (ingredient, index, self) =>
+                                index ===
+                                self.findIndex(
+                                  (i) => i.name === ingredient.name
                                 )
-                            ),
-                            ...selected.map((t) => ({
-                              tagId: t._id || t.tagId,
-                              tagName: t.name || t.tagName || "Unknown",
-                            })),
-                          ],
-                          ingredients: [
-                            ...prev.ingredients,
-                            ...selected
-                              .filter(
-                                (newTag) =>
-                                  !prev.ingredients.some(
-                                    (ing) => ing.name === newTag.name
-                                  )
-                              )
-                              .map((t) => ({ name: t.name, quantity: "" })),
-                          ],
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="kh-recipe-form__form--item">
-                    <span>Equipment Tags</span>
-                    <TagSelector
-                      attribute="equipmentTag"
-                      value={formData.equipmentTag}
-                      onSelect={(selected) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          equipmentTag: [
-                            ...prev.equipmentTag.filter(
-                              (existing) =>
-                                !selected.some(
-                                  (newTag) =>
-                                    (newTag._id || newTag.tagId) ===
-                                    existing.tagId
-                                )
-                            ),
-                            ...selected.map((t) => ({
-                              tagId: t._id || t.tagId,
-                              tagName: t.name || t.tagName || "Unknown",
-                            })),
-                          ],
-                        }))
+                            ), // Ensure no duplicate ingredients
+                          };
+                        })
                       }
                     />
                   </div>

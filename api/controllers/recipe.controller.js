@@ -1,34 +1,53 @@
 import Recipe from '../models/recipe.model.js';
 import User from '../models/user.model.js';
-import RecipeTag from '../models/recipeTag.model.js';
+import RecipeTag from '../models/recipeTag.model.js'; // Import RecipeTag model
+
+// Helper function to populate tagName based on tagId
+const populateTags = async (tags) => {
+  return Promise.all(
+    tags.map(async (tag) => {
+      const tagData = await RecipeTag.findById(tag.tagId);
+      return {
+        tagId: tag.tagId,
+        tagName: tagData ? tagData.name : "Unknown",
+      };
+    })
+  );
+};
+
+// Helper function to update recipe references in tags
+const updateRecipeReferences = async (tags, recipeId) => {
+  await Promise.all(
+    tags.map(async (tag) => {
+      const tagData = await RecipeTag.findById(tag.tagId);
+      if (tagData) {
+        await tagData.addRecipeReference(recipeId);
+      }
+    })
+  );
+};
 
 // Create a recipe using properly formatted data from the client.
 export const createRecipe = async (req, res, next) => {
   try {
-    const { ingredientTag, equipmentTag, cuisineTag, flavourTag, ...otherData } = req.body;
+    const { cuisineTag, flavourTag, ingredientTag, ...rest } = req.body;
 
-    // Fetch tag names for each tag type
-    const fetchTags = async (tags) => {
-      return Promise.all(
-        tags.map(async (tag) => {
-          const tagData = await RecipeTag.findById(tag.tagId || tag._id); // Ensure compatibility with both tagId and _id
-          return { tagId: tagData?._id, tagName: tagData?.name || 'Unknown' }; // Use tagData._id for consistency
-        })
-      );
-    };
-
-    const populatedIngredientTags = await fetchTags(ingredientTag || []);
-    const populatedEquipmentTags = await fetchTags(equipmentTag || []);
-    const populatedCuisineTags = await fetchTags(cuisineTag || []);
-    const populatedFlavourTags = await fetchTags(flavourTag || []);
+    // Populate tagName for each tag type
+    const populatedCuisineTag = await populateTags(cuisineTag || []);
+    const populatedFlavourTag = await populateTags(flavourTag || []);
+    const populatedIngredientTag = await populateTags(ingredientTag || []);
 
     const recipe = await Recipe.create({
-      ...otherData,
-      ingredientTag: populatedIngredientTags,
-      equipmentTag: populatedEquipmentTags,
-      cuisineTag: populatedCuisineTags,
-      flavourTag: populatedFlavourTags,
+      ...rest,
+      cuisineTag: populatedCuisineTag,
+      flavourTag: populatedFlavourTag,
+      ingredientTag: populatedIngredientTag,
     });
+
+    // Update recipe references in tags
+    await updateRecipeReferences(populatedCuisineTag, recipe._id);
+    await updateRecipeReferences(populatedFlavourTag, recipe._id);
+    await updateRecipeReferences(populatedIngredientTag, recipe._id);
 
     return res.status(201).json(recipe);
   } catch (error) {
@@ -39,45 +58,32 @@ export const createRecipe = async (req, res, next) => {
 // Update a recipe with new data from the client (used by EditRecipe page)
 export const updateRecipe = async (req, res, next) => {
   try {
-    const { ingredientTag, equipmentTag, cuisineTag, flavourTag, ...otherData } = req.body;
+    const { cuisineTag, flavourTag, ingredientTag, ...rest } = req.body;
 
-    // Helper function to merge existing and new tags
-    const mergeTags = async (existingTags, newTags) => {
-      const existingMap = new Map(existingTags.map(tag => [tag.tagId.toString(), tag]));
-      for (const tag of newTags) {
-        const tagId = tag.tagId || tag._id;
-        if (!existingMap.has(tagId.toString())) {
-          // Fetch the tag from the database to ensure consistency
-          const tagData = await RecipeTag.findById(tagId);
-          if (tagData) {
-            existingMap.set(tagId.toString(), {
-              tagId: tagData._id,
-              tagName: tagData.name,
-            });
-          }
-        }
-      }
-      return Array.from(existingMap.values());
-    };
+    // Populate tagName for each tag type
+    const populatedCuisineTag = await populateTags(cuisineTag || []);
+    const populatedFlavourTag = await populateTags(flavourTag || []);
+    const populatedIngredientTag = await populateTags(ingredientTag || []);
 
-    // Fetch existing recipe to merge tags
-    const existingRecipe = await Recipe.findById(req.params.id);
-    if (!existingRecipe) return res.status(404).json({ message: "Recipe not found" });
-
-    const updatedRecipe = await Recipe.findByIdAndUpdate(
+    const recipe = await Recipe.findByIdAndUpdate(
       req.params.id,
       {
-        ...otherData,
-        ingredientTag: await mergeTags(existingRecipe.ingredientTag, ingredientTag || []),
-        equipmentTag: await mergeTags(existingRecipe.equipmentTag, equipmentTag || []),
-        cuisineTag: await mergeTags(existingRecipe.cuisineTag, cuisineTag || []),
-        flavourTag: await mergeTags(existingRecipe.flavourTag, flavourTag || []),
+        ...rest,
+        cuisineTag: populatedCuisineTag,
+        flavourTag: populatedFlavourTag,
+        ingredientTag: populatedIngredientTag,
       },
       { new: true }
     );
 
-    if (!updatedRecipe) return res.status(404).json({ message: "Recipe not found" });
-    return res.status(200).json(updatedRecipe);
+    if (!recipe) return res.status(404).json({ message: 'Recipe not found' });
+
+    // Update recipe references in tags
+    await updateRecipeReferences(populatedCuisineTag, recipe._id);
+    await updateRecipeReferences(populatedFlavourTag, recipe._id);
+    await updateRecipeReferences(populatedIngredientTag, recipe._id);
+
+    return res.status(200).json(recipe);
   } catch (error) {
     next(error);
   }
@@ -98,7 +104,6 @@ export const getRecipeById = async (req, res, next) => {
       .populate("cuisineTag")
       .populate("flavourTag")
       .populate("ingredientTag");
-    // .populate("equipmentTag");
     if (!recipe) {
       return res.status(404).json({ message: 'Recipe not found' });
     }
@@ -162,8 +167,8 @@ export const filterRecipes = async (req, res, next) => {
       ingredientTag,
       cuisineTag,
       flavorTag,
-      equipmentTag,  // NEW: equipment tag parameter
       diet,
+      // Remove direct recipe filters for allergies, dietaryRestrictions, tastePreferences
       allergies,
       dietaryRestrictions,
       tastePreferences,
@@ -177,19 +182,15 @@ export const filterRecipes = async (req, res, next) => {
     }
     if (ingredientTag) {
       const tags = ingredientTag.split(",").map(tag => tag.trim());
-      filter["ingredientTag.tagId"] = { $in: tags };
+      filter.ingredientTag = { $in: tags };
     }
     if (cuisineTag) {
       const cuisines = cuisineTag.split(",").map(tag => tag.trim());
-      filter["cuisineTag.tagId"] = { $in: cuisines };
+      filter.cuisineTag = { $in: cuisines };
     }
     if (flavorTag) {
       const flavors = flavorTag.split(",").map(tag => tag.trim());
-      filter["flavourTag.tagId"] = { $in: flavors };
-    }
-    if (equipmentTag) {
-      const eqTags = equipmentTag.split(",").map(tag => tag.trim());
-      filter["equipmentTag.tagId"] = { $in: eqTags };
+      filter.flavourTag = { $in: flavors };
     }
     if (diet) {
       filter.diet = diet;
@@ -243,15 +244,4 @@ export const getRecipesByUser = async (req, res, next) => {
   }
 };
 
-export const getRecipesBykey = async (req, res, next) => {
-  try {
-    const { key, value } = req.params;
-    const recipes = await Recipe.find({ [`${key}.tagName`]: value });
-    if (!recipes.length) {
-      return res.status(404).json({ message: 'No recipes found' });
-    }
-    return res.status(200).json(recipes);
-  } catch (error) {
-    next(error);
-  }
-};
+

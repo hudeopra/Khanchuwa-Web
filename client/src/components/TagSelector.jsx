@@ -11,7 +11,6 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
       try {
         const res = await fetch(`http://localhost:3000/api/tag/${attribute}`);
         const data = await res.json();
-        console.log("Fetched tags:", data); // Debugging line
         setDbTags(data);
       } catch (err) {
         console.error("Error fetching tags:", err);
@@ -37,11 +36,14 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
         if (!tag || !tag.name) return false;
         return (
           tag.name.toLowerCase().includes(val.toLowerCase()) &&
-          !selectedTags.some(
-            (sel) =>
-              sel.tagId === tag._id ||
-              sel.name.toLowerCase() === tag.name.toLowerCase()
-          )
+          !selectedTags.some((sel) => {
+            if (sel && sel.name) {
+              return sel.name.toLowerCase() === tag.name.toLowerCase();
+            } else if (typeof sel === "string") {
+              return sel.toLowerCase() === tag.name.toLowerCase();
+            }
+            return false;
+          })
         );
       })
       .map((tag) => tag.name);
@@ -118,7 +120,7 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
             const keyVal = (tag && tag._id) || `${displayName}-${index}`;
             return (
               <span key={keyVal} className="tag-badge">
-                {typeof tag === "object" ? tag.tagName || tag.name : tag}
+                {displayName}
                 <button
                   onClick={() => handleRemoveTag((tag && tag._id) || tag)}
                 >
@@ -137,7 +139,7 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          placeholder={`Search or create a ${attribute}...`} // updated placeholder for equipmentTag support
+          placeholder="Search or create a tag..."
         />
       </div>
       {suggestions.length > 0 && (

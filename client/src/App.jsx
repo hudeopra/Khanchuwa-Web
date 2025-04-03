@@ -23,15 +23,16 @@ import BlogList from "./pages/BlogList"; // Import BlogList component
 import BlogDetail from "./pages/BlogDetail"; // Import BlogDetail component
 import UserBlog from "./pages/UserBlog"; // Import UserBlog component
 import EditBlog from "./pages/EditBlog"; // Updated import name
-import Category from "./pages/Category"; // Updated import name
+
+// shop
+import TagDetail from "./pages/TagDetail"; // Import TagDetail component
+import TagList from "./pages/TagList"; // Import TagList component
+import ProductEdit from "./pages/ProductEdit"; // Import ProductEdit component
 
 // 404
 import NotFound from "./pages/404"; // Import NotFound component
 import PrivacyPolicy from "./pages/PrivacyPolicy"; // Import PrivacyPolicy
 import TermsAndConditions from "./pages/TermsAndConditions"; // Import TermsAndConditions
-import TagList from "./pages/TagList"; // Import TagList component
-import TagDetail from "./pages/TagDetail"; // Import TagDetail component
-import ProductEdit from "./pages/ProductEdit"; // Import ProductEdit component
 
 export default function App() {
   return (
@@ -47,25 +48,21 @@ export default function App() {
           <Route path="/profile-edit" element={<ProfileEdit />} />
           <Route path="/create-recipe" element={<CreateRecipe />} />
           <Route path="/user-recipe" element={<UserRecipie />} />
-          <Route path="/recipes/edit/:id" element={<EditRecipe />} />
+          <Route path="/recipes/edit/:id" element={<EditRecipe />} />{" "}
           {/* blog pages */}
           <Route path="/create-blog" element={<CreateBlog />} />
-          <Route path="/blog/edit/:id" element={<EditBlog />} />
+          <Route path="/blog/edit/:id" element={<EditBlog />} />{" "}
           <Route path="/user-blog" element={<UserBlog />} />
           {/* Updated route for editing */}
-          <Route path="/product/edit/:id" element={<ProductEdit />} />{" "}
-          {/* New route for ProductEdit */}
         </Route>
         <Route path="/recipes" element={<RecipeList />} />
         <Route path="/search" element={<RecipeList />} />
         <Route path="/recipes/:id" element={<RecipeDetail />} />
         <Route path="/blogs" element={<BlogList />} />
         <Route path="/blogs/:id" element={<BlogDetail />} />
-        <Route path="/category/:value" element={<Category />} />
-        <Route path="/cookshop" element={<TagList />} />{" "}
-        {/* New route for TagList */}
-        <Route path="/cookshop/:tagType/:id" element={<TagDetail />} />{" "}
-        {/* Updated route for TagDetail */}
+        <Route path="/cookshop" element={<TagList />} />
+        <Route path="/cookshop/:tagType/:id" element={<TagDetail />} />
+        <Route path="/product/edit/:id" element={<ProductEdit />} />{" "}
         <Route path="*" element={<NotFound />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />

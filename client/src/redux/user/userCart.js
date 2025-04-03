@@ -12,19 +12,18 @@ const userCartSlice = createSlice({
       state.items = [];
     },
     addToCart: (state, action) => {
-      // Expect action.payload to be a single product object with _id, productName, quantity, price, objId
-      const { _id, productName, quantity, price, objId } = action.payload;
-      const existing = state.items.find(item => item.id === _id);
+      const { _id, productName, quantity, price } = action.payload;
+      const existing = state.items.find((item) => item.id === _id);
       if (existing) {
         existing.quantity += quantity; // Increment quantity
-        existing.price = price || existing.price || 0; // Update price if defined or keep existing
+        existing.price = existing.quantity * (price / quantity); // Recalculate total price based on unit price
       } else {
         state.items.push({
           id: _id,
           productName,
           quantity,
-          price: price || 0,
-          objId: objId || null, // Handle undefined objId by setting it to null
+          price, // Total price for the initial quantity
+          unitPrice: price / quantity, // Store unit price for future calculations
         });
       }
     },
@@ -35,9 +34,17 @@ const userCartSlice = createSlice({
     },
     removeFromCart: (state, action) => {
       state.items = state.items.filter(item => item.id !== action.payload);
+    },
+    updateCartItem: (state, action) => {
+      const { id, quantity } = action.payload;
+      const item = state.items.find((item) => item.id === id);
+      if (item) {
+        item.quantity = quantity; // Update quantity
+        item.price = item.unitPrice * quantity; // Recalculate total price
+      }
     }
   }
 });
 
-export const { clearCart, addToCart, updateQuantity, removeFromCart } = userCartSlice.actions;
+export const { clearCart, addToCart, updateQuantity, removeFromCart, updateCartItem } = userCartSlice.actions;
 export default userCartSlice.reducer;

@@ -895,10 +895,10 @@ export default function ProfileEdit() {
               </div>
             )}
 
-            <ul className="nav nav-tabs" id="myTab" role="tablist">
-              <li className="nav-item" role="presentation">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+              <li class="nav-item" role="presentation">
                 <button
-                  className="nav-link active"
+                  class="nav-link active"
                   id="home-tab"
                   data-toggle="tab"
                   data-target="#home"
@@ -910,9 +910,9 @@ export default function ProfileEdit() {
                   Home
                 </button>
               </li>
-              <li className="nav-item" role="presentation">
+              <li class="nav-item" role="presentation">
                 <button
-                  className="nav-link"
+                  class="nav-link"
                   id="profile-tab"
                   data-toggle="tab"
                   data-target="#profile"
@@ -924,9 +924,9 @@ export default function ProfileEdit() {
                   Profile
                 </button>
               </li>
-              <li className="nav-item" role="presentation">
+              <li class="nav-item" role="presentation">
                 <button
-                  className="nav-link"
+                  class="nav-link"
                   id="contact-tab"
                   data-toggle="tab"
                   data-target="#contact"
@@ -939,9 +939,9 @@ export default function ProfileEdit() {
                 </button>
               </li>
             </ul>
-            <div className="tab-content" id="myTabContent">
+            <div class="tab-content" id="myTabContent">
               <div
-                className="tab-pane fade show active"
+                class="tab-pane fade show active"
                 id="home"
                 role="tabpanel"
                 aria-labelledby="home-tab"
@@ -957,7 +957,7 @@ export default function ProfileEdit() {
                 choice.
               </div>
               <div
-                className="tab-pane fade"
+                class="tab-pane fade"
                 id="profile"
                 role="tabpanel"
                 aria-labelledby="profile-tab"
@@ -972,7 +972,7 @@ export default function ProfileEdit() {
                 rather get wasted.
               </div>
               <div
-                className="tab-pane fade"
+                class="tab-pane fade"
                 id="contact"
                 role="tabpanel"
                 aria-labelledby="contact-tab"
