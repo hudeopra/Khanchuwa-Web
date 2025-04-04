@@ -16,18 +16,38 @@ export default function RecipeList() {
   const [selectedIngredient, setSelectedIngredient] = useState([]);
   const [selectedFlavour, setSelectedFlavour] = useState([]);
 
+  // New state variables for toggle
+  const [showCuisineFilter, setShowCuisineFilter] = useState(false);
+  const [showIngredientFilter, setShowIngredientFilter] = useState(false);
+  const [showFlavourFilter, setShowFlavourFilter] = useState(false);
+
+  const [ingredientLogic, setIngredientLogic] = useState("OR"); // AND or OR
+  const [cuisineLogic, setCuisineLogic] = useState("OR"); // AND or OR
+  const [flavourLogic, setFlavourLogic] = useState("OR"); // AND or OR
+
   useEffect(() => {
     const params = {};
-    if (selectedCuisine.length) params.cuisineTag = selectedCuisine.join(",");
-    if (selectedIngredient.length)
+    if (selectedCuisine.length) {
+      params.cuisineTag = selectedCuisine.join(",");
+      params.cuisineLogic = cuisineLogic; // Add logic to query params
+    }
+    if (selectedIngredient.length) {
       params.ingredientTag = selectedIngredient.join(",");
-    if (selectedFlavour.length) params.flavorTag = selectedFlavour.join(",");
+      params.ingredientLogic = ingredientLogic; // Add logic to query params
+    }
+    if (selectedFlavour.length) {
+      params.flavorTag = selectedFlavour.join(",");
+      params.flavourLogic = flavourLogic; // Add logic to query params
+    }
     if (searchTerm) params.searchTerm = searchTerm;
     setSearchParams(params);
   }, [
     selectedCuisine,
     selectedIngredient,
     selectedFlavour,
+    ingredientLogic,
+    cuisineLogic,
+    flavourLogic,
     searchTerm,
     setSearchParams,
   ]);
@@ -39,14 +59,13 @@ export default function RecipeList() {
           `/api/recipe/filter?${searchParams.toString()}`
         );
         const data = await res.json();
-        setRecipes(data);
+        setRecipes(Array.isArray(data) ? data : []);
         setLoading(false);
       } catch (error) {
         setError(error.message);
         setLoading(false);
       }
     };
-
     fetchRecipes();
   }, [searchParams]);
 
@@ -58,12 +77,9 @@ export default function RecipeList() {
           fetch("http://localhost:3000/api/tag/ingredientTag"),
           fetch("http://localhost:3000/api/tag/flavourTag"),
         ]);
-        const cuisineData = await cuisineRes.json();
-        const ingredientData = await ingredientRes.json();
-        const flavourData = await flavourRes.json();
-        setCuisineTags(cuisineData);
-        setIngredientTags(ingredientData);
-        setFlavourTags(flavourData);
+        setCuisineTags(await cuisineRes.json());
+        setIngredientTags(await ingredientRes.json());
+        setFlavourTags(await flavourRes.json());
       } catch (err) {
         console.error("Error fetching tags:", err);
       }
@@ -92,130 +108,223 @@ export default function RecipeList() {
             <h1 className="text-3xl font-semibold text-center my-7">
               All Recipes
             </h1>
-            <div className="filter-checkboxes">
+            <div className="kh-recipe-list__filter-wrapper">
               <h2>Filter by Tags</h2>
-              <div>
-                <h3>Cuisine Tags</h3>
-                <div className="d-flex flex-wrap gap-2">
-                  {cuisineTags
-                    .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
-                    .map((tag) => (
+              <div className="kh-recipe-list__filter-wrapper--tags">
+                {/* Toggle Cuisine Filter */}
+                <h3
+                  onClick={() => setShowCuisineFilter(!showCuisineFilter)}
+                  style={{ cursor: "pointer" }}
+                >
+                  Cuisine Tags {cuisineTags.length}
+                </h3>
+                <button
+                  onClick={() =>
+                    setCuisineLogic((prev) => (prev === "AND" ? "OR" : "AND"))
+                  }
+                >
+                  Toggle Logic: {cuisineLogic}
+                </button>
+                <div
+                  className={`kh-recipe-list__filter ${
+                    showCuisineFilter ? "filter-popup" : ""
+                  }`}
+                >
+                  <button
+                    className="close-button"
+                    onClick={() => setShowCuisineFilter(false)}
+                  >
+                    x
+                  </button>
+                  <div className="d-flex gap-2 flex-wrap">
+                    {cuisineTags.map((tag) => (
                       <div
-                        key={tag._id || tag.name}
+                        key={tag.name || tag._id}
                         className="kh-recipe-form__checkbox--item"
                       >
                         <input
                           type="checkbox"
-                          value={tag._id || tag.name}
+                          value={tag.name || tag._id}
                           checked={selectedCuisine.includes(
-                            tag._id || tag.name
+                            tag.name || tag._id
                           )}
                           onChange={(e) => {
                             e.target.checked
-                              ? setSelectedCuisine([
-                                  ...selectedCuisine,
-                                  e.target.value,
-                                ])
-                              : setSelectedCuisine(
-                                  selectedCuisine.filter(
+                              ? setSelectedCuisine((prev) => {
+                                  const updated = [...prev, e.target.value];
+                                  console.log(
+                                    "Selected Cuisine Tags:",
+                                    updated
+                                  );
+                                  return updated;
+                                })
+                              : setSelectedCuisine((prev) => {
+                                  const updated = prev.filter(
                                     (t) => t !== e.target.value
-                                  )
-                                );
+                                  );
+                                  console.log(
+                                    "Selected Cuisine Tags:",
+                                    updated
+                                  );
+                                  return updated;
+                                });
                           }}
                         />
                         <label>{tag.name}</label>
                       </div>
                     ))}
+                  </div>
                 </div>
+                <span
+                  className={`kh-recipe-list__filter-wrapper--overlay ${
+                    showCuisineFilter ? "filter-popup" : ""
+                  }`}
+                ></span>
               </div>
-              <div>
-                <h3>Ingredient Tags</h3>{" "}
-                <div className="d-flex flex-wrap gap-2">
-                  {ingredientTags
-                    .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
-                    .map((tag) => (
+              <div className="kh-recipe-list__filter-wrapper--tags">
+                {/* Toggle Ingredient Filter */}
+                <h3
+                  onClick={() => setShowIngredientFilter(!showIngredientFilter)}
+                  style={{ cursor: "pointer" }}
+                >
+                  Ingredient Tags {ingredientTags.length}
+                </h3>
+                <button
+                  onClick={() =>
+                    setIngredientLogic((prev) =>
+                      prev === "AND" ? "OR" : "AND"
+                    )
+                  }
+                >
+                  Toggle Logic: {ingredientLogic}
+                </button>
+                <div
+                  className={`kh-recipe-list__filter ${
+                    showIngredientFilter ? "filter-popup" : ""
+                  }`}
+                >
+                  <button
+                    className="close-button"
+                    onClick={() => setShowIngredientFilter(false)}
+                  >
+                    x
+                  </button>
+                  <div className="d-flex gap-2 flex-wrap">
+                    {ingredientTags.map((tag) => (
                       <div
-                        key={tag._id || tag.name}
+                        key={tag.name || tag._id}
                         className="kh-recipe-form__checkbox--item"
                       >
                         <input
                           type="checkbox"
-                          value={tag._id || tag.name}
+                          value={tag.name || tag._id}
                           checked={selectedIngredient.includes(
-                            tag._id || tag.name
+                            tag.name || tag._id
                           )}
                           onChange={(e) => {
                             e.target.checked
-                              ? setSelectedIngredient([
-                                  ...selectedIngredient,
-                                  e.target.value,
-                                ])
-                              : setSelectedIngredient(
-                                  selectedIngredient.filter(
+                              ? setSelectedIngredient((prev) => {
+                                  const updated = [...prev, e.target.value];
+                                  console.log(
+                                    "Selected Ingredient Tags:",
+                                    updated
+                                  );
+                                  return updated;
+                                })
+                              : setSelectedIngredient((prev) => {
+                                  const updated = prev.filter(
                                     (t) => t !== e.target.value
-                                  )
-                                );
+                                  );
+                                  console.log(
+                                    "Selected Ingredient Tags:",
+                                    updated
+                                  );
+                                  return updated;
+                                });
                           }}
                         />
                         <label>{tag.name}</label>
                       </div>
                     ))}
+                  </div>
                 </div>
+                <span
+                  className={`kh-recipe-list__filter-wrapper--overlay ${
+                    showIngredientFilter ? "filter-popup" : ""
+                  }`}
+                ></span>
               </div>
-              <div>
-                <h3>Flavour Tags</h3>
-                <div className="d-flex flex-wrap gap-2">
-                  {flavourTags
-                    .filter((tag) => tag.usedIn.recipe > 0) // Only include tags with usedIn.recipe > 0
-                    .map((tag) => (
+              <div className="kh-recipe-list__filter-wrapper--tags">
+                {/* Toggle Flavour Filter */}
+                <h3
+                  onClick={() => setShowFlavourFilter(!showFlavourFilter)}
+                  style={{ cursor: "pointer" }}
+                >
+                  Flavour Tags {flavourTags.length}
+                </h3>
+                <button
+                  onClick={() =>
+                    setFlavourLogic((prev) => (prev === "AND" ? "OR" : "AND"))
+                  }
+                >
+                  Toggle Logic: {flavourLogic}
+                </button>
+                <div
+                  className={`kh-recipe-list__filter ${
+                    showFlavourFilter ? "filter-popup" : ""
+                  }`}
+                >
+                  <button
+                    className="close-button"
+                    onClick={() => setShowFlavourFilter(false)}
+                  >
+                    x
+                  </button>
+                  <div className="d-flex gap-2 flex-wrap">
+                    {flavourTags.map((tag) => (
                       <div
-                        key={tag._id || tag.name}
+                        key={tag.name || tag._id}
                         className="kh-recipe-form__checkbox--item"
                       >
                         <input
                           type="checkbox"
-                          value={tag._id || tag.name}
+                          value={tag.name || tag._id}
                           checked={selectedFlavour.includes(
-                            tag._id || tag.name
+                            tag.name || tag._id
                           )}
                           onChange={(e) => {
                             e.target.checked
-                              ? setSelectedFlavour([
-                                  ...selectedFlavour,
-                                  e.target.value,
-                                ])
-                              : setSelectedFlavour(
-                                  selectedFlavour.filter(
+                              ? setSelectedFlavour((prev) => {
+                                  const updated = [...prev, e.target.value];
+                                  console.log(
+                                    "Selected Flavour Tags:",
+                                    updated
+                                  );
+                                  return updated;
+                                })
+                              : setSelectedFlavour((prev) => {
+                                  const updated = prev.filter(
                                     (t) => t !== e.target.value
-                                  )
-                                );
+                                  );
+                                  console.log(
+                                    "Selected Flavour Tags:",
+                                    updated
+                                  );
+                                  return updated;
+                                });
                           }}
                         />
                         <label>{tag.name}</label>
                       </div>
                     ))}
+                  </div>
                 </div>
+                <span
+                  className={`kh-recipe-list__filter-wrapper--overlay ${
+                    showFlavourFilter ? "filter-popup" : ""
+                  }`}
+                ></span>
               </div>
-            </div>
-            <div>
-              <span>Cuisine Tags (Count: {cuisineTags.length})</span>
-              {/* <ul>
-                {cuisineTags.map((tag) => (
-                  <li key={tag._id || tag.name}>{tag.name}</li>
-                ))}
-              </ul> */}
-              <span>Ingredient Tags (Count: {ingredientTags.length})</span>
-              {/* <ul>
-                {ingredientTags.map((tag) => (
-                  <li key={tag._id || tag.name}>{tag.name}</li>
-                ))}
-              </ul> */}
-              <span>Flavour Tags (Count: {flavourTags.length})</span>
-              {/* <ul>
-                {flavourTags.map((tag) => (
-                  <li key={tag._id || tag.name}>{tag.name}</li>
-                ))}
-              </ul> */}
             </div>
           </div>
           {filteredRecipes.map((recipe) => (
@@ -244,12 +353,7 @@ export default function RecipeList() {
                     Ingredient Tags:{" "}
                     {Array.isArray(recipe.ingredientTag)
                       ? recipe.ingredientTag
-                          .map((id) => {
-                            const tag = ingredientTags.find(
-                              (t) => t._id === id
-                            );
-                            return tag ? tag.name : id;
-                          })
+                          .map((tag) => tag.tagName)
                           .join(", ")
                       : recipe.ingredientTag}
                   </p>
@@ -258,23 +362,13 @@ export default function RecipeList() {
                   <p>
                     Flavour Tags:{" "}
                     {Array.isArray(recipe.flavourTag)
-                      ? recipe.flavourTag
-                          .map((id) => {
-                            const tag = flavourTags.find((t) => t._id === id);
-                            return tag ? tag.name : id;
-                          })
-                          .join(", ")
+                      ? recipe.flavourTag.map((tag) => tag.tagName).join(", ")
                       : recipe.flavourTag}
                   </p>
                   <p>
                     Cuisine Tags:{" "}
                     {Array.isArray(recipe.cuisineTag)
-                      ? recipe.cuisineTag
-                          .map((id) => {
-                            const tag = cuisineTags.find((t) => t._id === id);
-                            return tag ? tag.name : id;
-                          })
-                          .join(", ")
+                      ? recipe.cuisineTag.map((tag) => tag.tagName).join(", ")
                       : recipe.cuisineTag}
                   </p>
                 </Link>

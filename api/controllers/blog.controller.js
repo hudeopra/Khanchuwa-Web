@@ -94,16 +94,8 @@ export const getBlogById = async (req, res, next) => {
       return res.status(404).json({ message: 'Blog not found' });
     }
     // If a user is provided (when available), record a view (similar to recipes)
-    if (req.user) {
-      if (!blog.views || !Array.isArray(blog.views)) {
-        blog.views = [];
-      }
-      if (!blog.views.some(id => id.equals(req.user.id))) {
-        blog.views.push(req.user.id);
-        await blog.save();
-      }
-    }
-    return res.status(200).json(blog);
+
+    return res.status(200).json({ success: true, message: "getBlogById", blog });
   } catch (error) {
     next(error);
   }

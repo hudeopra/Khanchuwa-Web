@@ -12,7 +12,7 @@ const userCartSlice = createSlice({
       state.items = [];
     },
     addToCart: (state, action) => {
-      const { _id, productName, quantity, price } = action.payload;
+      const { _id, productName, quantity, price, favImg } = action.payload; // Include favImg
       const existing = state.items.find((item) => item.id === _id);
       if (existing) {
         existing.quantity += quantity; // Increment quantity
@@ -24,6 +24,7 @@ const userCartSlice = createSlice({
           quantity,
           price, // Total price for the initial quantity
           unitPrice: price / quantity, // Store unit price for future calculations
+          favImg: favImg, // Provide a default value for favImg
         });
       }
     },

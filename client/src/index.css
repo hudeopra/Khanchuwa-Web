@@ -89,7 +89,7 @@ optgroup,
 select,
 textarea {
   background-color: var(--gray);
-  color: #fff;
+  color: var(--dark-charcol);
   border-radius: 4px;
   min-height: 40px;
   padding: 10px 8px;
@@ -139,7 +139,7 @@ h4 {
   margin-bottom: 10px;
 }
 main {
-  color: #fff;
+  background-color: var(--dark-charcol);
   min-height: 100vh;
 }
 .header_fixed {
@@ -295,7 +295,7 @@ main {
 .kh-recipe-block__wrapper {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: repeat(7, 1fr);
+  grid-template-rows: repeat(7, 85px);
   gap: 30px;
 }
 .kh-recipe-block__item:nth-of-type(1) {
@@ -342,6 +342,7 @@ main {
 .kh-recipe-block__content h3 {
   font-size: 28px;
   margin-bottom: 10px;
+  text-shadow: 2px 2px 6px rgb(35 35 35);
 }
 .kh-recipe-block__content p {
   opacity: 0;
@@ -1134,3 +1135,23 @@ li.kh-recipe-single__tags--item {
 }
 
 /* 404 page not found ends */
+/* header cart start */
+.kh-header__cart {
+  position: relative;
+}
+.kh-header__cart--content {
+  position: absolute;
+  min-height: 100vh;
+  background: var(--border-light);
+  top: -46px;
+  left: 55px;
+  padding: 10px;
+}
+
+.kh-header__cart--content.active {
+  left: -170px;
+}
+.kh-header__cart--item {
+  padding: 15px 30px;
+}
+/* header cart ends */

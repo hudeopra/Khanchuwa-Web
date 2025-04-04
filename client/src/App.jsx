@@ -53,6 +53,7 @@ export default function App() {
           <Route path="/create-blog" element={<CreateBlog />} />
           <Route path="/blog/edit/:id" element={<EditBlog />} />{" "}
           <Route path="/user-blog" element={<UserBlog />} />
+          <Route path="/product/edit/:id" element={<ProductEdit />} />{" "}
           {/* Updated route for editing */}
         </Route>
         <Route path="/recipes" element={<RecipeList />} />
@@ -62,7 +63,6 @@ export default function App() {
         <Route path="/blogs/:id" element={<BlogDetail />} />
         <Route path="/cookshop" element={<TagList />} />
         <Route path="/cookshop/:tagType/:id" element={<TagDetail />} />
-        <Route path="/product/edit/:id" element={<ProductEdit />} />{" "}
         <Route path="*" element={<NotFound />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />

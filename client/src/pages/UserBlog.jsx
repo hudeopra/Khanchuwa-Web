@@ -10,24 +10,26 @@ export default function UserBlog() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchBlogs() {
-      try {
-        const res = await fetch("/api/blog/all");
-        const data = await res.json();
-        console.log(data);
-        // Compare blog.userRef with currentUser._id by converting to string
-        const userBlogs = data.filter(
-          (blog) => blog.userRef?.toString() === currentUser?._id?.toString()
-        );
-        setBlogs(userBlogs);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    if (currentUser?._id) {
-      fetchBlogs();
+    if (currentUser) {
+      const user = currentUser.user || currentUser;
+      const userId = user._id;
+      fetch(`http://localhost:3000/api/blog/user/${userId}`)
+        .then((res) => {
+          if (!res.ok) {
+            return res.text().then((text) => {
+              throw new Error(`Fetch error: ${res.status} ${text}`);
+            });
+          }
+          return res.json();
+        })
+        .then((data) => {
+          if (data.success) {
+            setBlogs(data.blogs);
+            console.log("User Blogs: ", data.blogs);
+          }
+        })
+        .catch((error) => setError(error.message))
+        .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
@@ -50,23 +52,71 @@ export default function UserBlog() {
             {blogs.length === 0 ? (
               <p>No blogs found.</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="kh-blog-post">
                 {blogs.map((blog) => (
-                  <div key={blog._id} className="border p-4 rounded-lg">
-                    <img
-                      src={blog.imageUrl}
-                      alt={blog.blogtitle}
-                      className="w-full h-40 object-cover rounded"
-                    />
-                    <h2 className="mt-2 font-semibold">{blog.blogtitle}</h2>
-                    <p className="text-sm">{blog.shortDescription}</p>
-                    <div className="flex gap-2">
-                      <Link className="text-blue-500" to={`/blogs/${blog._id}`}>
+                  <div
+                    key={blog._id}
+                    className="blog-block border p-4 rounded-lg"
+                  >
+                    <div className="blog-block-wrapper">
+                      <h3 className="font-semibold text-lg">
+                        {blog.blogtitle}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        <strong>Author:</strong> {blog.author}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Type:</strong> {blog.blogtype}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Quote:</strong> {blog.blogquote}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Short Description:</strong>{" "}
+                        {blog.shortDescription}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Created At:</strong>{" "}
+                        {new Date(blog.createdAt).toLocaleDateString()}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Updated At:</strong>{" "}
+                        {new Date(blog.updatedAt).toLocaleDateString()}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Body:</strong> {blog.blogBody}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Recipe Favorites:</strong> {blog.recipeFav}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Tags:</strong>
+                      </p>
+                      <ul className="list-disc ml-5">
+                        <li>
+                          <strong>Cuisine:</strong>{" "}
+                          {blog.cuisineTag.map((tag) => tag.$oid).join(", ")}
+                        </li>
+                        <li>
+                          <strong>Flavour:</strong>{" "}
+                          {blog.flavourTag.map((tag) => tag.$oid).join(", ")}
+                        </li>
+                        <li>
+                          <strong>Ingredients:</strong>{" "}
+                          {blog.ingredientTag.map((tag) => tag.$oid).join(", ")}
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      <Link
+                        to={`/blogs/${blog._id}`}
+                        className="btn btn-view text-blue-500"
+                      >
                         View Blog
                       </Link>
                       <Link
-                        className="text-green-500"
                         to={`/blog/edit/${blog._id}`}
+                        className="btn btn-edit text-green-500"
                       >
                         Edit Blog
                       </Link>

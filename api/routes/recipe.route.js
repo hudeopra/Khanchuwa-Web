@@ -31,6 +31,13 @@
 /**
  * @route GET /filter
  * @description Retrieve recipes based on specific filter criteria. Publicly accessible.
+ *              This endpoint allows users to filter recipes by various parameters such as:
+ *              - Ingredients
+ *              - Cuisine type
+ *              - Preparation time
+ *              - Difficulty level
+ *              - Dietary restrictions (e.g., vegan, gluten-free)
+ *              Users can pass these filters as query parameters in the request.
  * @access Public
  */
 
@@ -45,6 +52,19 @@
  * @description Retrieve a specific recipe by its ID. Requires user authentication.
  * @access Private
  */
+
+/**
+ * API Endpoints for Testing (Base URL: http://localhost:5000/api/recipes):
+ * POST   /create          - http://localhost:5000/api/recipes/create
+ * POST   /update/:id      - http://localhost:5000/api/recipes/update/:id
+ * POST   /comment/:id     - http://localhost:5000/api/recipes/comment/:id
+ * DELETE /delete/:id      - http://localhost:5000/api/recipes/delete/:id
+ * GET    /all             - http://localhost:5000/api/recipes/all
+ * GET    /filter          - http://localhost:5000/api/recipes/filter
+ * GET    /user/:userId    - http://localhost:5000/api/recipes/user/:userId
+ * GET    /:id             - http://localhost:5000/api/recipes/:id
+ */
+
 import express from 'express';
 import { createRecipe, getAllRecipes, getRecipeById, updateRecipe, addComment, deleteRecipe, filterRecipes, getRecipesByUser } from '../controllers/recipe.controller.js';
 import { verifyToken } from '../utils/verifyUser.js';
@@ -57,7 +77,7 @@ router.post('/comment/:id', verifyToken, addComment); // new route for adding co
 router.delete('/delete/:id', verifyToken, deleteRecipe); // new route for deleting recipe
 router.get('/all', getAllRecipes);
 router.get('/filter', filterRecipes); // new filtering endpoint
-router.get('/user/:userId', getRecipesByUser); // new route for getting recipes by user
-router.get('/:id', getRecipeById);
+router.get('/user/:userId', getRecipesByUser); // updated route for getting recipes by user
+router.get('/:id', getRecipeById); // moved this route below to avoid conflict
 
 export default router;

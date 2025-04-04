@@ -52,12 +52,13 @@
   }
 }
 
-$dark-charcol: #303030;
+$dark-charcol: #f2f2f2;
 $white: #fff;
 $primary-color: #e2bb76;
 $gray: #838383;
 $border-light: #4f4f4f;
 $hover-color: #595959;
+$bg-dark: #303030;
 * {
   margin: 0;
   padding: 0;
@@ -134,7 +135,6 @@ nav ul {
 }
 
 main {
-  background-color: #303030;
 }
 // Homepage starts
 

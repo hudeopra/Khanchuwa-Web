@@ -107,15 +107,7 @@ export const getRecipeById = async (req, res, next) => {
     if (!recipe) {
       return res.status(404).json({ message: 'Recipe not found' });
     }
-    // Ensure recipeViews is initialized as an array
-    if (!recipe.recipeViews || !Array.isArray(recipe.recipeViews)) {
-      recipe.recipeViews = [];
-    }
-    // Use req.user.id instead of req.user._id
-    if (req.user && !recipe.recipeViews.some(id => id.equals(req.user.id))) {
-      recipe.recipeViews.push(req.user.id);
-      await recipe.save();
-    }
+
     return res.status(200).json(recipe);
   } catch (error) {
     next(error);
@@ -127,7 +119,7 @@ export const getRandomRecipe = async (req, res, next) => {
     const count = await Recipe.countDocuments();
     const random = Math.floor(Math.random() * count);
     const randomRecipe = await Recipe.findOne().skip(random);
-    res.json({ id: randomRecipe._id });
+    res.json({ id: randomRecipe._id, success: true, message: "getRandomRecipe" });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching random recipe', error });
   }
@@ -168,7 +160,6 @@ export const filterRecipes = async (req, res, next) => {
       cuisineTag,
       flavorTag,
       diet,
-      // Remove direct recipe filters for allergies, dietaryRestrictions, tastePreferences
       allergies,
       dietaryRestrictions,
       tastePreferences,
@@ -181,32 +172,49 @@ export const filterRecipes = async (req, res, next) => {
       filter.userRef = userId;
     }
     if (ingredientTag) {
-      const tags = ingredientTag.split(",").map(tag => tag.trim());
-      filter.ingredientTag = { $in: tags };
+      const tags = ingredientTag.split(",").map((tag) => tag.trim());
+      if (req.query.ingredientLogic === "AND") {
+        filter["ingredientTag.tagName"] = { $all: tags }; // Match all tags
+      } else {
+        filter["ingredientTag.tagName"] = { $in: tags }; // Match any tag
+      }
     }
     if (cuisineTag) {
-      const cuisines = cuisineTag.split(",").map(tag => tag.trim());
-      filter.cuisineTag = { $in: cuisines };
+      const cuisines = cuisineTag.split(",").map((tag) => tag.trim());
+      if (req.query.cuisineLogic === "AND") {
+        filter["cuisineTag.tagName"] = { $all: cuisines }; // Match all tags
+      } else {
+        filter["cuisineTag.tagName"] = { $in: cuisines }; // Match any tag
+      }
     }
     if (flavorTag) {
-      const flavors = flavorTag.split(",").map(tag => tag.trim());
-      filter.flavourTag = { $in: flavors };
+      const flavors = flavorTag.split(",").map((tag) => tag.trim());
+      if (req.query.flavourLogic === "AND") {
+        filter["flavourTag.tagName"] = { $all: flavors }; // Match all tags
+      } else {
+        filter["flavourTag.tagName"] = { $in: flavors }; // Match any tag
+      }
     }
     if (diet) {
       filter.diet = diet;
     }
+
+    // Combine searchTerm with other filters
     if (searchTerm) {
       const words = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
-      filter.$and = words.map(word => ({
+      const searchConditions = words.map(word => ({
         $or: [
           { recipeName: new RegExp(word, "i") },
           { description: new RegExp(word, "i") },
           { chefName: new RegExp(word, "i") },
-        ]
+        ],
       }));
+
+      // Combine existing filter with $and condition
+      filter.$and = [...(filter.$and || []), ...searchConditions];
     }
 
-    // New: Filter based on user preferences (allergies, dietaryRestrictions, tastePreferences)
+    // Filter based on user preferences (allergies, dietaryRestrictions, tastePreferences)
     if (allergies || dietaryRestrictions || tastePreferences) {
       let userFilter = {};
       if (allergies) {
@@ -227,7 +235,7 @@ export const filterRecipes = async (req, res, next) => {
     }
 
     const recipes = await Recipe.find(filter);
-    return res.status(200).json(recipes);
+    return res.status(200).json({ success: true, message: "filterRecipes", recipes });
   } catch (error) {
     next(error);
   }
@@ -238,7 +246,7 @@ export const getRecipesByUser = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 0;
     const recipes = await Recipe.find({ userRef: req.params.userId }).limit(limit);
-    return res.status(200).json({ success: true, recipes });
+    return res.status(200).json({ success: true, message: "getRecipesByUser", recipes });
   } catch (error) {
     next(error);
   }

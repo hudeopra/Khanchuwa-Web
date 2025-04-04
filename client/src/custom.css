@@ -141,10 +141,6 @@ nav ul {
   margin: 0;
 }
 
-main {
-  background-color: #303030;
-}
-
 .kh-slide {
   position: relative;
   height: clamp(720px, 100vh, 100vh);
@@ -414,7 +410,7 @@ main {
   position: absolute;
   top: 97px;
   left: -500px;
-  background-color: #303030;
+  background-color: #f2f2f2;
   color: #fff;
   max-width: 360px;
   height: calc(100vh - 117px);

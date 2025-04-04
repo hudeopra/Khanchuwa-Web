@@ -24,6 +24,7 @@ export default function Header() {
   const [isMenuActive, setIsMenuActive] = useState(false);
   const [randomRecipeId, setRandomRecipeId] = useState(null);
   const dispatch = useDispatch(); // new dispatch hook
+  const [isCartActive, setIsCartActive] = useState(false); // New state for cart toggle
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -72,6 +73,10 @@ export default function Header() {
 
   const toggleMenu = () => {
     setIsMenuActive(!isMenuActive);
+  };
+
+  const toggleCart = () => {
+    setIsCartActive(!isCartActive);
   };
 
   const handleClearCart = () => {
@@ -322,76 +327,119 @@ export default function Header() {
                     alt="profile"
                   />
                 </Link>
-                <button
-                  onClick={handleClearCart}
-                  className="text-xs text-red-600 hover:underline"
-                >
-                  Clear Cart
-                </button>
                 <div className="kh-header__cart">
-                  {cartItems && cartItems.length > 0 ? (
-                    <ul className="kh-header__cart--items">
-                      {cartItems.map((item) => (
-                        <li className="kh-header__cart--item" key={item.id}>
-                          <div className="kh-header__cart--item--wrapper">
-                            <div className="kh-header__cart--item--details">
-                              <p className="kh-header__cart--item--name">
-                                {item.productName}
-                              </p>
-                              <p className="kh-header__cart--item--price">
-                                ${(item.price || 0).toFixed(2)}{" "}
-                                {/* Ensure price is not NaN */}
-                              </p>
-                              <div className="kh-header__cart--item--quantity">
+                  <div className="kh-header__cart--head">
+                    <span
+                      className={`kh-header__cart--count trigger ${
+                        isCartActive ? "active" : ""
+                      }`}
+                      onClick={toggleCart}
+                    >
+                      {cartItems.reduce(
+                        (total, item) => total + item.quantity,
+                        0
+                      )}
+                    </span>
+                  </div>
+                  <div
+                    className={`kh-header__cart--content ${
+                      isCartActive ? "active" : ""
+                    }`}
+                  >
+                    <button
+                      onClick={handleClearCart}
+                      className="text-xs text-red-600 hover:underline"
+                    >
+                      Clear Cart
+                    </button>
+                    <div className="kh-header__cart--body">
+                      <div className="kh-header__cart--title">
+                        <h3>Cart</h3>
+                      </div>
+                      {cartItems && cartItems.length > 0 ? (
+                        <ul className="kh-header__cart--items">
+                          {cartItems.map((item) => (
+                            <li className="kh-header__cart--item" key={item.id}>
+                              <div className="kh-header__cart--item--wrapper">
+                                <div className="kh-header__cart--item--details">
+                                  <p className="kh-header__cart--item--name">
+                                    {item.productName}
+                                  </p>
+                                  <img
+                                    src={item.favImg} // Use favImg from Redux or fallback
+                                    alt={item.productName} // Use product name as alt text
+                                    className="kh-header__cart--item--fav"
+                                  />
+                                  <p className="kh-header__cart--item--price">
+                                    ${(item.price || 0).toFixed(2)}{" "}
+                                    {/* Ensure price is not NaN */}
+                                  </p>
+                                  <div className="kh-header__cart--item--quantity">
+                                    <button
+                                      onClick={() =>
+                                        handleQuantityChange(
+                                          item.id,
+                                          item.quantity - 1
+                                        )
+                                      }
+                                      className="p-2 border"
+                                    >
+                                      -
+                                    </button>
+                                    <input
+                                      type="number"
+                                      value={item.quantity}
+                                      onChange={(e) =>
+                                        handleQuantityChange(
+                                          item.id,
+                                          Number(e.target.value)
+                                        )
+                                      }
+                                      min="1"
+                                      className="w-16 p-2 border text-center"
+                                    />
+                                    <button
+                                      onClick={() =>
+                                        handleQuantityChange(
+                                          item.id,
+                                          item.quantity + 1
+                                        )
+                                      }
+                                      className="p-2 border"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                </div>
                                 <button
-                                  onClick={() =>
-                                    handleQuantityChange(
-                                      item.id,
-                                      item.quantity - 1
-                                    )
-                                  }
-                                  className="p-2 border"
+                                  onClick={() => handleRemoveFromCart(item.id)}
+                                  className="kh-header__cart--item--remove"
                                 >
-                                  -
-                                </button>
-                                <input
-                                  type="number"
-                                  value={item.quantity}
-                                  onChange={(e) =>
-                                    handleQuantityChange(
-                                      item.id,
-                                      Number(e.target.value)
-                                    )
-                                  }
-                                  min="1"
-                                  className="w-16 p-2 border text-center"
-                                />
-                                <button
-                                  onClick={() =>
-                                    handleQuantityChange(
-                                      item.id,
-                                      item.quantity + 1
-                                    )
-                                  }
-                                  className="p-2 border"
-                                >
-                                  +
+                                  Remove
                                 </button>
                               </div>
-                            </div>
-                            <button
-                              onClick={() => handleRemoveFromCart(item.id)}
-                              className="kh-header__cart--item--remove" // added class
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>Cart is empty</p>
-                  )}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>Cart is empty</p>
+                      )}
+                      <div className="kh-header__cart--checkout">
+                        <Link
+                          to=""
+                          className="bg-green-500 text-white py-2 px-4 rounded"
+                          onClick={() =>
+                            console.log(
+                              "Cart Data:",
+                              JSON.stringify(userCart, null, 2)
+                            )
+                          }
+                        >
+                          Checkout
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (

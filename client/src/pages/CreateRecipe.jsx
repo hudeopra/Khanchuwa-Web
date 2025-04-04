@@ -658,9 +658,9 @@ export default function CreateRecipe() {
                                     ),
                                   })
                                 }
-                                className=""
+                                className="Remove"
                               >
-                                Remove
+                                x
                               </button>
                             )}
                           </div>
@@ -746,9 +746,9 @@ export default function CreateRecipe() {
                               bannerImgUrl: "",
                             })
                           }
-                          className="p-2 text-red-700 rounded-lg"
+                          className="kh-btn kh-btn__x"
                         >
-                          Delete
+                          x
                         </button>
                       </div>
                     )}
@@ -776,9 +776,9 @@ export default function CreateRecipe() {
                               favImgUrl: "",
                             })
                           }
-                          className="p-2 text-red-700 rounded-lg"
+                          className="kh-btn kh-btn__x"
                         >
-                          Delete
+                          x
                         </button>
                       </div>
                     )}
@@ -810,9 +810,9 @@ export default function CreateRecipe() {
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(index)}
-                            className=" text-red-700 rounded-lg uppercase hover:opacity-75"
+                            className="kh-btn kh-btn__x"
                           >
-                            Delete
+                            x
                           </button>
                         </div>
                       ))}

@@ -129,6 +129,7 @@ const TagDetail = () => {
         productName: tag.name,
         quantity,
         price: unitPrice * quantity, // Calculate total price
+        favImg: tag.favImg, // Include favImg
       };
       console.log("Dispatching addToCart with:", cartItem); // Debugging log
       dispatch(addToCart(cartItem));
@@ -147,12 +148,6 @@ const TagDetail = () => {
             <h1>{tag.name}</h1>
             <p>
               <strong>Type:</strong> {tag.tagType}
-            </p>
-            <p>
-              <strong>Used in Recipes:</strong> {tag.usedIn.recipe}
-            </p>
-            <p>
-              <strong>Used in Blogs:</strong> {tag.usedIn.blog}
             </p>
             {tag.favImg && (
               <div>
@@ -243,36 +238,6 @@ const TagDetail = () => {
               <p>
                 <strong>Categories:</strong> {tag.category.join(", ")}
               </p>
-            )}
-            {tag.recipeRefs && tag.recipeRefs.length > 0 && (
-              <div>
-                <strong>Recipe References:</strong>
-                <ul>
-                  {tag.recipeRefs.map((ref, index) => (
-                    <li key={`recipe-ref-${index}`}>
-                      <a
-                        href={`/cookshop/${tag.tagType}/${
-                          ref.tagId || ref._id
-                        }`} // Use tagId if available, fallback to _id
-                        className="kh-recipe-single__tags--item"
-                      >
-                        {ref.tagName || "Unnamed Tag"} // Fallback to a default
-                        name if tagName is missing
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {tag.blogRefs && tag.blogRefs.length > 0 && (
-              <div>
-                <strong>Blog References:</strong>
-                <ul>
-                  {tag.blogRefs.map((ref, index) => (
-                    <li key={`blog-ref-${index}`}>{ref}</li>
-                  ))}
-                </ul>
-              </div>
             )}
           </div>
         </div>

@@ -46,10 +46,10 @@ const RecipeCardBig = () => {
         >
           <div className="kh-recipe-block__item--img">
             <img
-              // Use image from DB if available, otherwise fallback to images asset
+              // Use favImgUrl from DB if available, otherwise fallback to images asset
               src={
-                item.imageUrls && item.imageUrls.length > 0
-                  ? item.imageUrls[0]
+                item.favImgUrl
+                  ? item.favImgUrl
                   : images[`recipe${item.recipeName.replace(/ /g, "")}Thumb`]
               }
               alt={item.recipeName}
@@ -58,8 +58,8 @@ const RecipeCardBig = () => {
           <div className="kh-recipe-block__content">
             <h3>{item.recipeName}</h3>
             <p>
-              {item.description.length > 300
-                ? `${item.description.slice(0, 150)}...`
+              {item.description.length > 150
+                ? `${item.description.slice(0, 110)}...`
                 : item.description}
             </p>{" "}
           </div>
@@ -78,10 +78,6 @@ const RecipeCardBig = () => {
           to={`/recipes/${item._id}`}
           className="kh-recipe-block__item"
         >
-          <div className="kh-recipe-block__content">
-            <h3>{item.recipeName}</h3>
-            <p>{item.description} Recipes</p>
-          </div>
           <div className="kh-recipe-block__item--img">
             <img
               src={
@@ -91,6 +87,15 @@ const RecipeCardBig = () => {
               }
               alt={item.recipeName}
             />
+          </div>
+          <div className="kh-recipe-block__content">
+            <h3>{item.recipeName}</h3>
+            <p>
+              {item.description.length > 200
+                ? `${item.description.slice(0, 120)}...`
+                : item.description}{" "}
+              Recipes
+            </p>
           </div>
           <div className="kh-recipe-block__info">
             <span>{item.cookTime} </span>

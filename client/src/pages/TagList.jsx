@@ -51,6 +51,7 @@ const TagList = () => {
         quantity,
         price: unitPrice * quantity, // Calculate total price
         unitPrice, // Store unit price for future calculations
+        favImg: tag.favImg, // Include favImg
       })
     );
   };
@@ -81,12 +82,6 @@ const TagList = () => {
                       width="100"
                     />
                   )}
-                  {type === "cuisineTag" || type === "flavourTag" ? (
-                    <p>
-                      Used in: {tag.usedIn.recipe} Recipes, {tag.usedIn.blog}{" "}
-                      Blogs
-                    </p>
-                  ) : null}
                   {type === "ingredientTag" && (
                     <>
                       <p>In Stock: {tag.inStock ? "Yes" : "No"}</p>

@@ -10,24 +10,26 @@ export default function UserRecipie() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchRecipes() {
-      try {
-        const res = await fetch("/api/recipe/all");
-        const data = await res.json();
-        // Compare recipe.userRef with currentUser._id by converting to string
-        const userRecipes = data.filter(
-          (recipe) =>
-            recipe.userRef?.toString() === currentUser?._id?.toString()
-        );
-        setRecipes(userRecipes);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    if (currentUser?._id) {
-      fetchRecipes();
+    if (currentUser) {
+      const user = currentUser.user || currentUser;
+      const userId = user._id;
+      fetch(`http://localhost:3000/api/recipe/user/${userId}`)
+        .then((res) => {
+          if (!res.ok) {
+            return res.text().then((text) => {
+              throw new Error(`Fetch error: ${res.status} ${text}`);
+            });
+          }
+          return res.json();
+        })
+        .then((data) => {
+          if (data.success) {
+            setRecipes(data.recipes);
+            console.log("User Recipes: ", data.recipes);
+          }
+        })
+        .catch((error) => setError(error.message))
+        .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
@@ -37,7 +39,7 @@ export default function UserRecipie() {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <main className="" kh-profile>
+    <main className="kh-profile">
       <div className="container">
         <div className="row">
           <div className="col-3">
@@ -50,28 +52,49 @@ export default function UserRecipie() {
             {recipes.length === 0 ? (
               <p>No recipes found.</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="kh-recipe-post">
                 {recipes.map((recipe) => (
-                  <div key={recipe._id} className="border p-4 rounded-lg">
-                    <img
-                      src={recipe.imageUrls[0]}
-                      alt={recipe.recipeName}
-                      className="w-full h-40 object-cover rounded"
-                    />
-                    <h2 className="mt-2 font-semibold">{recipe.recipeName}</h2>
-                    <p className="text-sm">{recipe.description}</p>
-                    <div className="flex gap-2">
+                  <div key={recipe._id} className="recipe-block">
+                    <div className="recipe-block-wrapper">
+                      <h3>{recipe.recipeName}</h3>
+                      <img
+                        src={
+                          Array.isArray(recipe.imageUrls) &&
+                          recipe.imageUrls.length > 0
+                            ? recipe.imageUrls[0]
+                            : ""
+                        }
+                        alt={recipe.recipeName}
+                        className="recipe-fav-image"
+                      />
+                      <h3>{recipe.shortDescription}</h3>
+                      <h3>{recipe.diet}</h3>
+                      <h3>{recipe.updatedAt}</h3>
+                      <p>Meal Type:</p>
+                      <ul>
+                        {recipe.mealType.map((meal, index) => (
+                          <li key={index}>{meal}</li>
+                        ))}
+                      </ul>
+                      <h3>Ingredients:</h3>
+                      <ul>
+                        {recipe.ingredients.map((ingredient) => (
+                          <li key={ingredient._id}>{ingredient.name}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="flex gap-2 mt-4">
                       <Link
-                        className="text-blue-500"
                         to={`/recipes/${recipe._id}`}
+                        className="btn btn-view text-blue-500"
                       >
                         View Recipe
                       </Link>
                       <Link
-                        className="text-green-500"
-                        to={`/recipes/edit/${recipe._id}`}
+                        to={`/recipe/edit/${recipe._id}`}
+                        className="btn btn-edit"
                       >
-                        Edit Recipe
+                        Edit
                       </Link>
                     </div>
                   </div>

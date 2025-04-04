@@ -1,22 +1,29 @@
-import React from "react";
-import { cuisineCategoryData } from "../assets/js/dummyContent.js";
-import * as images from "../assets/js/images.js";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
 const CategoryList = () => {
-  // Get the first 5 items from the cuisineCategoryData array
-  const displayedCategories = cuisineCategoryData.slice(0, 11);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    // Fetch data from the API
+    fetch("http://localhost:3000/api/tag/cuisineTag")
+      .then((response) => response.json())
+      .then((data) => setCategories(data))
+      .catch((error) => console.error("Error fetching categories:", error));
+  }, []);
+
   return (
     <div className="kh-category__wrapper py-2">
-      {displayedCategories.map((item, index) => (
+      {categories.map((item, index) => (
         <div key={index} className="kh-category__item">
           <div className="kh-category__item--img">
-            <img
-              src={images[`cuisine${item.name.replace(" ", "")}`]}
-              alt={item.name}
-            />
+            {/* Add Link to navigate to /cookshop/cuisineTag/{objid} */}
+            <Link to={`/cookshop/cuisineTag/${item._id}`}>
+              <img src={item.favImg} alt={item.name} />
+            </Link>
           </div>
           <h3>{item.name}</h3>
-          <p>{item.recipeCount} Recipes</p>
+          <p>{item.recipeRefs.length} Recipes</p>
         </div>
       ))}
     </div>

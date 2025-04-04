@@ -211,14 +211,22 @@ export default function RecipeDetail() {
               <h4>Cuisine:</h4>
               <ul className="kh-recipe-single__tags--list">
                 {recipe.cuisineTag && recipe.cuisineTag.length > 0 ? (
-                  recipe.cuisineTag.map((tag) => (
-                    <li
-                      className="kh-recipe-single__tags--item"
-                      key={tag.tagId || tag._id}
-                    >
-                      {tag.tagName || "N/A"}
-                    </li>
-                  ))
+                  recipe.cuisineTag
+                    .filter((tag) => {
+                      const tagName =
+                        typeof tag === "object"
+                          ? tag.tagName || "Unknown Tag"
+                          : tag;
+                      return tagName !== "Unknown"; // Exclude "Unknown" tags
+                    })
+                    .map((tag) => (
+                      <li
+                        className="kh-recipe-single__tags--item"
+                        key={tag.tagId || tag._id}
+                      >
+                        {tag.tagName || "N/A"}
+                      </li>
+                    ))
                 ) : (
                   <li>N/A</li>
                 )}
@@ -228,14 +236,22 @@ export default function RecipeDetail() {
               <h4>Flavour Tags:</h4>
               <ul className="kh-recipe-single__tags--list">
                 {recipe.flavourTag && recipe.flavourTag.length > 0 ? (
-                  recipe.flavourTag.map((tag) => (
-                    <li
-                      className="kh-recipe-single__tags--item"
-                      key={tag.tagId || tag._id}
-                    >
-                      {tag.tagName || "N/A"}
-                    </li>
-                  ))
+                  recipe.flavourTag
+                    .filter((tag) => {
+                      const tagName =
+                        typeof tag === "object"
+                          ? tag.tagName || "Unknown Tag"
+                          : tag;
+                      return tagName !== "Unknown"; // Exclude "Unknown" tags
+                    })
+                    .map((tag) => (
+                      <li
+                        className="kh-recipe-single__tags--item"
+                        key={tag.tagId || tag._id}
+                      >
+                        {tag.tagName || "N/A"}
+                      </li>
+                    ))
                 ) : (
                   <li>N/A</li>
                 )}
@@ -245,28 +261,36 @@ export default function RecipeDetail() {
               <h4>Ingredient Tags:</h4>
               <ul className="kh-recipe-single__tags--list">
                 {recipe.ingredientTag && recipe.ingredientTag.length > 0 ? (
-                  recipe.ingredientTag.map((tag, index) => {
-                    const tagName =
-                      typeof tag === "object"
-                        ? tag.tagName || "Unknown Tag"
-                        : tag;
-                    const tagType =
-                      typeof tag === "object" && tag.tagType
-                        ? tag.tagType
-                        : "ingredientTag"; // Fallback to "ingredientTag"
-                    const tagId = typeof tag === "object" ? tag.tagId : tag; // Use tagId instead of _id
+                  recipe.ingredientTag
+                    .filter((tag) => {
+                      const tagName =
+                        typeof tag === "object"
+                          ? tag.tagName || "Unknown Tag"
+                          : tag;
+                      return tagName !== "Unknown"; // Exclude "Unknown" tags
+                    })
+                    .map((tag, index) => {
+                      const tagName =
+                        typeof tag === "object"
+                          ? tag.tagName || "Unknown Tag"
+                          : tag;
+                      const tagType =
+                        typeof tag === "object" && tag.tagType
+                          ? tag.tagType
+                          : "ingredientTag"; // Fallback to "ingredientTag"
+                      const tagId = typeof tag === "object" ? tag.tagId : tag; // Use tagId instead of _id
 
-                    return (
-                      <li
-                        className="kh-recipe-single__tags--item"
-                        key={tagId || `${tagName}-${index}`} // Ensure a unique key
-                      >
-                        <a href={`/cookshop/${tagType}/${tagId || index}`}>
-                          {tagName}
-                        </a>
-                      </li>
-                    );
-                  })
+                      return (
+                        <li
+                          className="kh-recipe-single__tags--item"
+                          key={tagId || `${tagName}-${index}`} // Ensure a unique key
+                        >
+                          <a href={`/cookshop/${tagType}/${tagId || index}`}>
+                            {tagName}
+                          </a>
+                        </li>
+                      );
+                    })
                 ) : (
                   <li>N/A</li>
                 )}
