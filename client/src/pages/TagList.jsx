@@ -52,6 +52,8 @@ const TagList = () => {
         price: unitPrice * quantity, // Calculate total price
         unitPrice, // Store unit price for future calculations
         favImg: tag.favImg, // Include favImg
+        disPrice: tag.disPrice || null, // Add disPrice if available
+        mrkPrice: tag.mrkPrice || null, // Add mrkPrice if available
       })
     );
   };

@@ -1,7 +1,6 @@
 import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
-import { categorySliderData } from "../assets/js/dummyContent.js";
 
-const CategorySlider = () => {
+const CategorySlider = ({ keyParam, valueParam }) => {
   const sliderRef = useRef(null);
   const [position, setPosition] = useState(0);
   const [sliderHeight, setSliderHeight] = useState(0);
@@ -12,9 +11,26 @@ const CategorySlider = () => {
   const [canSlidePrev, setCanSlidePrev] = useState(false);
   const [slideWidth, setSlideWidth] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [items, setItems] = useState([]); // State for fetched recipes
 
-  // Use imported data for slider items.
-  const items = categorySliderData;
+  // Fetch recipes based on provided key and value props
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const response = await fetch(
+          `/api/recipe/filter-by-attributes?${keyParam}=${valueParam}`
+        );
+        const data = await response.json();
+        console.log("Fetched recipes:", data);
+        if (data.success && Array.isArray(data.recipes)) {
+          setItems(data.recipes);
+        }
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+      }
+    };
+    fetchRecipes();
+  }, [keyParam, valueParam]);
 
   // Calculate dimensions and update slider container height
   useLayoutEffect(() => {
@@ -30,7 +46,6 @@ const CategorySlider = () => {
             parseInt(getComputedStyle(firstItem).marginRight || 0, 10);
           setSlideWidth(width);
         }
-        // Set the height of the slider (for absolute positioning)
         setSliderHeight(sliderRef.current.offsetHeight);
       }
     };
@@ -104,7 +119,7 @@ const CategorySlider = () => {
         >
           {items.map((item, index) => (
             <div
-              key={index}
+              key={item._id}
               className={`slider-item ${
                 hoveredIndex !== null
                   ? index === hoveredIndex
@@ -114,13 +129,6 @@ const CategorySlider = () => {
                   ? "activeSlide"
                   : ""
               }`}
-              // For active/hovered slide, set width as computed slideWidth + expandedWidth
-              style={
-                (hoveredIndex !== null && index === hoveredIndex) ||
-                index === activeIndex
-                  ? { width: `${slideWidth + expandedWidth}px` }
-                  : {}
-              }
               onMouseEnter={() => {
                 if (index !== activeIndex) {
                   setHoveredIndex(index);
@@ -131,17 +139,18 @@ const CategorySlider = () => {
               }}
             >
               <div className="card-content">
-                <h3>{item.name}</h3>
-                {item.image && (
+                <h3>{item.recipeName}</h3>
+                {item.imageUrls && item.imageUrls[0] && (
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={item.imageUrls[0]}
+                    alt={item.recipeName}
                     className="card-image"
                   />
                 )}
-                <p>{item.description}</p>
+                <p>{item.shortDescription}</p>
                 <p className="price">
-                  {item.cookTime} | {item.portion} | {item.difficulty}
+                  {item.cookTime} mins | {item.servings} servings |{" "}
+                  {item.difficulty}
                 </p>
               </div>
             </div>

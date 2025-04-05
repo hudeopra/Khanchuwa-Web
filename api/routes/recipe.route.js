@@ -66,7 +66,7 @@
  */
 
 import express from 'express';
-import { createRecipe, getAllRecipes, getRecipeById, updateRecipe, addComment, deleteRecipe, filterRecipes, getRecipesByUser } from '../controllers/recipe.controller.js';
+import { createRecipe, getAllRecipes, getRecipeById, updateRecipe, addComment, deleteRecipe, filterRecipes, getRecipesByUser, filterRecipesByAttributes } from '../controllers/recipe.controller.js';
 import { verifyToken } from '../utils/verifyUser.js';
 
 const router = express.Router();
@@ -77,6 +77,7 @@ router.post('/comment/:id', verifyToken, addComment); // new route for adding co
 router.delete('/delete/:id', verifyToken, deleteRecipe); // new route for deleting recipe
 router.get('/all', getAllRecipes);
 router.get('/filter', filterRecipes); // new filtering endpoint
+router.get('/filter-by-attributes', filterRecipesByAttributes); // moved above to avoid conflict
 router.get('/user/:userId', getRecipesByUser); // updated route for getting recipes by user
 router.get('/:id', getRecipeById); // moved this route below to avoid conflict
 

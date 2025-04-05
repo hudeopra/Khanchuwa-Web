@@ -241,6 +241,33 @@ export const filterRecipes = async (req, res, next) => {
   }
 };
 
+// New function: Filter recipes by mealType, diet, difficulty, and servings
+export const filterRecipesByAttributes = async (req, res, next) => {
+  try {
+    const { mealType, diet, difficulty, servings } = req.query;
+
+    let filter = {};
+
+    if (mealType) {
+      filter.mealType = { $in: mealType.split(",").map((type) => type.trim()) };
+    }
+    if (diet) {
+      filter.diet = diet;
+    }
+    if (difficulty) {
+      filter.difficulty = difficulty;
+    }
+    if (servings) {
+      filter.servings = parseInt(servings, 10);
+    }
+
+    const recipes = await Recipe.find(filter);
+    return res.status(200).json({ success: true, message: "filterRecipesByAttributes", recipes });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // New function: Get recipes for a given user (with optional limit)
 export const getRecipesByUser = async (req, res, next) => {
   try {

@@ -40,7 +40,11 @@ export default function RecipeList() {
       params.flavourLogic = flavourLogic; // Add logic to query params
     }
     if (searchTerm) params.searchTerm = searchTerm;
-    setSearchParams(params);
+
+    // Update searchParams only if there are filters or search term
+    if (Object.keys(params).length > 0) {
+      setSearchParams(params);
+    }
   }, [
     selectedCuisine,
     selectedIngredient,
@@ -55,18 +59,26 @@ export default function RecipeList() {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const res = await fetch(
-          `/api/recipe/filter?${searchParams.toString()}`
-        );
+        const query = searchParams.toString();
+        const url = query ? `/api/recipe/filter?${query}` : `/api/recipe/all`; // Fetch all recipes if no query
+        const res = await fetch(url);
         const data = await res.json();
-        setRecipes(Array.isArray(data) ? data : []);
+        console.log("Fetched recipes:", data);
+        const fetchedRecipes = Array.isArray(data.recipes) ? data.recipes : [];
+        setRecipes(fetchedRecipes); // Ensure recipes are set correctly
         setLoading(false);
       } catch (error) {
         setError(error.message);
         setLoading(false);
       }
     };
-    fetchRecipes();
+
+    // Ensure default behavior when no filters or search term
+    if (!searchParams.toString() && !Object.keys(searchParams).length) {
+      fetchRecipes(); // Fetch all recipes directly
+    } else {
+      fetchRecipes(); // Fetch recipes based on filters or search term
+    }
   }, [searchParams]);
 
   useEffect(() => {
@@ -90,7 +102,9 @@ export default function RecipeList() {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
-  const filteredRecipes = recipes.filter((recipe) => {
+  // Ensure recipes are correctly accessed if wrapped in an object
+  const recipesToFilter = Array.isArray(recipes) ? recipes : [];
+  const filteredRecipes = recipesToFilter.filter((recipe) => {
     if (searchTerm) {
       const searchWords = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
       const text =
@@ -99,6 +113,9 @@ export default function RecipeList() {
     }
     return true;
   });
+
+  // Debugging log to verify filteredRecipes
+  console.log("Filtered Recipes:", filteredRecipes);
 
   return (
     <main className="kh-recipe-list">
@@ -118,13 +135,6 @@ export default function RecipeList() {
                 >
                   Cuisine Tags {cuisineTags.length}
                 </h3>
-                <button
-                  onClick={() =>
-                    setCuisineLogic((prev) => (prev === "AND" ? "OR" : "AND"))
-                  }
-                >
-                  Toggle Logic: {cuisineLogic}
-                </button>
                 <div
                   className={`kh-recipe-list__filter ${
                     showCuisineFilter ? "filter-popup" : ""
@@ -135,6 +145,13 @@ export default function RecipeList() {
                     onClick={() => setShowCuisineFilter(false)}
                   >
                     x
+                  </button>
+                  <button
+                    onClick={() =>
+                      setCuisineLogic((prev) => (prev === "AND" ? "OR" : "AND"))
+                    }
+                  >
+                    Toggle Logic: {cuisineLogic}
                   </button>
                   <div className="d-flex gap-2 flex-wrap">
                     {cuisineTags.map((tag) => (
@@ -189,15 +206,7 @@ export default function RecipeList() {
                 >
                   Ingredient Tags {ingredientTags.length}
                 </h3>
-                <button
-                  onClick={() =>
-                    setIngredientLogic((prev) =>
-                      prev === "AND" ? "OR" : "AND"
-                    )
-                  }
-                >
-                  Toggle Logic: {ingredientLogic}
-                </button>
+
                 <div
                   className={`kh-recipe-list__filter ${
                     showIngredientFilter ? "filter-popup" : ""
@@ -208,6 +217,13 @@ export default function RecipeList() {
                     onClick={() => setShowIngredientFilter(false)}
                   >
                     x
+                  </button>
+                  <button
+                    onClick={() =>
+                      setFlavourLogic((prev) => (prev === "AND" ? "OR" : "AND"))
+                    }
+                  >
+                    Toggle Logic: {flavourLogic}
                   </button>
                   <div className="d-flex gap-2 flex-wrap">
                     {ingredientTags.map((tag) => (
@@ -262,13 +278,6 @@ export default function RecipeList() {
                 >
                   Flavour Tags {flavourTags.length}
                 </h3>
-                <button
-                  onClick={() =>
-                    setFlavourLogic((prev) => (prev === "AND" ? "OR" : "AND"))
-                  }
-                >
-                  Toggle Logic: {flavourLogic}
-                </button>
                 <div
                   className={`kh-recipe-list__filter ${
                     showFlavourFilter ? "filter-popup" : ""
@@ -279,6 +288,13 @@ export default function RecipeList() {
                     onClick={() => setShowFlavourFilter(false)}
                   >
                     x
+                  </button>
+                  <button
+                    onClick={() =>
+                      setFlavourLogic((prev) => (prev === "AND" ? "OR" : "AND"))
+                    }
+                  >
+                    Toggle Logic: {flavourLogic}
                   </button>
                   <div className="d-flex gap-2 flex-wrap">
                     {flavourTags.map((tag) => (
@@ -327,54 +343,58 @@ export default function RecipeList() {
               </div>
             </div>
           </div>
-          {filteredRecipes.map((recipe) => (
-            <div
-              key={recipe._id}
-              className="col-12 col-lg-3 col-md-4 col-sm-6 mb-3"
-            >
-              <div className="kh-recipe-block__item mb-3">
-                <Link to={`/recipes/${recipe._id}`} className="">
-                  <div className="kh-recipe-block__content">
-                    <h3 className="">{recipe.recipeName}</h3>
-                    <p className="">{recipe.shortDescription}</p>
-                    <span className="">By {recipe.chefName}</span>
-                  </div>
-                  <div className="kh-recipe-block__item--img">
-                    <img
-                      src={recipe.imageUrls[0]}
-                      alt={recipe.recipeName}
-                      className=""
-                    />
-                  </div>
-                  <p>Cook Time: {recipe.cookTime}</p>
-                  <p>Diet: {recipe.diet}</p>
-                  <p>Difficulty: {recipe.difficulty}</p>
-                  <p>
-                    Ingredient Tags:{" "}
-                    {Array.isArray(recipe.ingredientTag)
-                      ? recipe.ingredientTag
-                          .map((tag) => tag.tagName)
-                          .join(", ")
-                      : recipe.ingredientTag}
-                  </p>
-                  <p>Prep Time: {recipe.prepTime}</p>
-                  <p>Portion: {recipe.portion}</p>
-                  <p>
-                    Flavour Tags:{" "}
-                    {Array.isArray(recipe.flavourTag)
-                      ? recipe.flavourTag.map((tag) => tag.tagName).join(", ")
-                      : recipe.flavourTag}
-                  </p>
-                  <p>
-                    Cuisine Tags:{" "}
-                    {Array.isArray(recipe.cuisineTag)
-                      ? recipe.cuisineTag.map((tag) => tag.tagName).join(", ")
-                      : recipe.cuisineTag}
-                  </p>
-                </Link>
+          {filteredRecipes.length > 0 ? (
+            filteredRecipes.map((recipe) => (
+              <div
+                key={recipe._id}
+                className="col-12 col-lg-3 col-md-4 col-sm-6 mb-3"
+              >
+                <div className="kh-recipe-block__item mb-3">
+                  <Link to={`/recipes/${recipe._id}`} className="">
+                    <div className="kh-recipe-block__content">
+                      <h3 className="">{recipe.recipeName}</h3>
+                      <p className="">{recipe.shortDescription}</p>
+                      <span className="">By {recipe.chefName}</span>
+                    </div>
+                    <div className="kh-recipe-block__item--img">
+                      <img
+                        src={recipe.imageUrls[0]}
+                        alt={recipe.recipeName}
+                        className=""
+                      />
+                    </div>
+                    <p>Cook Time: {recipe.cookTime}</p>
+                    <p>Diet: {recipe.diet}</p>
+                    <p>Difficulty: {recipe.difficulty}</p>
+                    <p>
+                      Ingredient Tags:{" "}
+                      {Array.isArray(recipe.ingredientTag)
+                        ? recipe.ingredientTag
+                            .map((tag) => tag.tagName)
+                            .join(", ")
+                        : recipe.ingredientTag}
+                    </p>
+                    <p>Prep Time: {recipe.prepTime}</p>
+                    <p>Portion: {recipe.portion}</p>
+                    <p>
+                      Flavour Tags:{" "}
+                      {Array.isArray(recipe.flavourTag)
+                        ? recipe.flavourTag.map((tag) => tag.tagName).join(", ")
+                        : recipe.flavourTag}
+                    </p>
+                    <p>
+                      Cuisine Tags:{" "}
+                      {Array.isArray(recipe.cuisineTag)
+                        ? recipe.cuisineTag.map((tag) => tag.tagName).join(", ")
+                        : recipe.cuisineTag}
+                    </p>
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p>No recipes found.</p>
+          )}
         </div>
       </div>
     </main>

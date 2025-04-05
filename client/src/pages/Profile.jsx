@@ -475,41 +475,72 @@ export default function Profile() {
                 <p>No user data available</p>
               )}
             </div>
-            <div className="kh-recipe-post">
+            <div className="kh-profile__items">
               <Link to={`/user-recipe`} className="btn btn-edit">
                 View All recipes
               </Link>
               {recentRecipes.length > 0 ? (
                 recentRecipes.map((recipe) => (
-                  <div key={recipe._id} className="recipe-block">
-                    <div className="recipe-block-wrapper">
-                      <h3>{recipe.recipeName}</h3>
-                      <img
-                        src={
-                          Array.isArray(recipe.imageUrls) &&
-                          recipe.imageUrls.length > 0
-                            ? recipe.imageUrls[0]
-                            : ""
-                        }
-                        alt={recipe.recipeName}
-                        className="recipe-fav-image"
-                      />
+                  <div key={recipe._id} className="kh-profile__item-wrapper">
+                    <div className="kh-profile__item">
+                      <div className="kh-profile__item--content">
+                        <div className="kh-profile__item--img">
+                          <img
+                            src={
+                              Array.isArray(recipe.imageUrls) &&
+                              recipe.imageUrls.length > 0
+                                ? recipe.imageUrls[0]
+                                : ""
+                            }
+                            alt={recipe.recipeName}
+                            className="recipe-fav-image"
+                          />
+                        </div>
 
-                      <h3>{recipe.shortDescription}</h3>
-                      <h3>{recipe.diet}</h3>
-                      <h3>{recipe.updatedAt}</h3>
-                      <p>mealtype:</p>
-                      <ul>
-                        {recipe.mealType.map((meal, index) => (
-                          <li key={index}>{meal}</li>
-                        ))}
-                      </ul>
-                      <h3>Ingredients:</h3>
-                      <ul>
-                        {recipe.ingredients.map((ingredient) => (
-                          <li key={ingredient._id}>{ingredient.name}</li>
-                        ))}
-                      </ul>
+                        <div className="kh-profile__item--details">
+                          <h3>{recipe.recipeName}</h3>
+                          <h3>{recipe.shortDescription}</h3>
+                          <h3>{recipe.diet}</h3>
+                        </div>
+                      </div>
+                      <div className="kh-profile__item--tags">
+                        <p>mealtype:</p>
+                        <ul>
+                          {recipe.mealType.map((meal, index) => (
+                            <li
+                              className={`kh-bubble kh-bubble__mealtype ${
+                                typeof meal === "string"
+                                  ? meal.replace(/\s+/g, "-").toLowerCase()
+                                  : meal.name
+                                  ? meal.name.replace(/\s+/g, "-").toLowerCase()
+                                  : "unknown"
+                              }`}
+                              key={index}
+                            >
+                              {typeof meal === "string"
+                                ? meal
+                                : meal.name || "Unknown"}
+                            </li>
+                          ))}
+                        </ul>
+                        <h3>Ingredients:</h3>
+                        <ul>
+                          {recipe.ingredients.map((ingredient) => (
+                            <li
+                              className={`kh-bubble kh-bubble__mealtype ${
+                                ingredient.name
+                                  ? ingredient.name
+                                      .replace(/\s+/g, "-")
+                                      .toLowerCase()
+                                  : "unknown"
+                              }`}
+                              key={ingredient._id}
+                            >
+                              {ingredient.name || "Unknown"}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                     <Link
                       to={`/recipe/edit/${recipe._id}`}
@@ -517,6 +548,7 @@ export default function Profile() {
                     >
                       Edit
                     </Link>
+                    {/* add delete button here */}
                   </div>
                 ))
               ) : (
@@ -541,6 +573,7 @@ export default function Profile() {
                     >
                       Edit
                     </Link>
+                    {/* add delete button here */}
                   </div>
                 ))
               ) : (

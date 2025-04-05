@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import { useSelector, useDispatch } from "react-redux"; // added import
 import { useEffect, useState } from "react";
 import { SignOut } from "./SignOut"; // Changed to named import
@@ -7,6 +7,8 @@ import {
   removeFromCart,
   updateCartItem,
 } from "../redux/user/userCart"; // ensure correct import
+import Cart from "./Cart"; // Import the new Cart component
+import MainMenu from "./MainMenu"; // Add import for MainMenu
 
 export default function Header() {
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -21,10 +23,12 @@ export default function Header() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const location = useLocation(); // Hook to detect route changes
   const [isMenuActive, setIsMenuActive] = useState(false);
   const [randomRecipeId, setRandomRecipeId] = useState(null);
   const dispatch = useDispatch(); // new dispatch hook
   const [isCartActive, setIsCartActive] = useState(false); // New state for cart toggle
+  const [isOverlayActive, setIsOverlayActive] = useState(false); // New shared state for overlay
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -73,10 +77,20 @@ export default function Header() {
 
   const toggleMenu = () => {
     setIsMenuActive(!isMenuActive);
+    setIsCartActive(false); // Ensure cart is not active
+    setIsOverlayActive(!isMenuActive); // Overlay active if menu is active
   };
 
   const toggleCart = () => {
     setIsCartActive(!isCartActive);
+    setIsMenuActive(false); // Ensure menu is not active
+    setIsOverlayActive(!isCartActive); // Overlay active if cart is active
+  };
+
+  const closeOverlay = () => {
+    setIsMenuActive(false);
+    setIsCartActive(false);
+    setIsOverlayActive(false); // Remove overlay when both are inactive
   };
 
   const handleClearCart = () => {
@@ -115,183 +129,24 @@ export default function Header() {
     navbarFixed();
   }, []);
 
+  useEffect(() => {
+    setIsOverlayActive(false); // Remove overlay when route changes
+  }, [location]); // Dependency on route changes
+
   return (
     <header className="kh-header header">
       <div className="container-fluid">
-        <div className="kh-header__wrapper">
+        <div className="kh-header__wrapper row">
           <div className="kh-header__head">
             <div className="kh-header__head--nav">
-              <div className="trigger" onClick={toggleMenu}>
-                =
-              </div>
-              <nav
-                className={`kh-header__head--menu-wrapper ${
-                  isMenuActive ? "active" : ""
-                }`}
-              >
-                <div className="kh-header__head--menu-block">
-                  <ul>
-                    <li onClick={handleLinkClick}>
-                      <Link to={"/"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Home</span>
-                      </Link>
-                    </li>
-                    <li onClick={handleLinkClick}>
-                      <Link to={"/recipes"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Recipes</span>
-                      </Link>
-                    </li>
-                    <li onClick={handleLinkClick}>
-                      <Link to={"/trending"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Trending</span>
-                      </Link>
-                    </li>
-                    <li onClick={handleLinkClick}>
-                      {randomRecipeId && (
-                        <Link
-                          to={`/recipes/${randomRecipeId}`}
-                          onClick={handleRandomRecipeClick}
-                        >
-                          <img
-                            src="../src/assets/img/search/chefLogo.png"
-                            alt="Khanchuwa Logo"
-                          />
-                          <span>Random</span>
-                        </Link>
-                      )}
-                    </li>
-                    <li onClick={handleLinkClick}>
-                      <Link to={"/search"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Search</span>
-                      </Link>
-                    </li>
-                    <li onClick={handleLinkClick}>
-                      <Link to={"/about"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>About Khanchuwa</span>
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-                <div className="kh-header__head--menu-block">
-                  <p>Account</p>
-                  {currentUser ? (
-                    <ul>
-                      <li onClick={handleLinkClick}>
-                        <Link to="/profile">
-                          <img
-                            src="../src/assets/img/search/chefLogo.png"
-                            alt="Khanchuwa Logo"
-                          />
-                          <span>My Profile</span>
-                        </Link>
-                      </li>
-                      <li onClick={handleLinkClick}>
-                        <Link to={"/create-recipe"}>
-                          <img
-                            src="../src/assets/img/search/chefLogo.png"
-                            alt="Khanchuwa Logo"
-                          />
-                          <span>Create Recipe</span>
-                        </Link>
-                      </li>
-                      <SignOut type="list" />
-                    </ul>
-                  ) : (
-                    <ul>
-                      <li onClick={handleLinkClick}>
-                        <Link to={"/signup"}>
-                          <img
-                            src="../src/assets/img/search/chefLogo.png"
-                            alt="Khanchuwa Logo"
-                          />
-                          <span>Create Account</span>
-                        </Link>
-                      </li>
-                      <li onClick={handleLinkClick}>
-                        <Link to={"/signin"}>
-                          <img
-                            src="../src/assets/img/search/chefLogo.png"
-                            alt="Khanchuwa Logo"
-                          />
-                          <span>Sign In</span>
-                        </Link>
-                      </li>
-                    </ul>
-                  )}
-                </div>
-                <div className="kh-header__head--menu-block">
-                  <p>Connect</p>
-                  <ul>
-                    <li onClick={handleLinkClick}>
-                      <Link to={"/whats-new"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>What’s New</span>
-                      </Link>
-                    </li>
-                    <li onClick={handleLinkClick}>
-                      <Link to={"/contact"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Contact Us</span>
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-                <div className="kh-header__head--menu-block">
-                  <p>Resources</p>
-                  <ul>
-                    <li onClick={handleLinkClick}>
-                      <Link to={"/faq"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>FAQ</span>
-                      </Link>
-                    </li>
-                    <li onClick={handleLinkClick}>
-                      <Link to={"/site-map"}>
-                        <img
-                          src="../src/assets/img/search/chefLogo.png"
-                          alt="Khanchuwa Logo"
-                        />
-                        <span>Site Map</span>
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-                <div
-                  className={`kh-header__head--overlay  ${
-                    isMenuActive ? "active" : ""
-                  }`}
-                  onClick={toggleMenu}
-                ></div>
-              </nav>
+              <MainMenu
+                isMenuActive={isMenuActive}
+                toggleMenu={toggleMenu}
+                handleLinkClick={handleLinkClick}
+                randomRecipeId={randomRecipeId}
+                handleRandomRecipeClick={handleRandomRecipeClick}
+                currentUser={currentUser}
+              />
             </div>
             <div className="kh-header__head--main-logo">
               <Link to="/" onClick={handleLinkClick}>
@@ -304,142 +159,43 @@ export default function Header() {
             {/* <div className="kh-header__head--page-title">Current Page</div> */}
           </div>
           <div className="kh-header__search">
-            <form
-              onSubmit={handleSubmit}
-              className="bg-slate-100 p-3 rounded-lg flex items-center"
-            >
+            <form onSubmit={handleSubmit} className="">
               <input
                 type="text"
                 placeholder="Search..."
-                className="bg-transparent focus:outline-none w-24 sm:w-64"
+                className=""
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onClick={() => navigate("/recipes")} // Redirect to RecipeList page on click
               />
             </form>
           </div>
-          <div className="kh-header__account">
+          <div className="kh-header__user">
             {currentUser ? (
-              <div className="flex items-center gap-2">
-                <Link to="/profile" onClick={handleLinkClick}>
-                  <img
-                    className="rounded-full h-7 w-7 object-cover"
-                    src={currentUser.avatar}
-                    alt="profile"
+              <div className="kh-header__user--profile-wrapper">
+                <div className="kh-header__user--tab">
+                  <Link to="/profile" onClick={handleLinkClick}>
+                    <img
+                      className="rounded-full h-7 w-7 object-cover"
+                      src={
+                        currentUser?.user?.avatar ||
+                        currentUser?.avatar ||
+                        defaultAvatar
+                      }
+                      alt="User Avatar"
+                    />
+                  </Link>
+                </div>
+                <div className="kh-header__user--cart">
+                  <Cart
+                    cartItems={cartItems}
+                    isCartActive={isCartActive}
+                    toggleCart={toggleCart}
+                    handleClearCart={handleClearCart}
+                    handleQuantityChange={handleQuantityChange}
+                    handleRemoveFromCart={handleRemoveFromCart}
+                    userCart={userCart}
                   />
-                </Link>
-                <div className="kh-header__cart">
-                  <div className="kh-header__cart--head">
-                    <span
-                      className={`kh-header__cart--count trigger ${
-                        isCartActive ? "active" : ""
-                      }`}
-                      onClick={toggleCart}
-                    >
-                      {cartItems.reduce(
-                        (total, item) => total + item.quantity,
-                        0
-                      )}
-                    </span>
-                  </div>
-                  <div
-                    className={`kh-header__cart--content ${
-                      isCartActive ? "active" : ""
-                    }`}
-                  >
-                    <button
-                      onClick={handleClearCart}
-                      className="text-xs text-red-600 hover:underline"
-                    >
-                      Clear Cart
-                    </button>
-                    <div className="kh-header__cart--body">
-                      <div className="kh-header__cart--title">
-                        <h3>Cart</h3>
-                      </div>
-                      {cartItems && cartItems.length > 0 ? (
-                        <ul className="kh-header__cart--items">
-                          {cartItems.map((item) => (
-                            <li className="kh-header__cart--item" key={item.id}>
-                              <div className="kh-header__cart--item--wrapper">
-                                <div className="kh-header__cart--item--details">
-                                  <p className="kh-header__cart--item--name">
-                                    {item.productName}
-                                  </p>
-                                  <img
-                                    src={item.favImg} // Use favImg from Redux or fallback
-                                    alt={item.productName} // Use product name as alt text
-                                    className="kh-header__cart--item--fav"
-                                  />
-                                  <p className="kh-header__cart--item--price">
-                                    ${(item.price || 0).toFixed(2)}{" "}
-                                    {/* Ensure price is not NaN */}
-                                  </p>
-                                  <div className="kh-header__cart--item--quantity">
-                                    <button
-                                      onClick={() =>
-                                        handleQuantityChange(
-                                          item.id,
-                                          item.quantity - 1
-                                        )
-                                      }
-                                      className="p-2 border"
-                                    >
-                                      -
-                                    </button>
-                                    <input
-                                      type="number"
-                                      value={item.quantity}
-                                      onChange={(e) =>
-                                        handleQuantityChange(
-                                          item.id,
-                                          Number(e.target.value)
-                                        )
-                                      }
-                                      min="1"
-                                      className="w-16 p-2 border text-center"
-                                    />
-                                    <button
-                                      onClick={() =>
-                                        handleQuantityChange(
-                                          item.id,
-                                          item.quantity + 1
-                                        )
-                                      }
-                                      className="p-2 border"
-                                    >
-                                      +
-                                    </button>
-                                  </div>
-                                </div>
-                                <button
-                                  onClick={() => handleRemoveFromCart(item.id)}
-                                  className="kh-header__cart--item--remove"
-                                >
-                                  Remove
-                                </button>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p>Cart is empty</p>
-                      )}
-                      <div className="kh-header__cart--checkout">
-                        <Link
-                          to=""
-                          className="bg-green-500 text-white py-2 px-4 rounded"
-                          onClick={() =>
-                            console.log(
-                              "Cart Data:",
-                              JSON.stringify(userCart, null, 2)
-                            )
-                          }
-                        >
-                          Checkout
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             ) : (
@@ -455,6 +211,10 @@ export default function Header() {
           </div>
         </div>
       </div>
+      <div
+        className={`kh-header__overlay ${isOverlayActive ? "active" : ""}`}
+        onClick={closeOverlay}
+      ></div>
     </header>
   );
 }

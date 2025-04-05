@@ -130,6 +130,8 @@ const TagDetail = () => {
         quantity,
         price: unitPrice * quantity, // Calculate total price
         favImg: tag.favImg, // Include favImg
+        disPrice: tag.disPrice || null, // Add disPrice if available
+        mrkPrice: tag.mrkPrice || null, // Add mrkPrice if available
       };
       console.log("Dispatching addToCart with:", cartItem); // Debugging log
       dispatch(addToCart(cartItem));
