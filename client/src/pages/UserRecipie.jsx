@@ -91,7 +91,7 @@ export default function UserRecipie() {
                         View Recipe
                       </Link>
                       <Link
-                        to={`/recipe/edit/${recipe._id}`}
+                        to={`/recipes/edit/${recipe._id}`}
                         className="btn btn-edit"
                       >
                         Edit

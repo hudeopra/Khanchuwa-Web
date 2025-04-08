@@ -41,7 +41,6 @@ export default function CreateRecipe() {
     ], // default to 2 items
     cookInstructions: "", // Initialize the new instructions as empty strings
     prepInstructions: "", // Initialize the new instructions as empty strings
-    tags: [],
     mealType: [], // UPDATED: multiple meal types can be selected
     cookingMethod: [], // UPDATED: cooking methods (multiple), will include extra +1 option
   });
@@ -50,14 +49,18 @@ export default function CreateRecipe() {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Set chefName from currentUser’s username
+  // Set chefName from currentUser’s fullname
   useEffect(() => {
-    // Use nested user object if available.
-    const username = currentUser?.user?.username || currentUser?.username;
+    const username = currentUser?.username; // Access fullname directly
     if (username) {
       setFormData((prev) => ({ ...prev, chefName: username }));
     }
   }, [currentUser]);
+
+  useEffect(() => {
+    // Log formData changes to the console
+    console.log("Form data updated:", formData);
+  }, [formData]);
 
   const handleArrayChange = (field, index, value) => {
     const newArr = [...formData[field]];
@@ -263,14 +266,14 @@ export default function CreateRecipe() {
 
   // Add helper function to remove a field:
   const removeField = (field, index) => {
-    // For nutritionalInfo, ensure at least 2 remain; for instructions, allow removal if length >= 3.
-    if (
-      (field === "nutritionalInfo" && formData.nutritionalInfo.length >= 3) ||
-      ((field === "cookInstructions" || field === "prepInstructions") &&
-        formData[field].length >= 3)
-    ) {
+    if (field === "nutritionalInfo" && formData.nutritionalInfo.length >= 3) {
       const newArr = formData[field].filter((_, i) => i !== index);
       setFormData({ ...formData, [field]: newArr });
+    } else if (
+      (field === "cookInstructions" || field === "prepInstructions") &&
+      formData[field].length > 0
+    ) {
+      setFormData({ ...formData, [field]: "" }); // Reset the string field
     }
   };
 
@@ -312,7 +315,7 @@ export default function CreateRecipe() {
                             <input
                               type="text"
                               placeholder="Name"
-                              className="border  rounded-lg"
+                              className="  "
                               id="recipeName"
                               maxLength="62"
                               minLength="10"
@@ -328,13 +331,39 @@ export default function CreateRecipe() {
                               type="text"
                               id="videoUrl"
                               placeholder="Video URL"
-                              className="border  rounded-lg"
+                              className="  "
                               onChange={handleChange}
                               value={formData.videoUrl}
                             />
                           </div>
                         </div>
                       </div>
+                      <div className="kh-recipe-form__form--item">
+                        <label htmlFor="description">Long Description</label>
+                        <textarea
+                          id="description"
+                          placeholder="Description"
+                          className="  "
+                          onChange={handleChange}
+                          value={formData.description}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-4">
+                      <div className="kh-recipe-form__form--item">
+                        <label htmlFor="shortDescription">
+                          Short Description
+                        </label>
+                        <textarea
+                          id="shortDescription"
+                          placeholder="Short description"
+                          className="  "
+                          onChange={handleChange}
+                          value={formData.shortDescription}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-12">
                       <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                         <label>Meal Course</label>
                         <div className="d-flex flex-wrap gap-2">
@@ -398,29 +427,41 @@ export default function CreateRecipe() {
                           ))}
                         </div>
                       </div>
-                      <div className="kh-recipe-form__form--item">
-                        <label htmlFor="description">Long Description</label>
-                        <textarea
-                          id="description"
-                          placeholder="Description"
-                          className="border  rounded-lg"
-                          onChange={handleChange}
-                          value={formData.description}
-                        />
-                      </div>
-                    </div>
-                    <div className="col-4">
-                      <div className="kh-recipe-form__form--item">
-                        <label htmlFor="shortDescription">
-                          Short Description
-                        </label>
-                        <textarea
-                          id="shortDescription"
-                          placeholder="Short description"
-                          className="border  rounded-lg"
-                          onChange={handleChange}
-                          value={formData.shortDescription}
-                        />
+                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
+                        <label>Cooking Method</label>
+                        <div className="d-flex flex-wrap gap-2">
+                          {[
+                            "Stir-fried",
+                            "Grilled",
+                            "Baked",
+                            "Boiled",
+                            "Fried",
+                            "Roasting",
+                            "Steamed",
+                            "Simmered",
+                            "Fresh",
+                          ].map((opt) => (
+                            <div
+                              className={`kh-recipe-form__checkbox--item ${
+                                formData.cookingMethod?.includes(opt)
+                                  ? "checked"
+                                  : ""
+                              }`}
+                              key={opt}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.cookingMethod?.includes(opt) || false
+                                }
+                                onChange={() =>
+                                  toggleOption("cookingMethod", opt)
+                                }
+                              />
+                              <label>{opt}</label>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -435,10 +476,7 @@ export default function CreateRecipe() {
                         key={idx}
                         className="kh-recipe-form__nutritional__item"
                       >
-                        <label
-                          className="w-32"
-                          htmlFor={`nutritional-info-${idx}`}
-                        >
+                        <label className="" htmlFor={`nutritional-info-${idx}`}>
                           {item.name}
                         </label>
                         <input
@@ -459,7 +497,7 @@ export default function CreateRecipe() {
                             });
                           }}
                           placeholder="Enter amount"
-                          className="border p-2 rounded"
+                          className="  "
                         />
                       </div>
                     ))}
@@ -474,7 +512,7 @@ export default function CreateRecipe() {
                       <label htmlFor="diet">Diet</label>
                       <select
                         id="diet"
-                        className="border  rounded-lg"
+                        className=" nice-select "
                         onChange={handleChange}
                         value={formData.diet}
                       >
@@ -490,7 +528,7 @@ export default function CreateRecipe() {
                       <label htmlFor="difficulty">Difficulty</label>
                       <select
                         id="difficulty"
-                        className="border  rounded-lg"
+                        className=" nice-select "
                         onChange={handleChange}
                         value={formData.difficulty}
                       >
@@ -507,7 +545,7 @@ export default function CreateRecipe() {
                       <input
                         type="number"
                         placeholder="Prep Time"
-                        className="border  rounded-lg"
+                        className="  "
                         id="prepTime"
                         onChange={handleChange}
                         value={formData.prepTime}
@@ -518,80 +556,27 @@ export default function CreateRecipe() {
                       <input
                         type="number"
                         placeholder="Cook Time"
-                        className="border  rounded-lg"
+                        className="  "
                         id="cookTime"
                         onChange={handleChange}
                         value={formData.cookTime}
                       />
                     </div>
                     <div className="kh-recipe-form__form--item">
-                      <p>Servings:</p>
-                      <label>
-                        <input
-                          type="radio"
-                          name="servings"
-                          value="1"
-                          checked={formData.servings === "1"}
-                          onChange={handleChange}
-                        />
-                        1
-                      </label>
-                      <label>
-                        <input
-                          type="radio"
-                          name="servings"
-                          value="2"
-                          checked={formData.servings === "2"}
-                          onChange={handleChange}
-                        />
-                        2
-                      </label>
-                      <label>
-                        <input
-                          type="radio"
-                          name="servings"
-                          value="4"
-                          checked={formData.servings === "4"}
-                          onChange={handleChange}
-                        />
-                        4
-                      </label>
-                    </div>
-                    <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
-                      <label>Cooking Method</label>
-                      <div className="d-flex flex-wrap gap-2">
-                        {[
-                          "Stir-fried",
-                          "Grilled",
-                          "Baked",
-                          "Boiled",
-                          "Fried",
-                          "Roasting",
-                          "Steamed",
-                          "Simmered",
-                          "Fresh",
-                        ].map((opt) => (
-                          <div
-                            className={`kh-recipe-form__checkbox--item ${
-                              formData.cookingMethod?.includes(opt)
-                                ? "checked"
-                                : ""
-                            }`}
-                            key={opt}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={
-                                formData.cookingMethod?.includes(opt) || false
-                              }
-                              onChange={() =>
-                                toggleOption("cookingMethod", opt)
-                              }
-                            />
-                            <label>{opt}</label>
-                          </div>
+                      <label htmlFor="servings">Servings:</label>
+                      <select
+                        id="servings"
+                        className="nice-select "
+                        value={formData.servings}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Servings</option>
+                        {[1, 2, 4, 6, 8, 10, 12].map((option) => (
+                          <option key={option} value={option.toString()}>
+                            {option}
+                          </option>
                         ))}
-                      </div>
+                      </select>
                     </div>
                     <div className="kh-recipe-form__form--item">
                       <label>Ingredients:</label>
@@ -605,7 +590,7 @@ export default function CreateRecipe() {
                               id={`ingredient-name-${index}`}
                               type="text"
                               placeholder="Ingredient name"
-                              className="border  rounded-lg my-1"
+                              className="   my-1"
                               value={ingredient.name}
                               onChange={(e) => {
                                 const newIngredients = formData.ingredients.map(
@@ -630,7 +615,7 @@ export default function CreateRecipe() {
                               id={`ingredient-qty-${index}`}
                               type="text"
                               placeholder="Quantity"
-                              className="border  rounded-lg my-1"
+                              className="   my-1"
                               value={ingredient.quantity}
                               onChange={(e) => {
                                 const newIngredients = formData.ingredients.map(
@@ -646,7 +631,7 @@ export default function CreateRecipe() {
                               }}
                             />
                           </div>
-                          <div className="kh-recipe-form__ingredient--item">
+                          <div className="kh-recipe-form__ingredient--remove">
                             {formData.ingredients.length > 1 && (
                               <button
                                 type="button"
@@ -658,7 +643,7 @@ export default function CreateRecipe() {
                                     ),
                                   })
                                 }
-                                className="Remove"
+                                className="kh-btn kh-btn__x"
                               >
                                 x
                               </button>
@@ -704,10 +689,12 @@ export default function CreateRecipe() {
                 </div>
               </AccordionItem>
             </div>
-            <div className="col-3">
+            <div className="col-4">
               <div className="kh-recipe-form__admin">
-                <p>Author: {formData.chefName}</p>
-                <div className="submitwrapper">
+                <p>
+                  Author: <span>@{formData.chefName}</span>
+                </p>
+                <div className="kh-recipe-form__admin--submit">
                   <input type="hidden" id="userRef" value={currentUser._id} />
 
                   <button
@@ -721,7 +708,7 @@ export default function CreateRecipe() {
                 </div>
               </div>
               <AccordionItem title="Media Upload ">
-                <div className="div-input-wrapper">
+                <div className="div-input-wrapper kh-media-upload">
                   <h4>Media Upload</h4>
                   <div className="kh-recipe-form__form--item">
                     <label htmlFor="bannerImg">Banner Image</label>
@@ -732,11 +719,11 @@ export default function CreateRecipe() {
                       onChange={handleBannerSelect}
                     />
                     {formData.bannerImgUrl && (
-                      <div className="flex items-center gap-2">
+                      <div className="kh-media-upload__preview">
                         <img
                           src={formData.bannerImgUrl}
                           alt="Banner"
-                          className="w-20 h-20 object-contain rounded-lg"
+                          className=""
                         />
                         <button
                           type="button"
@@ -762,11 +749,11 @@ export default function CreateRecipe() {
                       onChange={handleFavSelect}
                     />
                     {formData.favImgUrl && (
-                      <div className="flex items-center gap-2">
+                      <div className="kh-media-upload__preview">
                         <img
                           src={formData.favImgUrl}
                           alt="Favorite"
-                          className="w-20 h-20 object-contain rounded-lg"
+                          className=""
                         />
                         <button
                           type="button"
@@ -787,7 +774,7 @@ export default function CreateRecipe() {
                     <label htmlFor="images">Gallery Images:</label>
                     <input
                       onChange={handleFileSelect}
-                      className=" border border-gray-300 rounded w-full"
+                      className="  -gray-300  w-full"
                       type="file"
                       id="images"
                       accept="image/*"
@@ -796,26 +783,21 @@ export default function CreateRecipe() {
                     <p className="text-red-700 text-sm">
                       {imageUploadError && imageUploadError}
                     </p>
-                    {formData.imageUrls.length > 0 &&
-                      formData.imageUrls.map((url, index) => (
-                        <div
-                          key={url}
-                          className="flex justify-between  border items-center"
-                        >
-                          <img
-                            src={url}
-                            alt="recipe image"
-                            className="w-20 h-20 object-contain rounded-lg"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveImage(index)}
-                            className="kh-btn kh-btn__x"
-                          >
-                            x
-                          </button>
-                        </div>
-                      ))}
+                    <div className="kh-media-upload__flex">
+                      {formData.imageUrls.length > 0 &&
+                        formData.imageUrls.map((url, index) => (
+                          <div key={url} className="kh-media-upload__preview">
+                            <img src={url} alt="recipe image" className="" />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(index)}
+                              className="kh-btn kh-btn__x"
+                            >
+                              x
+                            </button>
+                          </div>
+                        ))}
+                    </div>
                   </div>
                 </div>
               </AccordionItem>

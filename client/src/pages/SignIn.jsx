@@ -7,8 +7,11 @@ import {
   signInFailure,
 } from "../redux/user/userSlice.js";
 import OAuth from "../components/OAuth.jsx";
+import BootstrapAlert from "../components/BootstrapAlert.jsx";
+import { useAlert } from "../components/AlertContext"; // Import the alert context
 
 export default function SignIn() {
+  const { showAlert } = useAlert(); // Access the showAlert function
   const [userData, setUserData] = useState({});
   // name of the userslice is user
   const { loading, error } = useSelector((state) => state.user);
@@ -42,12 +45,15 @@ export default function SignIn() {
 
       if (signinResData.success === false) {
         dispatch(signInFailure(signinResData.message));
+        showAlert("error", signinResData.message); // Redirect error to Header
         return;
       }
       dispatch(signInSuccess(signinResData));
+      showAlert("success", "Signed in successfully!"); // Redirect success to Header
       navigate("/");
     } catch (error) {
       dispatch(signInFailure(error.message));
+      showAlert("error", error.message); // Redirect error to Header
     }
 
     //   if (!res.ok) {
@@ -108,7 +114,16 @@ export default function SignIn() {
               <Link to="/SignUp">Sign Up</Link>
             </p>
           </div>
-          {error && <p className="">{error}</p>}
+          {error && (
+            <BootstrapAlert type="error" message={error} duration={5000} />
+          )}
+          {!error && !loading && (
+            <BootstrapAlert
+              type="success"
+              message="Signed in successfully!"
+              duration={5000}
+            />
+          )}
         </div>
       </div>
     </main>

@@ -9,8 +9,10 @@ import {
 } from "../redux/user/userCart"; // ensure correct import
 import Cart from "./Cart"; // Import the new Cart component
 import MainMenu from "./MainMenu"; // Add import for MainMenu
+import { useAlert } from "./AlertContext"; // Import the alert context
+import BootstrapAlert from "./BootstrapAlert"; // Import BootstrapAlert
 
-export default function Header() {
+export default function Header({ pagename }) {
   const currentUser = useSelector((state) => state.user.currentUser);
   const userCart = useSelector((state) => state.userCart);
   // derive cartItems; if userCart is missing use an empty array
@@ -29,6 +31,7 @@ export default function Header() {
   const dispatch = useDispatch(); // new dispatch hook
   const [isCartActive, setIsCartActive] = useState(false); // New state for cart toggle
   const [isOverlayActive, setIsOverlayActive] = useState(false); // New shared state for overlay
+  const { alert } = useAlert(); // Access the global alert
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -156,7 +159,7 @@ export default function Header() {
                 />
               </Link>
             </div>
-            {/* <div className="kh-header__head--page-title">Current Page</div> */}
+            <div className="kh-header__head--page-title">{pagename}</div>
           </div>
           <div className="kh-header__search">
             <form onSubmit={handleSubmit} className="">
@@ -174,17 +177,20 @@ export default function Header() {
             {currentUser ? (
               <div className="kh-header__user--profile-wrapper">
                 <div className="kh-header__user--tab">
-                  <Link to="/profile" onClick={handleLinkClick}>
-                    <img
-                      className="rounded-full h-7 w-7 object-cover"
-                      src={
-                        currentUser?.user?.avatar ||
-                        currentUser?.avatar ||
-                        defaultAvatar
-                      }
-                      alt="User Avatar"
-                    />
-                  </Link>
+                  <div className="kh-header__user--profile">
+                    <Link to="/profile" onClick={handleLinkClick}>
+                      <img
+                        className="rounded-full h-7 w-7 object-cover"
+                        src={currentUser?.user?.avatar || currentUser?.avatar}
+                        alt="User Avatar"
+                      />
+                      <span className="kh-header__user--label">Profile</span>
+                    </Link>
+                  </div>
+                  <div className="kh-header__user--signout">
+                    <SignOut txt={false} />
+                    <span className="kh-header__user--label">SignOut</span>
+                  </div>
                 </div>
                 <div className="kh-header__user--cart">
                   <Cart
@@ -211,6 +217,13 @@ export default function Header() {
           </div>
         </div>
       </div>
+      {alert && (
+        <BootstrapAlert
+          type={alert.type}
+          message={alert.message}
+          duration={5000}
+        />
+      )}
       <div
         className={`kh-header__overlay ${isOverlayActive ? "active" : ""}`}
         onClick={closeOverlay}

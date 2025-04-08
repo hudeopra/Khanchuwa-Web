@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { SignOut } from "./SignOut"; // Import SignOut component
 
 export default function ProfileNav({ active, subActive }) {
   const [menuToggles, setMenuToggles] = useState({
@@ -157,6 +158,10 @@ export default function ProfileNav({ active, subActive }) {
                   </Link>
                 </li>
               </ul>
+            </li>
+            <li>
+              <SignOut type="content" />{" "}
+              {/* Render SignOut content without <li> */}
             </li>
           </ul>
         </div>

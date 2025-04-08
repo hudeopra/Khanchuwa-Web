@@ -21,6 +21,7 @@ import {
 import { Link } from "react-router-dom";
 import BootstrapAlert from "../components/BootstrapAlert";
 import ProfileNav from "../components/ProfileNav";
+import { useAlert } from "../components/AlertContext"; // Import the alert context
 
 // import { getAuth } from "firebase/auth";
 
@@ -36,6 +37,7 @@ export default function ProfileEdit() {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const dispatch = useDispatch();
+  const { showAlert } = useAlert(); // Access the showAlert function
 
   useEffect(() => {
     if (file) {
@@ -46,7 +48,7 @@ export default function ProfileEdit() {
   useEffect(() => {
     if (currentUser) {
       const user = currentUser.user || currentUser;
-      console.log("Current User Data:", user);
+      console.log("Current User Data:", user); // Debugging user data
       setUserData({
         // retained fields
         username: user.username,
@@ -56,38 +58,15 @@ export default function ProfileEdit() {
         // new fields:
         fullname: user.fullname || "",
         dateOfBirth: user.dateOfBirth || "",
-        gender: user.gender || "",
-        emails: user.emails || "",
-        phoneNumbers:
-          user.phoneNumbers && user.phoneNumbers.length > 0
-            ? user.phoneNumbers
-            : [{ number: "", isPrimary: false }],
-        addresses:
-          user.addresses && user.addresses.length > 0
-            ? user.addresses
-            : [
-                {
-                  type: "",
-                  street: "",
-                  city: "",
-                  state: "",
-                  zip: "",
-                  country: "",
-                },
-              ],
+        gender: user.gender || "", // Ensure gender is initialized
         socialMedia:
-          user.socialMedia && user.socialMedia.length > 0
-            ? user.socialMedia
-            : [{ platform: "", url: "" }],
-        preferences: user.preferences || {
-          dietaryRestrictions: [],
-          allergies: [],
-          tastePreferences: [],
-          language: "",
-          notifications: { email: false, push: false },
-        },
+          user.socialMedia?.reduce((acc, item) => {
+            acc[item.platform.toLowerCase()] = item.url;
+            return acc;
+          }, {}) || {}, // Map socialMedia array to an object
         // New field for usertype with default "guest"
         usertype: user.usertype || "guest",
+        bio: user.bio || "", // Ensure bio is initialized as an empty string
       });
     }
   }, [currentUser]);
@@ -120,6 +99,7 @@ export default function ProfileEdit() {
   };
 
   const handelChange = (e) => {
+    console.log(`Field Changed: ${e.target.id}, Value: ${e.target.value}`); // Debugging field changes
     if (e.target.id === "dateOfBirth") {
       const selectedDate = new Date(e.target.value);
       const currentDate = new Date();
@@ -160,22 +140,17 @@ export default function ProfileEdit() {
     try {
       dispatch(updateUserStart());
       const userId = currentUser.user ? currentUser.user._id : currentUser._id;
-      // Transform socialMedia object into array
-      const socialMediaArray = [
-        ...(userData.socialMedia?.tiktok
-          ? [{ platform: "TikTok", url: userData.socialMedia.tiktok }]
-          : []),
-        ...(userData.socialMedia?.insta
-          ? [{ platform: "Instagram", url: userData.socialMedia.insta }]
-          : []),
-        ...(userData.socialMedia?.youtube
-          ? [{ platform: "YouTube", url: userData.socialMedia.youtube }]
-          : []),
-      ];
-      // Merge the transformed array into userData before sending
-      const updatedUserData = { ...userData, socialMedia: socialMediaArray };
 
-      // ...existing code...
+      const socialMediaArray = Object.entries(userData.socialMedia).map(
+        ([platform, url]) => ({ platform, url })
+      ); // Convert socialMedia object back to an array
+
+      const updatedUserData = {
+        ...userData,
+        socialMedia: socialMediaArray,
+        bio: userData.bio, // Ensure bio is included
+      };
+
       const res = await fetch(`/api/user/update/${userId}`, {
         method: "POST",
         headers: {
@@ -183,16 +158,19 @@ export default function ProfileEdit() {
         },
         body: JSON.stringify(updatedUserData),
       });
+
       const data = await res.json();
       if (data.success === false) {
         dispatch(updateUserFailure(data.message));
+        showAlert("error", data.message); // Redirect error to Header
         return;
       }
 
       dispatch(updateUserSuccess(data));
-      setUpdateSuccess(true);
+      showAlert("success", "User updated successfully!"); // Redirect success to Header
     } catch (error) {
       dispatch(updateUserFailure(error.message));
+      showAlert("error", error.message); // Redirect error to Header
     }
   };
 
@@ -325,10 +303,12 @@ export default function ProfileEdit() {
                   <input
                     type="text"
                     placeholder="Full Name"
-                    value={userData.fullname || ""}
-                    id="fullnamelanguage"
+                    value={userData.fullname || ""} // Ensure correct field is used
+                    id="fullname" // Corrected id to match userData field
                     className="border p-3 rounded-lg"
-                    onChange={handelChange}
+                    onChange={(e) =>
+                      setUserData({ ...userData, fullname: e.target.value })
+                    } // Directly update fullname
                   />
                 </div>
 
@@ -348,190 +328,49 @@ export default function ProfileEdit() {
                   {dobError && <p className="text-red-700">{dobError}</p>}
                 </div>
                 <div className="kh-input-wrapper">
-                  <label>Gender:</label>{" "}
+                  <label className="block text-gray-700 font-bold mb-2">
+                    Gender:
+                  </label>
                   <div className="flex space-x-4">
-                    <label>
+                    <label className="flex items-center space-x-2">
                       <input
                         type="radio"
+                        id="gender" // Add id attribute
                         name="gender"
                         value="male"
                         checked={userData.gender === "male"}
                         onChange={handelChange}
+                        className="form-radio text-blue-600"
                       />
-                      Male
+                      <span className="text-gray-700">Male</span>
                     </label>
-                    <label>
+                    <label className="flex items-center space-x-2">
                       <input
                         type="radio"
+                        id="gender" // Add id attribute
                         name="gender"
-                        value="Female"
-                        checked={userData.gender === "Female"}
+                        value="female"
+                        checked={userData.gender === "female"}
                         onChange={handelChange}
+                        className="form-radio text-blue-600"
                       />
-                      Female
+                      <span className="text-gray-700">Female</span>
                     </label>
-                    <label>
+                    <label className="flex items-center space-x-2">
                       <input
                         type="radio"
+                        id="gender" // Add id attribute
                         name="gender"
                         value="other"
                         checked={userData.gender === "other"}
                         onChange={handelChange}
+                        className="form-radio text-blue-600"
                       />
-                      Other
+                      <span className="text-gray-700">Other</span>
                     </label>
                   </div>
-                </div>
-                <div className="kh-input-wrapper">
-                  <input
-                    type="text"
-                    placeholder="Alternative Emails"
-                    value={userData.emails || ""}
-                    id="emails"
-                    className="border p-3 rounded-lg"
-                    onChange={handelChange}
-                  />
-                </div>
-                {/* Dynamic array field for Phone Numbers */}
-                <div className="kh-input-wrapper">
-                  <label>Phone Numbers:</label>
-                  {userData.phoneNumbers &&
-                    userData.phoneNumbers.map((phone, index) => (
-                      <div key={index} className="flex space-x-2">
-                        <input
-                          type="text"
-                          placeholder="Phone Number"
-                          value={phone.number || ""}
-                          onChange={(e) =>
-                            handleArrayChange(
-                              e,
-                              "phoneNumbers",
-                              index,
-                              "number"
-                            )
-                          }
-                          className="border p-2 rounded"
-                        />
-                        <label>
-                          Primary
-                          <input
-                            type="radio"
-                            name="phonePrimary"
-                            checked={phone.isPrimary || false}
-                            onChange={() => {
-                              const updatedPhones = userData.phoneNumbers.map(
-                                (p, i) => ({
-                                  ...p,
-                                  isPrimary: i === index,
-                                })
-                              );
-                              setUserData({
-                                ...userData,
-                                phoneNumbers: updatedPhones,
-                              });
-                            }}
-                          />
-                        </label>
-                      </div>
-                    ))}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if ((userData.phoneNumbers?.length || 0) < 3) {
-                        addArrayItem("phoneNumbers", {
-                          number: "",
-                          isPrimary: userData.phoneNumbers?.length === 0, // default primary for first phone
-                        });
-                      }
-                    }}
-                    disabled={(userData.phoneNumbers?.length || 0) >= 3}
-                  >
-                    +
-                  </button>
-                </div>
-                {/* Dynamic array field for Addresses */}
-                <div className="kh-input-wrapper">
-                  <label>Addresses:</label>
-                  {userData.addresses &&
-                    userData.addresses.map((addr, index) => (
-                      <div
-                        key={index}
-                        className="flex flex-col space-y-1 border p-2 mb-2"
-                      >
-                        <input
-                          type="text"
-                          placeholder="Type"
-                          value={addr.type || ""}
-                          onChange={(e) =>
-                            handleArrayChange(e, "addresses", index, "type")
-                          }
-                          className="border p-2 rounded"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Street"
-                          value={addr.street || ""}
-                          onChange={(e) =>
-                            handleArrayChange(e, "addresses", index, "street")
-                          }
-                          className="border p-2 rounded"
-                        />
-                        <input
-                          type="text"
-                          placeholder="City"
-                          value={addr.city || ""}
-                          onChange={(e) =>
-                            handleArrayChange(e, "addresses", index, "city")
-                          }
-                          className="border p-2 rounded"
-                        />
-                        <input
-                          type="text"
-                          placeholder="State"
-                          value={addr.state || ""}
-                          onChange={(e) =>
-                            handleArrayChange(e, "addresses", index, "state")
-                          }
-                          className="border p-2 rounded"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Zip"
-                          value={addr.zip || ""}
-                          onChange={(e) =>
-                            handleArrayChange(e, "addresses", index, "zip")
-                          }
-                          className="border p-2 rounded"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Country"
-                          value={addr.country || ""}
-                          onChange={(e) =>
-                            handleArrayChange(e, "addresses", index, "country")
-                          }
-                          className="border p-2 rounded"
-                        />
-                      </div>
-                    ))}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if ((userData.addresses?.length || 0) < 2) {
-                        addArrayItem("addresses", {
-                          type: "",
-                          street: "",
-                          city: "",
-                          state: "",
-                          zip: "",
-                          country: "",
-                        });
-                      }
-                    }}
-                    disabled={(userData.addresses?.length || 0) >= 2}
-                  >
-                    +
-                  </button>
+                  {console.log("Selected Gender:", userData.gender)}{" "}
+                  {/* Debugging selected gender */}
                 </div>
                 {/* Replace dynamic social media block with fixed social media inputs */}
                 <div className="kh-input-wrapper">
@@ -558,15 +397,15 @@ export default function ProfileEdit() {
                   <input
                     type="text"
                     placeholder="Instagram URL"
-                    value={userData.socialMedia?.insta || ""}
-                    id="socialMedia.insta"
+                    value={userData.socialMedia?.instagram || ""} // Corrected key from 'insta' to 'instagram'
+                    id="socialMedia.instagram"
                     className="border p-2 rounded"
                     onChange={(e) =>
                       setUserData({
                         ...userData,
                         socialMedia: {
                           ...userData.socialMedia,
-                          insta: e.target.value,
+                          instagram: e.target.value, // Corrected key from 'insta' to 'instagram'
                         },
                       })
                     }
@@ -591,246 +430,22 @@ export default function ProfileEdit() {
                     }
                   />
                 </div>
-                {/* Preferences section */}
                 <div className="kh-input-wrapper">
-                  <label>Preferences:</label>
-                  <input
-                    type="text"
-                    placeholder="Language"
-                    value={userData.preferences?.language || ""}
-                    id="preferences.language"
+                  <textarea
+                    placeholder="Bio (max 150 characters)"
+                    value={userData.bio || ""} // Add fallback to ensure bio is not undefined
+                    id="bio"
+                    maxLength={150}
                     className="border p-3 rounded-lg"
-                    onChange={(e) =>
-                      setUserData({
-                        ...userData,
-                        preferences: {
-                          ...userData.preferences,
-                          language: e.target.value,
-                        },
-                      })
-                    }
+                    onChange={handelChange}
                   />
-                  <div className="kh-input-wrapper">
-                    <label>Dietary Restrictions:</label>
-                    {userData.preferences?.dietaryRestrictions &&
-                      userData.preferences.dietaryRestrictions.map(
-                        (item, index) => (
-                          <div key={index}>
-                            <select
-                              value={item || ""}
-                              onChange={(e) => {
-                                const restrictions = [
-                                  ...userData.preferences.dietaryRestrictions,
-                                ];
-                                restrictions[index] = e.target.value;
-                                setUserData({
-                                  ...userData,
-                                  preferences: {
-                                    ...userData.preferences,
-                                    dietaryRestrictions: restrictions,
-                                  },
-                                });
-                              }}
-                              className="border p-2 rounded"
-                            >
-                              <option value="">Select Restriction</option>
-                              <option value="none">None</option>
-                              <option value="vegetarian">Vegetarian</option>
-                              <option value="vegan">Vegan</option>
-                              <option value="glutenFree">Gluten Free</option>
-                              <option value="dairyFree">Dairy Free</option>
-                            </select>
-                          </div>
-                        )
-                      )}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (
-                          (userData.preferences?.dietaryRestrictions?.length ||
-                            0) < 5
-                        ) {
-                          const restrictions = userData.preferences
-                            ?.dietaryRestrictions
-                            ? [...userData.preferences.dietaryRestrictions]
-                            : [];
-                          restrictions.push("");
-                          setUserData({
-                            ...userData,
-                            preferences: {
-                              ...userData.preferences,
-                              dietaryRestrictions: restrictions,
-                            },
-                          });
-                        }
-                      }}
-                      disabled={
-                        (userData.preferences?.dietaryRestrictions?.length ||
-                          0) >= 5
-                      }
-                    >
-                      +
-                    </button>
-                  </div>
-                  <div className="kh-input-wrapper">
-                    <label>Allergies:</label>
-                    {userData.preferences?.allergies &&
-                      userData.preferences.allergies.map((item, index) => (
-                        <div key={index}>
-                          <select
-                            value={item || ""}
-                            onChange={(e) => {
-                              const allergies = [
-                                ...userData.preferences.allergies,
-                              ];
-                              allergies[index] = e.target.value;
-                              setUserData({
-                                ...userData,
-                                preferences: {
-                                  ...userData.preferences,
-                                  allergies: allergies,
-                                },
-                              });
-                            }}
-                            className="border p-2 rounded"
-                          >
-                            <option value="">Select Allergy</option>
-                            <option value="none">None</option>
-                            <option value="peanuts">Peanuts</option>
-                            <option value="shellfish">Shellfish</option>
-                            <option value="dairy">Dairy</option>
-                            <option value="gluten">Gluten</option>
-                            <option value="soy">Soy</option>
-                            <option value="eggs">Eggs</option>
-                          </select>
-                        </div>
-                      ))}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (
-                          (userData.preferences?.allergies?.length || 0) < 5
-                        ) {
-                          const allergies = userData.preferences?.allergies
-                            ? [...userData.preferences.allergies]
-                            : [];
-                          allergies.push("");
-                          setUserData({
-                            ...userData,
-                            preferences: {
-                              ...userData.preferences,
-                              allergies: allergies,
-                            },
-                          });
-                        }
-                      }}
-                      disabled={
-                        (userData.preferences?.allergies?.length || 0) >= 5
-                      }
-                    >
-                      +
-                    </button>
-                  </div>
-                  <div className="kh-input-wrapper">
-                    <label>Taste Preferences:</label>
-                    {userData.preferences?.tastePreferences &&
-                      userData.preferences.tastePreferences.map(
-                        (item, index) => (
-                          <div key={index}>
-                            <input
-                              type="text"
-                              placeholder="Preference"
-                              value={item || ""}
-                              onChange={(e) => {
-                                const tastes = [
-                                  ...userData.preferences.tastePreferences,
-                                ];
-                                tastes[index] = e.target.value;
-                                setUserData({
-                                  ...userData,
-                                  preferences: {
-                                    ...userData.preferences,
-                                    tastePreferences: tastes,
-                                  },
-                                });
-                              }}
-                              className="border p-2 rounded"
-                            />
-                          </div>
-                        )
-                      )}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (
-                          (userData.preferences?.tastePreferences?.length ||
-                            0) < 5
-                        ) {
-                          const tastes = userData.preferences?.tastePreferences
-                            ? [...userData.preferences.tastePreferences]
-                            : [];
-                          tastes.push("");
-                          setUserData({
-                            ...userData,
-                            preferences: {
-                              ...userData.preferences,
-                              tastePreferences: tastes,
-                            },
-                          });
-                        }
-                      }}
-                      disabled={
-                        (userData.preferences?.tastePreferences?.length || 0) >=
-                        5
-                      }
-                    >
-                      +
-                    </button>
-                  </div>
-                  <div className="kh-input-wrapper">
-                    <label>
-                      Notifications Email:
-                      <input
-                        type="checkbox"
-                        checked={
-                          userData.preferences?.notifications?.email || false
-                        }
-                        onChange={(e) =>
-                          setUserData({
-                            ...userData,
-                            preferences: {
-                              ...userData.preferences,
-                              notifications: {
-                                ...userData.preferences.notifications,
-                                email: e.target.checked,
-                              },
-                            },
-                          })
-                        }
-                      />
-                    </label>
-                    <label>
-                      Notifications Push:
-                      <input
-                        type="checkbox"
-                        checked={
-                          userData.preferences?.notifications?.push || false
-                        }
-                        onChange={(e) =>
-                          setUserData({
-                            ...userData,
-                            preferences: {
-                              ...userData.preferences,
-                              notifications: {
-                                ...userData.preferences.notifications,
-                                push: e.target.checked,
-                              },
-                            },
-                          })
-                        }
-                      />
-                    </label>
-                  </div>
+                  <p>{(userData.bio || "").length}/150</p>{" "}
+                  {/* Add fallback for length */}
+                  {userData.bio && userData.bio.length > 150 && (
+                    <p className="text-red-700">
+                      Bio exceeds the maximum character limit!
+                    </p>
+                  )}
                 </div>
                 {/* ...existing submit button and action links... */}
                 <div className="kh-input-wrapper">

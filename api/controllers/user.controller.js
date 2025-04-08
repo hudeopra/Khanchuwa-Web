@@ -25,21 +25,13 @@ export const updateUserInfo = async (req, res, next) => {
           username: req.body.username,
           email: req.body.email,
           password: req.body.password,
-          avatar: req.body.avatar,
+          avatar: req.body.avatar, // Use avatar instead of profilePicture
           fullname: req.body.fullname,
           dateOfBirth: req.body.dateOfBirth,
           gender: req.body.gender,
-          emails: req.body.emails,
-          phoneNumbers: req.body.phoneNumbers,
-          addresses: req.body.addresses,
+          bio: req.body.bio, // Include bio
           socialMedia: req.body.socialMedia,
-          preferences: {
-            notifications: req.body.preferences.notifications,
-            dietaryRestrictions: req.body.preferences.dietaryRestrictions,
-            allergies: req.body.preferences.allergies,
-            tastePreferences: req.body.preferences.tastePreferences,
-            language: req.body.preferences.language,
-          },
+          role: req.body.role,
         },
       },
       { new: true }
@@ -68,30 +60,65 @@ export const deleteUser = async (req, res, next) => {
 export const toggleFavoriteRecipe = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const recipeId = req.params.recipeId;
+    const { recipeId, favRecipeId } = req.body; // Include favRecipeId
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const hasFav = user.userFavRecipe.some(id => id.equals(recipeId));
-    let updateUser;
-    if (hasFav) {
-      // Remove from favorites
-      updateUser = await User.findByIdAndUpdate(userId, {
-        $pull: { userFavRecipe: recipeId }
-      }, { new: true });
-      await Recipe.findByIdAndUpdate(recipeId, { $inc: { recipeFav: -1 } });
+    const recipeIndex = user.userFavRecipe.findIndex(fav => fav.recipeId.equals(recipeId));
+    if (recipeIndex !== -1) {
+      // Recipe exists, toggle favorite recipe
+      const favrefs = user.userFavRecipe[recipeIndex].favrefs || [];
+      const favRecipeIndex = favrefs.findIndex(id => id.equals(favRecipeId));
+      if (favRecipeIndex !== -1) {
+        favrefs.splice(favRecipeIndex, 1); // Remove favorite recipe
+      } else {
+        favrefs.push(favRecipeId); // Add favorite recipe
+      }
+      user.userFavRecipe[recipeIndex].favrefs = favrefs;
     } else {
-      // Add to favorites
-      updateUser = await User.findByIdAndUpdate(userId, {
-        $addToSet: { userFavRecipe: recipeId }
-      }, { new: true });
-      await Recipe.findByIdAndUpdate(recipeId, { $inc: { recipeFav: 1 } });
+      // Add new recipe with favorite recipe
+      user.userFavRecipe.push({
+        recipeId,
+        favrefs: [favRecipeId]
+      });
     }
-    return res.status(200).json({
-      message: hasFav ? 'Removed from favorites' : 'Added to favorites',
-      userFavRecipe: updateUser.userFavRecipe
-    });
+
+    await user.save();
+    return res.status(200).json({ message: 'Favorite updated', userFavRecipe: user.userFavRecipe });
   } catch (error) {
     next(error);
+  }
+};
+
+// NEW: Fetch user recipes based on current user ID
+export const getUserRecipes = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const user = await User.findById(userId).populate('userFavRecipe.recipeId');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const userRecipes = user.userFavRecipe.map(fav => ({
+      recipeId: fav.recipeId._id,
+      title: fav.recipeId.title,
+      description: fav.recipeId.description,
+      favrefs: fav.favrefs,
+    }));
+
+    res.status(200).json({ userRecipes });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// NEW: Fetch current user data
+export const getCurrentUser = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const user = await User.findById(userId).select('-password'); // Exclude password
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.status(200).json(user);
+  } catch (error) {
+    next(errorHandler(500, 'api/user.controller: Internal Server Error'));
   }
 };

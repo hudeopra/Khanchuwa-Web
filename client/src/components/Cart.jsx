@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useAlert } from "./AlertContext"; // Import the alert context
 
 export default function Cart({
   cartItems,
@@ -10,6 +11,35 @@ export default function Cart({
   handleRemoveFromCart,
   userCart,
 }) {
+  const { showAlert } = useAlert(); // Access the showAlert function
+
+  const handleClearCartWithAlert = () => {
+    handleClearCart();
+    showAlert("success", "Cart cleared successfully!"); // Show success alert
+  };
+
+  const handleRemoveFromCartWithAlert = (itemId) => {
+    const item = cartItems.find((item) => item.id === itemId);
+    handleRemoveFromCart(itemId);
+    showAlert("success", `${item.productName} removed from cart!`); // Show specific success alert
+  };
+
+  const handleQuantityChangeWithAlert = (itemId, newQuantity) => {
+    const item = cartItems.find((item) => item.id === itemId);
+    const change = newQuantity - item.quantity;
+
+    if (change > 0) {
+      showAlert("info", `${item.productName} quantity increased by ${change}.`); // Show specific info alert
+    } else if (change < 0) {
+      showAlert(
+        "info",
+        `${item.productName} quantity decreased by ${Math.abs(change)}.`
+      ); // Show specific info alert
+    }
+
+    handleQuantityChange(itemId, newQuantity);
+  };
+
   return (
     <div className="kh-header__cart">
       <div className="kh-header__cart--head ">
@@ -23,9 +53,7 @@ export default function Cart({
             src="../src/assets/img/search/chefLogo.png"
             alt="Khanchuwa Logo"
           />
-          <span className="count">
-            {cartItems.reduce((total, item) => total + item.quantity, 0)}
-          </span>
+          <span className="count">{cartItems.length}</span>
         </span>
       </div>
       <div
@@ -33,7 +61,7 @@ export default function Cart({
       >
         <div className="kh-header__cart--title">
           <h3>Cart</h3>
-          <button onClick={handleClearCart} className="kh-btn">
+          <button onClick={handleClearCartWithAlert} className="kh-btn">
             Clear Cart
           </button>
         </div>
@@ -53,7 +81,10 @@ export default function Cart({
                           />
                           <button
                             onClick={() =>
-                              handleQuantityChange(item.id, item.quantity + 1)
+                              handleQuantityChangeWithAlert(
+                                item.id,
+                                item.quantity + 1
+                              )
                             }
                             className="kh-heaader__cart--count-up kh-btn kh-btn__small"
                           >
@@ -72,7 +103,7 @@ export default function Cart({
                               type="number"
                               value={item.quantity}
                               onChange={(e) =>
-                                handleQuantityChange(
+                                handleQuantityChangeWithAlert(
                                   item.id,
                                   Number(e.target.value)
                                 )
@@ -82,7 +113,10 @@ export default function Cart({
                             />
                             <button
                               onClick={() =>
-                                handleQuantityChange(item.id, item.quantity - 1)
+                                handleQuantityChangeWithAlert(
+                                  item.id,
+                                  item.quantity - 1
+                                )
                               }
                               className="kh-heaader__cart--count-down kh-btn kh-btn__small invert"
                             >
@@ -92,7 +126,7 @@ export default function Cart({
                         </div>
                       </div>
                       <button
-                        onClick={() => handleRemoveFromCart(item.id)}
+                        onClick={() => handleRemoveFromCartWithAlert(item.id)}
                         className="kh-header__cart--item--remove kh-btn kh-btn__x"
                       >
                         x

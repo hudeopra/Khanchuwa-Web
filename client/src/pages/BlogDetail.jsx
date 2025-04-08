@@ -16,11 +16,32 @@ export default function BlogDetail() {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
   const [deleteError, setDeleteError] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null); // State for current user
   const navigate = useNavigate();
   const userData = useSelector((state) => state.user);
   console.log("BlogDetail - current user data:", userData);
   const currentUserId =
     userData.currentUser?._id || userData.currentUser?.user?._id;
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const res = await fetch("/api/user/current", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch current user");
+        const data = await res.json();
+        setCurrentUser(data);
+      } catch (error) {
+        console.error("Error fetching current user:", error.message);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
 
   useEffect(() => {
     const fetchBlog = async () => {
@@ -173,7 +194,7 @@ export default function BlogDetail() {
       )}
 
       {/* Edit and Delete Options for the Author */}
-      {currentUserId && String(blog.userRef) === String(currentUserId) && (
+      {currentUser?._id === blog.userRef && (
         <div className="my-4">
           <button
             onClick={() => navigate(`/blog/edit/${id}`)}

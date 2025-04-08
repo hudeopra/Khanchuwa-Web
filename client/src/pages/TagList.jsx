@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/user/userCart";
+import { useAlert } from "../components/AlertContext"; // Import the alert context
 
 const TagList = () => {
   const [tags, setTags] = useState([]);
@@ -10,6 +11,7 @@ const TagList = () => {
   const [quantities, setQuantities] = useState({}); // State to track quantities for each tag
 
   const dispatch = useDispatch();
+  const { showAlert } = useAlert(); // Access the showAlert function
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -56,6 +58,7 @@ const TagList = () => {
         mrkPrice: tag.mrkPrice || null, // Add mrkPrice if available
       })
     );
+    showAlert("success", `${tag.name} added to cart!`); // Show success alert
   };
 
   if (loading) return <div>Loading...</div>;

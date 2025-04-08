@@ -1,4 +1,3 @@
-
 import { errorHandler } from '../utils/error.js';
 import User from '../models/user.model.js';
 import bcryptjs from 'bcryptjs';
@@ -45,11 +44,11 @@ export const signIn = async (req, res, next) => {
     const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
 
     console.log('auth.controller: Generated token', token);
-    const { password: pass, ...user } = validUser._doc;
+    const { password: pass, ...user } = validUser._doc; // _id is already included in user
     res
       .cookie('access_token', token, { httpOnly: true })
       .status(200)
-      .json({ user });
+      .json({ user }); // No changes needed here
   } catch (error) {
     console.error('auth.controller: Signin error', error);
     res.status(500).json({ success: false, message: error.message });

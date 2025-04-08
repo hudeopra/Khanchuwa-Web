@@ -120,8 +120,9 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
             const keyVal = (tag && tag._id) || `${displayName}-${index}`;
             return (
               <span key={keyVal} className="tag-badge">
-                {displayName}
+                <span className="tag-name">{displayName}</span>
                 <button
+                  className="kh-btn kh-btn__x"
                   onClick={() => handleRemoveTag((tag && tag._id) || tag)}
                 >
                   &times;

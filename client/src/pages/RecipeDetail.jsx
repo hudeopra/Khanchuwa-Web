@@ -28,12 +28,33 @@ export default function RecipeDetail() {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
   const [deleteError, setDeleteError] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null); // State for current user
 
   const dispatch = useDispatch();
 
   console.log("User data:", userData);
   if (userData.currentUser) {
   }
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const res = await fetch("/api/user/current", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch current user");
+        const data = await res.json();
+        setCurrentUser(data);
+      } catch (error) {
+        console.error("Error fetching current user:", error.message);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
 
   useEffect(() => {
     console.log("Fetching recipe with ID:", id);
@@ -457,6 +478,16 @@ export default function RecipeDetail() {
             Submit Comment
           </button>
         </form>
+      )}
+      {currentUser?._id === recipe.userRef?.$oid && (
+        <div className="my-4">
+          <a
+            href={`/recipe/edit/${recipe._id.$oid}`}
+            className="mt-2 ml-4 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
+          >
+            Edit Recipe
+          </a>
+        </div>
       )}
       {currentUserId && recipe.userRef === currentUserId && (
         <div className="my-4">

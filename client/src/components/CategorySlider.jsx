@@ -1,6 +1,6 @@
 import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
 
-const CategorySlider = ({ keyParam, valueParam }) => {
+const CategorySlider = ({ keyParam, valueParam, tag }) => {
   const sliderRef = useRef(null);
   const [position, setPosition] = useState(0);
   const [sliderHeight, setSliderHeight] = useState(0);
@@ -59,11 +59,11 @@ const CategorySlider = ({ keyParam, valueParam }) => {
   useEffect(() => {
     if (sliderRef.current) {
       const totalWidth = sliderRef.current.scrollWidth;
-      const maxTranslate = containerWidth - totalWidth;
+      const maxTranslate = Math.min(0, containerWidth - (totalWidth - 200)); // Ensure maxTranslate is negative or zero
       setCanSlidePrev(position < 0);
-      setCanSlideNext(position > maxTranslate);
+      setCanSlideNext(position > maxTranslate); // Correct condition for enabling "Next" button
     }
-  }, [position, containerWidth]);
+  }, [position, containerWidth, slideWidth]);
 
   // Slide to the next item or adjust slider to container's end
   const slideNext = () => {
@@ -107,8 +107,11 @@ const CategorySlider = ({ keyParam, valueParam }) => {
 
   return (
     <div className="container">
-      <h2>Category Slider</h2>
-      <div className="slider-container" style={{ height: `${sliderHeight}px` }}>
+      {tag ? <h2>{tag}</h2> : <h2>Default Category Slider</h2>}
+      <div
+        className="slider-container"
+        // style={{ height: `${sliderHeight || 350}px` }}
+      >
         <div
           className="slider"
           ref={sliderRef}
@@ -118,9 +121,10 @@ const CategorySlider = ({ keyParam, valueParam }) => {
           }}
         >
           {items.map((item, index) => (
-            <div
+            <a
               key={item._id}
-              className={`slider-item ${
+              href={`/recipes/${item._id}`} // Link to the recipe's page
+              className={`kh-recipe-block__item ${
                 hoveredIndex !== null
                   ? index === hoveredIndex
                     ? "activeSlide"
@@ -138,8 +142,7 @@ const CategorySlider = ({ keyParam, valueParam }) => {
                 setHoveredIndex(null);
               }}
             >
-              <div className="card-content">
-                <h3>{item.recipeName}</h3>
+              <div className="kh-recipe-block__item--img">
                 {item.imageUrls && item.imageUrls[0] && (
                   <img
                     src={item.imageUrls[0]}
@@ -147,13 +150,21 @@ const CategorySlider = ({ keyParam, valueParam }) => {
                     className="card-image"
                   />
                 )}
-                <p>{item.shortDescription}</p>
-                <p className="price">
-                  {item.cookTime} mins | {item.servings} servings |{" "}
-                  {item.difficulty}
+              </div>
+              <div className="kh-recipe-block__content">
+                <h3>{item.recipeName}</h3>
+                <p>
+                  {item.shortDescription && item.shortDescription.length > 150
+                    ? `${item.shortDescription.slice(0, 110)}...`
+                    : item.shortDescription}
                 </p>
               </div>
-            </div>
+              <div className="kh-recipe-block__info">
+                <span>{item.cookTime} mins</span>
+                <span>{item.servings} servings</span>
+                <span>{item.difficulty}</span>
+              </div>
+            </a>
           ))}
         </div>
         <div className="controls">

@@ -75,10 +75,10 @@ router.post('/create', verifyToken, createRecipe);
 router.post('/update/:id', verifyToken, updateRecipe);
 router.post('/comment/:id', verifyToken, addComment); // new route for adding comments
 router.delete('/delete/:id', verifyToken, deleteRecipe); // new route for deleting recipe
+router.get('/user/:userId', getRecipesByUser); // updated route for getting recipes by user
 router.get('/all', getAllRecipes);
 router.get('/filter', filterRecipes); // new filtering endpoint
 router.get('/filter-by-attributes', filterRecipesByAttributes); // moved above to avoid conflict
-router.get('/user/:userId', getRecipesByUser); // updated route for getting recipes by user
 router.get('/:id', getRecipeById); // moved this route below to avoid conflict
 
 export default router;

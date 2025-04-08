@@ -21,6 +21,9 @@ import {
 import { Link } from "react-router-dom";
 import BootstrapAlert from "../components/BootstrapAlert";
 import ProfileNav from "../components/ProfileNav";
+import UserRecipeFive from "../components/UserRecipeFive";
+import UserBlogFive from "../components/UserBlogFIve";
+import ProfileCard from "../components/ProfileCard";
 
 // import { getAuth } from "firebase/auth";
 
@@ -81,14 +84,7 @@ export default function Profile() {
           user.socialMedia && user.socialMedia.length > 0
             ? user.socialMedia
             : [{ platform: "", url: "" }],
-        preferences: user.preferences || {
-          dietaryRestrictions: [],
-          allergies: [],
-          tastePreferences: [],
-          language: "",
-          notifications: { email: false, push: false },
-        },
-        // New field for usertype
+        // Removed preferences field
         usertype: user.usertype || "guest",
       });
     }
@@ -282,303 +278,22 @@ export default function Profile() {
               {currentUser ? (
                 (() => {
                   const user = currentUser.user || currentUser;
-                  return (
-                    <div className="row">
-                      <div className="col-6">
-                        <div className="kh-profile__tab--wrapper kh-profile__tab--id-card">
-                          <div className="kh-profile__tab--item">
-                            <img
-                              src={user.avatar}
-                              alt="Avatar"
-                              className="profile-avatar"
-                            />
-                          </div>
-                          <div className="kh-profile__tab--user-info">
-                            {user.fullname && <h2>{user.fullname}</h2>}
-                            <span>@{user.username}</span>
-                          </div>
-                          <div className="kh-profile__tab--item">
-                            <strong>Language:</strong>
-                            {user.preferences.language}
-                          </div>
-                        </div>
-                        <div className="kh-profile__tab--wrapper kh-profile__tab--user-details">
-                          <div className="kh-profile__tab--item">
-                            {user.dateOfBirth && (
-                              <p>
-                                <strong>Date Of Birth:</strong>{" "}
-                                {new Date(
-                                  user.dateOfBirth
-                                ).toLocaleDateString()}
-                              </p>
-                            )}
-                          </div>
-                          <div className="kh-profile__tab--item">
-                            {user.gender && (
-                              <p>
-                                <strong>Gender:</strong> {user.gender}
-                              </p>
-                            )}
-                          </div>
-                          <div className="kh-profile__tab--item">
-                            {user.phoneNumbers &&
-                              user.phoneNumbers.length > 0 && (
-                                <div>
-                                  <strong>Phone Numbers:</strong>
-                                  <ul>
-                                    {user.phoneNumbers.map((phone, index) => (
-                                      <li key={index}>
-                                        {phone.number}{" "}
-                                        {phone.isPrimary && "(Primary)"}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                          </div>
-                          <div className="kh-profile__tab--item">
-                            {user.addresses && user.addresses.length > 0 && (
-                              <div>
-                                <strong>Addresses:</strong>
-                                <ul>
-                                  {user.addresses.map((addr, index) => (
-                                    <li key={index}>
-                                      {addr.type}: {addr.street}, {addr.city}
-                                      {/* {addr.type}: {addr.street}, {addr.city},{" "}
-                                      {addr.state}, {addr.zip}, {addr.country} */}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                          </div>
-                          <div className="kh-profile__tab--item">
-                            {user.socialMedia &&
-                              user.socialMedia.filter(
-                                (sm) => sm.platform || sm.url
-                              ).length > 0 && (
-                                <div className="kh-profile__tab--social-media">
-                                  <strong>Social Media:</strong>
-                                  <ul>
-                                    {user.socialMedia
-                                      .filter((sm) => sm.platform || sm.url)
-                                      .map((sm, index) => (
-                                        <li key={index}>
-                                          {/* {sm.platform
-                                            ? `${sm.platform}: `
-                                            : ""} */}
-                                          {sm.platform &&
-                                            sm.platform.toLowerCase() ===
-                                              "instagram" &&
-                                            // image already rendered if needed; removed separate img tag
-                                            ""}
-                                          {sm.platform &&
-                                            sm.platform.toLowerCase() ===
-                                              "tiktok" &&
-                                            ""}
-                                          {sm.platform &&
-                                            sm.platform.toLowerCase() ===
-                                              "youtube" &&
-                                            ""}
-                                          {sm.url && (
-                                            <a
-                                              href={`${
-                                                sm.url
-                                              }?img=../src/assets/img/search/${sm.platform.toLowerCase()}.png`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                            >
-                                              <img
-                                                src={`../src/assets/img/search/${sm.platform.toLowerCase()}.png`}
-                                                alt={`${sm.platform} Logo`}
-                                              />
-                                            </a>
-                                          )}
-                                        </li>
-                                      ))}
-                                  </ul>
-                                </div>
-                              )}
-                          </div>
-
-                          <div className="kh-profile__tab--item"></div>
-                          <div className="kh-profile__tab--item"></div>
-                          <div className="kh-profile__tab--item"></div>
-                        </div>
-                      </div>
-                      <div className="col-6">
-                        <div className="kh-profile__tab--wrapper">
-                          {user.preferences && (
-                            <div>
-                              <strong>Preferences:</strong>
-                              {user.preferences.dietaryRestrictions &&
-                                user.preferences.dietaryRestrictions.length >
-                                  0 && (
-                                  <div>
-                                    <strong>Dietary Restrictions:</strong>
-                                    <ul>
-                                      {user.preferences.dietaryRestrictions.map(
-                                        (item, index) => (
-                                          <li key={index}>{item}</li>
-                                        )
-                                      )}
-                                    </ul>
-                                  </div>
-                                )}
-                              {user.preferences.allergies &&
-                                user.preferences.allergies.length > 0 && (
-                                  <div>
-                                    <strong>Allergies:</strong>
-                                    <ul>
-                                      {user.preferences.allergies.map(
-                                        (item, index) => (
-                                          <li key={index}>{item}</li>
-                                        )
-                                      )}
-                                    </ul>
-                                  </div>
-                                )}
-                              {user.preferences.tastePreferences &&
-                                user.preferences.tastePreferences.length >
-                                  0 && (
-                                  <div>
-                                    <strong>Taste Preferences:</strong>
-                                    <ul>
-                                      {user.preferences.tastePreferences.map(
-                                        (item, index) => (
-                                          <li key={index}>{item}</li>
-                                        )
-                                      )}
-                                    </ul>
-                                  </div>
-                                )}
-                              {user.preferences.notifications && (
-                                <p>
-                                  <strong>Notifications:</strong> Email:{" "}
-                                  {user.preferences.notifications.email
-                                    ? "Yes"
-                                    : "No"}
-                                  , Push:{" "}
-                                  {user.preferences.notifications.push
-                                    ? "Yes"
-                                    : "No"}
-                                </p>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
+                  return <ProfileCard />;
                 })()
               ) : (
                 <p>No user data available</p>
               )}
             </div>
-            <div className="kh-profile__items">
-              <Link to={`/user-recipe`} className="btn btn-edit">
-                View All recipes
-              </Link>
-              {recentRecipes.length > 0 ? (
-                recentRecipes.map((recipe) => (
-                  <div key={recipe._id} className="kh-profile__item-wrapper">
-                    <div className="kh-profile__item">
-                      <div className="kh-profile__item--content">
-                        <div className="kh-profile__item--img">
-                          <img
-                            src={
-                              Array.isArray(recipe.imageUrls) &&
-                              recipe.imageUrls.length > 0
-                                ? recipe.imageUrls[0]
-                                : ""
-                            }
-                            alt={recipe.recipeName}
-                            className="recipe-fav-image"
-                          />
-                        </div>
-
-                        <div className="kh-profile__item--details">
-                          <h3>{recipe.recipeName}</h3>
-                          <h3>{recipe.shortDescription}</h3>
-                          <h3>{recipe.diet}</h3>
-                        </div>
-                      </div>
-                      <div className="kh-profile__item--tags">
-                        <p>mealtype:</p>
-                        <ul>
-                          {recipe.mealType.map((meal, index) => (
-                            <li
-                              className={`kh-bubble kh-bubble__mealtype ${
-                                typeof meal === "string"
-                                  ? meal.replace(/\s+/g, "-").toLowerCase()
-                                  : meal.name
-                                  ? meal.name.replace(/\s+/g, "-").toLowerCase()
-                                  : "unknown"
-                              }`}
-                              key={index}
-                            >
-                              {typeof meal === "string"
-                                ? meal
-                                : meal.name || "Unknown"}
-                            </li>
-                          ))}
-                        </ul>
-                        <h3>Ingredients:</h3>
-                        <ul>
-                          {recipe.ingredients.map((ingredient) => (
-                            <li
-                              className={`kh-bubble kh-bubble__mealtype ${
-                                ingredient.name
-                                  ? ingredient.name
-                                      .replace(/\s+/g, "-")
-                                      .toLowerCase()
-                                  : "unknown"
-                              }`}
-                              key={ingredient._id}
-                            >
-                              {ingredient.name || "Unknown"}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                    <Link
-                      to={`/recipe/edit/${recipe._id}`}
-                      className="btn btn-edit"
-                    >
-                      Edit
-                    </Link>
-                    {/* add delete button here */}
-                  </div>
-                ))
-              ) : (
-                <p>No recent recipes.</p>
-              )}
-            </div>
-            <div className="kh-blog-post">
-              <h2>Recent Blogs</h2>
-              <Link to={`/user-blog`} className="btn btn-edit">
-                View All Blogs
-              </Link>
-              {recentBlogs.length > 0 ? (
-                recentBlogs.map((blog) => (
-                  <div key={blog._id} className="blog-block">
-                    <div className="blog-block-wrapper">
-                      <h3>{blog.blogtitle}</h3>
-                      <p>{blog.blogtype}</p>
-                    </div>
-                    <Link
-                      to={`/blog/edit/${blog._id}`}
-                      className="btn btn-edit"
-                    >
-                      Edit
-                    </Link>
-                    {/* add delete button here */}
-                  </div>
-                ))
-              ) : (
-                <p>No recent blogs.</p>
-              )}
+            <div className="row">
+              <div className="col-6">
+                <UserRecipeFive
+                  recentRecipes={recentRecipes}
+                  currentUser={currentUser}
+                />
+              </div>
+              <div className="col-6">
+                <UserBlogFive recentBlogs={recentBlogs} />
+              </div>
             </div>
           </div>
         </div>

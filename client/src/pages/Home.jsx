@@ -29,12 +29,15 @@ export default function Home() {
   return (
     <main className="kh-homepage">
       <TestingComponent />
-      {/* <TagSelector /> */}
       {/* <HomeBanner /> */}
       <div className="container py-5 mt-5">
         <div className="kh-recipeList">
           <h2>Food. Where Happiness Begins</h2>
-          <CategoryList />
+          <CategoryList taglink="cuisineTag" />
+        </div>
+        <div className="kh-recipeList">
+          <h2>Explore Flavours</h2>
+          <CategoryList taglink="flavourTag" />
         </div>
         <div className="kh-recipeBlock">
           <RecipeCardBig />
@@ -47,10 +50,21 @@ export default function Home() {
         <FavRecipeBlock />
       </div>
       <div className="kh-slider py-5">
-        <CategorySlider keyParam="mealType" valueParam="Dinner" />
+        <CategorySlider tag="Popular Recipes" />
       </div>
       <div className="kh-slider py-5">
-        <CategorySlider keyParam="diet" valueParam="Vegan" />
+        <CategorySlider
+          tag="Dinner Ideas"
+          keyParam="mealType"
+          valueParam="Dinner"
+        />
+      </div>
+      <div className="kh-slider py-5">
+        <CategorySlider
+          tag="Vegan Recipes"
+          keyParam="diet"
+          valueParam="Vegan"
+        />
       </div>
       {/* <div className="test">
         <CustomSelect />

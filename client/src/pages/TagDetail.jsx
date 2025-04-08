@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom"; // Add useNavigate import
 import { useDispatch } from "react-redux"; // Import useDispatch
 import { addToCart } from "../redux/user/userCart"; // Import addToCart action
+import { useAlert } from "../components/AlertContext"; // Import the alert context
 
 const TagDetail = () => {
   const { id, tagType } = useParams(); // Get the tag ID and tagType from the URL
@@ -13,6 +14,8 @@ const TagDetail = () => {
   const [quantity, setQuantity] = useState(1); // State for quantity
   const dispatch = useDispatch(); // Initialize dispatch
   const navigate = useNavigate(); // Initialize navigate
+  const { showAlert } = useAlert(); // Access the showAlert function
+  const [currentUser, setCurrentUser] = useState(null); // State for current user
 
   useEffect(() => {
     const fetchTag = async () => {
@@ -121,6 +124,26 @@ const TagDetail = () => {
     fetchTag();
   }, [id, tagType]); // Removed navigate from dependency array as it's not directly used
 
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const res = await fetch("/api/user/current", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch current user");
+        const data = await res.json();
+        setCurrentUser(data);
+      } catch (error) {
+        console.error("Error fetching current user:", error.message);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
   const handleAddToCart = () => {
     if (tag) {
       const unitPrice = tag.disPrice || tag.mrkPrice || 0; // Calculate unit price
@@ -135,6 +158,7 @@ const TagDetail = () => {
       };
       console.log("Dispatching addToCart with:", cartItem); // Debugging log
       dispatch(addToCart(cartItem));
+      showAlert("success", `${tag.name} added to cart!`); // Show success alert
     }
   };
 
@@ -228,14 +252,21 @@ const TagDetail = () => {
                   Add to Cart
                 </button>
                 {/* New Edit Product Link */}
-                <a
-                  href={`/product/edit/${tag._id}`}
-                  className="mt-2 ml-4 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
-                >
-                  Edit Product
-                </a>
               </div>
             )}
+            {currentUser?.role === "admin" &&
+              ["ingredientTag", "cuisineTag", "flavorTag"].includes(
+                tag.tagType
+              ) && ( // Show only for admin and specific tag types
+                <div className="my-4">
+                  <a
+                    href={`/product/edit/${tag._id}`}
+                    className="mt-2 ml-4 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
+                  >
+                    Edit Product
+                  </a>
+                </div>
+              )}
             {tag.category && tag.category.length > 0 && (
               <p>
                 <strong>Categories:</strong> {tag.category.join(", ")}

@@ -1,5 +1,11 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useParams,
+} from "react-router-dom"; // Import useParams
 import PrivateRoute from "./components/PrivateRoute";
+import { AlertProvider } from "./components/AlertContext";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -34,40 +40,230 @@ import NotFound from "./pages/404"; // Import NotFound component
 import PrivacyPolicy from "./pages/PrivacyPolicy"; // Import PrivacyPolicy
 import TermsAndConditions from "./pages/TermsAndConditions"; // Import TermsAndConditions
 
+function CookshopPageWrapper() {
+  const { tagType } = useParams(); // Get tagType from the URL
+  const pagename = tagType === "ingredientTag" ? "Cookshop" : "Category"; // Determine pagename based on tagType
+
+  return (
+    <>
+      <Header pagename={pagename} />
+      <TagDetail />
+    </>
+  );
+}
+
 export default function App() {
   return (
-    <Router>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/About" element={<About />} />
-        <Route path="/SignIn" element={<SignIn />} />
-        <Route path="/SignUp" element={<SignUp />} />
-        <Route element={<PrivateRoute />}>
-          <Route path="/Profile" element={<Profile />} />
-          <Route path="/profile-edit" element={<ProfileEdit />} />
-          <Route path="/create-recipe" element={<CreateRecipe />} />
-          <Route path="/user-recipe" element={<UserRecipie />} />
-          <Route path="/recipes/edit/:id" element={<EditRecipe />} />{" "}
-          {/* blog pages */}
-          <Route path="/create-blog" element={<CreateBlog />} />
-          <Route path="/blog/edit/:id" element={<EditBlog />} />{" "}
-          <Route path="/user-blog" element={<UserBlog />} />
-          <Route path="/product/edit/:id" element={<ProductEdit />} />{" "}
-          {/* Updated route for editing */}
-        </Route>
-        <Route path="/recipes" element={<RecipeList />} />
-        <Route path="/search" element={<RecipeList />} />
-        <Route path="/recipes/:id" element={<RecipeDetail />} />
-        <Route path="/blogs" element={<BlogList />} />
-        <Route path="/blogs/:id" element={<BlogDetail />} />
-        <Route path="/cookshop" element={<TagList />} />
-        <Route path="/cookshop/:tagType/:id" element={<TagDetail />} />
-        <Route path="*" element={<NotFound />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-      </Routes>
-      <Footer />
-    </Router>
+    <AlertProvider>
+      <Router>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <Header pagename="Home" />
+                <Home />
+              </>
+            }
+          />
+          <Route
+            path="/About"
+            element={
+              <>
+                <Header pagename="About" />
+                <About />
+              </>
+            }
+          />
+          <Route
+            path="/SignIn"
+            element={
+              <>
+                <Header pagename="Sign In" />
+                <SignIn />
+              </>
+            }
+          />
+          <Route
+            path="/SignUp"
+            element={
+              <>
+                <Header pagename="Sign Up" />
+                <SignUp />
+              </>
+            }
+          />
+          <Route element={<PrivateRoute />}>
+            <Route
+              path="/Profile"
+              element={
+                <>
+                  <Header pagename="Profile" />
+                  <Profile />
+                </>
+              }
+            />
+            <Route
+              path="/profile-edit"
+              element={
+                <>
+                  <Header pagename="Edit Profile" />
+                  <ProfileEdit />
+                </>
+              }
+            />
+            <Route
+              path="/create-recipe"
+              element={
+                <>
+                  <Header pagename="Create Recipe" />
+                  <CreateRecipe />
+                </>
+              }
+            />
+            <Route
+              path="/user-recipe"
+              element={
+                <>
+                  <Header pagename="My Recipes" />
+                  <UserRecipie />
+                </>
+              }
+            />
+            <Route
+              path="/recipes/edit/:id"
+              element={
+                <>
+                  <Header pagename="Edit Recipe" />
+                  <EditRecipe />
+                </>
+              }
+            />
+            <Route
+              path="/create-blog"
+              element={
+                <>
+                  <Header pagename="Create Blog" />
+                  <CreateBlog />
+                </>
+              }
+            />
+            <Route
+              path="/blog/edit/:id"
+              element={
+                <>
+                  <Header pagename="Edit Blog" />
+                  <EditBlog />
+                </>
+              }
+            />
+            <Route
+              path="/user-blog"
+              element={
+                <>
+                  <Header pagename="My Blogs" />
+                  <UserBlog />
+                </>
+              }
+            />
+            <Route
+              path="/product/edit/:id"
+              element={
+                <>
+                  <Header pagename="Edit Product" />
+                  <ProductEdit />
+                </>
+              }
+            />
+          </Route>
+          <Route
+            path="/recipes"
+            element={
+              <>
+                <Header pagename="Recipes" />
+                <RecipeList />
+              </>
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <>
+                <Header pagename="Search Results" />
+                <RecipeList />
+              </>
+            }
+          />
+          <Route
+            path="/recipes/:id"
+            element={
+              <>
+                <Header pagename="Recipe Details" />
+                <RecipeDetail />
+              </>
+            }
+          />
+          <Route
+            path="/blogs"
+            element={
+              <>
+                <Header pagename="Blogs" />
+                <BlogList />
+              </>
+            }
+          />
+          <Route
+            path="/blogs/:id"
+            element={
+              <>
+                <Header pagename="Blog Details" />
+                <BlogDetail />
+              </>
+            }
+          />
+          <Route
+            path="/cookshop"
+            element={
+              <>
+                <Header pagename="Cookshop" />
+                <TagList />
+              </>
+            }
+          />
+          <Route
+            path="/cookshop/:tagType/:id"
+            element={<CookshopPageWrapper />}
+          />
+          <Route
+            path="*"
+            element={
+              <>
+                <Header pagename="404 Not Found" />
+                <NotFound />
+              </>
+            }
+          />
+          <Route
+            path="/privacy-policy"
+            element={
+              <>
+                <Header pagename="Privacy Policy" />
+                <PrivacyPolicy />
+              </>
+            }
+          />
+          <Route
+            path="/terms-and-conditions"
+            element={
+              <>
+                <Header pagename="Terms and Conditions" />
+                <TermsAndConditions />
+              </>
+            }
+          />
+        </Routes>
+        <Footer />
+      </Router>
+    </AlertProvider>
   );
 }
