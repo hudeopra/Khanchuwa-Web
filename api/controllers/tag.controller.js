@@ -4,7 +4,14 @@ import RecipeTag from '../models/recipeTag.model.js';
 export const getTagsByType = async (req, res, next) => {
   try {
     const { type } = req.params; // Expecting a tag type in the URL
-    const tags = await RecipeTag.find({ tagType: type });
+    const filter = { tagType: type };
+
+    // Apply inStock filter only for ingredientTag
+    if (type === 'ingredientTag') {
+      filter.inStock = { $in: [true, 1] };
+    }
+
+    const tags = await RecipeTag.find(filter);
     console.log(`Fetched tags of type ${type}:`, tags);
     res.status(200).json(tags);
   } catch (error) {
@@ -76,7 +83,6 @@ export const removeBlogRef = async (req, res, next) => {
   }
 };
 
-
 // New endpoint: GET /api/tag -> fetches all tags
 export const getAllTags = async (req, res, next) => {
   try {
@@ -86,6 +92,7 @@ export const getAllTags = async (req, res, next) => {
     next(error);
   }
 };
+
 // New endpoint: PATCH /api/tag/update/:id
 export const updateTag = async (req, res, next) => {
   try {
@@ -118,6 +125,7 @@ export const updateTag = async (req, res, next) => {
     next(error);
   }
 };
+
 // New endpoint: GET /api/tag/:type/:id -> fetches a tag by tagType and TagObjID
 export const getTagByTypeAndId = async (req, res, next) => {
   try {

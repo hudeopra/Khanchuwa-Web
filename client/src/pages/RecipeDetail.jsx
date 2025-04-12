@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { useAlert } from "../components/AlertContext"; // Import AlertContext
 
 // Helper to format minutes into hr and min string
 const formatTime = (minutes) => {
@@ -29,8 +30,10 @@ export default function RecipeDetail() {
   const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
   const [deleteError, setDeleteError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null); // State for current user
+  const [isFavorite, setIsFavorite] = useState(false); // State for favorite toggle
 
   const dispatch = useDispatch();
+  const { showAlert } = useAlert(); // Use AlertContext
 
   console.log("User data:", userData);
   if (userData.currentUser) {
@@ -47,14 +50,19 @@ export default function RecipeDetail() {
         });
         if (!res.ok) throw new Error("Failed to fetch current user");
         const data = await res.json();
+        console.log("Current user data:", data); // Debugging log
         setCurrentUser(data);
+        dispatch({
+          type: "user/updateUserSuccess",
+          payload: data, // Update Redux with the new user data
+        });
       } catch (error) {
         console.error("Error fetching current user:", error.message);
       }
     };
 
-    fetchCurrentUser();
-  }, []);
+    fetchCurrentUser(); // Fetch current user on reload
+  }, [dispatch]);
 
   useEffect(() => {
     console.log("Fetching recipe with ID:", id);
@@ -84,6 +92,12 @@ export default function RecipeDetail() {
     };
     fetchRecipe();
   }, [id, userData]);
+
+  useEffect(() => {
+    // Check if the current recipe is in the user's favorite list
+    const isFav = userData.currentUser?.userFavRecipe?.includes(id);
+    setIsFavorite(isFav || false);
+  }, [userData, id]);
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
@@ -132,6 +146,50 @@ export default function RecipeDetail() {
       }
     } catch (err) {
       setDeleteError(err.message);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    try {
+      const res = await fetch(`/api/user/favorite/${id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      console.log("Toggle favorite response:", data); // Debugging log
+
+      if (res.ok) {
+        // Fetch updated user data explicitly
+        const updatedUserRes = await fetch("/api/user/current", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        const updatedUserData = await updatedUserRes.json();
+        if (updatedUserRes.ok) {
+          dispatch({
+            type: "user/updateUserSuccess",
+            payload: updatedUserData, // Update Redux with the new user data
+          });
+          showAlert("success", data.message || "Favorite status updated!"); // Show success alert
+        } else {
+          console.error(
+            "Failed to fetch updated user data:",
+            updatedUserData.message
+          );
+          showAlert("error", "Failed to update favorite status."); // Show error alert
+        }
+      } else {
+        console.error("Failed to toggle favorite:", data.message);
+        showAlert("error", data.message || "Failed to toggle favorite."); // Show error alert
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error.message);
+      showAlert("error", "An error occurred while toggling favorite."); // Show error alert
     }
   };
 
@@ -192,14 +250,16 @@ export default function RecipeDetail() {
                     <span>Diet:</span> {recipe.diet || "N/A"}
                   </div>
                   <div className="kh-recipe-single__head--info">
-                    <div className="my-4">
-                      <label>
-                        <input
-                          type="checkbox" // Changed from "radio" to "checkbox"
-                        />
-                        Add to Wishlist
-                      </label>
-                    </div>
+                    <button
+                      className={`toggle-favorite-btn ${
+                        isFavorite ? "active" : ""
+                      }`}
+                      onClick={handleToggleFavorite}
+                    >
+                      {isFavorite
+                        ? "Remove from Favorites"
+                        : "Add to Favorites"}
+                    </button>
                   </div>
                 </div>
               </div>

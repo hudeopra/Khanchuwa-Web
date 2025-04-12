@@ -39,6 +39,7 @@ import ProductEdit from "./pages/ProductEdit"; // Import ProductEdit component
 import NotFound from "./pages/404"; // Import NotFound component
 import PrivacyPolicy from "./pages/PrivacyPolicy"; // Import PrivacyPolicy
 import TermsAndConditions from "./pages/TermsAndConditions"; // Import TermsAndConditions
+// import AdminCookshop from "./pages/AdminCookshop"; // Import AdminCookshop component
 
 function CookshopPageWrapper() {
   const { tagType } = useParams(); // Get tagType from the URL
@@ -221,12 +222,39 @@ export default function App() {
               </>
             }
           />
+          {/* <Route
+            path="/admincookshop"
+            element={
+              <>
+                <Header pagename="Admin Cookshop" />
+                <AdminCookshop />
+              </>
+            }
+          /> */}
           <Route
             path="/cookshop"
             element={
               <>
                 <Header pagename="Cookshop" />
-                <TagList />
+                <TagList tagType="ingredientTag" />
+              </>
+            }
+          />
+          <Route
+            path="/cuisine"
+            element={
+              <>
+                <Header pagename="Cuisine" />
+                <TagList tagType="cuisineTag" /> {/* Corrected prop name */}
+              </>
+            }
+          />
+          <Route
+            path="/flavour"
+            element={
+              <>
+                <Header pagename="flavour" />
+                <TagList tagType="flavourTag" /> {/* Corrected prop name */}
               </>
             }
           />

@@ -34,11 +34,7 @@ export const SignOut = ({ handleLinkClick, type = "list", txt = true }) => {
 
   const content = (
     <span className="d-flex" onClick={handleSignOut}>
-      <img
-        src="../src/assets/img/search/logout.png"
-        alt="Khanchuwa Logo"
-        style={{ height: "26px", width: "26px", cursor: "pointer" }}
-      />
+      <img src="../src/assets/img/search/logout.png" alt="Khanchuwa Logo" />
       {txt !== false && <span>Sign Out</span>} {/* Conditionally render text */}
     </span>
   );

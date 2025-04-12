@@ -105,7 +105,7 @@ export default function SignIn() {
               <button disabled={loading}>
                 {loading ? "Loading..." : "SignIn"}
               </button>
-              <OAuth />
+              {/* <OAuth /> */}
             </div>
           </form>
           <div className="kh-signin__gotacc">

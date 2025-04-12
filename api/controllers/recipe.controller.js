@@ -30,7 +30,7 @@ const updateRecipeReferences = async (tags, recipeId) => {
 // Create a recipe using properly formatted data from the client.
 export const createRecipe = async (req, res, next) => {
   try {
-    const { cuisineTag, flavourTag, ingredientTag, ...rest } = req.body;
+    const { cuisineTag, flavourTag, ingredientTag, dietaryRestrictions, allergies, ...rest } = req.body;
 
     // Populate tagName for each tag type
     const populatedCuisineTag = await populateTags(cuisineTag || []);
@@ -42,6 +42,8 @@ export const createRecipe = async (req, res, next) => {
       cuisineTag: populatedCuisineTag,
       flavourTag: populatedFlavourTag,
       ingredientTag: populatedIngredientTag,
+      dietaryRestrictions: dietaryRestrictions || [], // Handle new field
+      allergies: allergies || [], // Handle new field
     });
 
     // Update recipe references in tags
@@ -58,7 +60,7 @@ export const createRecipe = async (req, res, next) => {
 // Update a recipe with new data from the client (used by EditRecipe page)
 export const updateRecipe = async (req, res, next) => {
   try {
-    const { cuisineTag, flavourTag, ingredientTag, ...rest } = req.body;
+    const { cuisineTag, flavourTag, ingredientTag, dietaryRestrictions, allergies, ...rest } = req.body;
 
     // Populate tagName for each tag type
     const populatedCuisineTag = await populateTags(cuisineTag || []);
@@ -72,6 +74,8 @@ export const updateRecipe = async (req, res, next) => {
         cuisineTag: populatedCuisineTag,
         flavourTag: populatedFlavourTag,
         ingredientTag: populatedIngredientTag,
+        dietaryRestrictions: dietaryRestrictions || [], // Handle new field
+        allergies: allergies || [], // Handle new field
       },
       { new: true }
     );
@@ -162,7 +166,6 @@ export const filterRecipes = async (req, res, next) => {
       diet,
       allergies,
       dietaryRestrictions,
-      tastePreferences,
       searchTerm,
     } = req.query;
 
@@ -214,8 +217,8 @@ export const filterRecipes = async (req, res, next) => {
       filter.$and = [...(filter.$and || []), ...searchConditions];
     }
 
-    // Filter based on user preferences (allergies, dietaryRestrictions, tastePreferences)
-    if (allergies || dietaryRestrictions || tastePreferences) {
+    // Filter based on user preferences (allergies, dietaryRestrictions)
+    if (allergies || dietaryRestrictions) {
       let userFilter = {};
       if (allergies) {
         const allergyFilters = allergies.split(",").map(tag => tag.trim());
@@ -224,10 +227,6 @@ export const filterRecipes = async (req, res, next) => {
       if (dietaryRestrictions) {
         const restrictions = dietaryRestrictions.split(",").map(tag => tag.trim());
         userFilter["preferences.dietaryRestrictions"] = { $in: restrictions };
-      }
-      if (tastePreferences) {
-        const tasteFilters = tastePreferences.split(",").map(tag => tag.trim());
-        userFilter["preferences.tastePreferences"] = { $in: tasteFilters };
       }
       const users = await User.find(userFilter).select("_id");
       const userIds = users.map(u => u._id);

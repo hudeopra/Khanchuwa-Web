@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-
+import {
+  Link,
+  useSearchParams,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 export default function RecipeList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm") || "";
-
+  const navigate = useNavigate();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -101,7 +105,13 @@ export default function RecipeList() {
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
-
+  const handleSubmit = (e) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set("searchTerm", searchTerm);
+    const searchQuery = urlParams.toString();
+    navigate(`/search?${searchQuery}`);
+  };
+  handleSubmit();
   // Ensure recipes are correctly accessed if wrapped in an object
   const recipesToFilter = Array.isArray(recipes) ? recipes : [];
   const filteredRecipes = recipesToFilter.filter((recipe) => {
@@ -118,7 +128,7 @@ export default function RecipeList() {
   console.log("Filtered Recipes:", filteredRecipes);
 
   return (
-    <main className="kh-recipe-list">
+    <main className="kh-recipe-list" onLoad={handleSubmit}>
       <div className="container">
         <div className="row">
           <div className="col-12">

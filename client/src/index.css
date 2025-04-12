@@ -103,6 +103,7 @@ textarea {
 input,
 select {
   min-height: 45px;
+  padding: 16px 8px 6px;
 }
 
 textarea {
@@ -121,7 +122,13 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
-.kh-input-wrapper {
+.kh-input-item {
+  position: relative;
+}
+.kh-input-item label {
+  position: absolute;
+  top: -10px;
+  left: 5px;
 }
 .kh-btn {
   background-color: unset;
@@ -339,7 +346,7 @@ main {
   right: 10px;
   padding: 5px 12px;
   border-radius: 12px 12px 0 0;
-  background-color: var(--gray);
+  background-color: var(--primary-color);
 }
 /* category section ends */
 .kh-category__wrapper--horizontal {
@@ -907,11 +914,7 @@ ul.kh-profile__menu--sub-menu-block.active {
 .kh-recipe-form__form--item #shortDescription {
   height: 163px;
 }
-.kh-recipe-form__fiveGrid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-}
+
 .kh-recipe-form__admin {
   background-color: rgba(48, 48, 48, 0.75);
   margin-bottom: 30px;
@@ -930,20 +933,13 @@ ul.kh-profile__menu--sub-menu-block.active {
 .kh-recipe-form__admin--submit button:hover {
   color: var(--white);
 }
+.kh-recipe-form__nutritional {
+  flex-wrap: wrap;
+}
 .kh-recipe-form__nutritional,
 .kh-recipe-form__ingredient {
   display: flex;
   gap: 30px;
-}
-.kh-recipe-form__nutritional__item,
-.kh-recipe-form__fiveGrid .kh-recipe-form__form--item {
-  position: relative;
-}
-.kh-recipe-form__nutritional label,
-.kh-recipe-form__fiveGrid .kh-recipe-form__form--item label {
-  position: absolute;
-  top: -10px;
-  left: 5px;
 }
 .kh-recipe-form__ingredient--remove {
   position: relative;
@@ -1274,7 +1270,7 @@ li.kh-recipe-single__tags--item {
 
 .kh-header__user--profile-wrapper {
   display: flex;
-  gap: 10px;
+  gap: 30px;
   position: relative;
   z-index: 1;
 }

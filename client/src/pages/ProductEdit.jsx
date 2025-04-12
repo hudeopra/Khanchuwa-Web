@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAlert } from "../components/AlertContext"; // Import AlertContext
 import {
   getStorage,
   ref,
@@ -11,6 +12,7 @@ import { app } from "../firebase";
 export default function ProductEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showAlert } = useAlert(); // Use AlertContext
   const [formData, setFormData] = useState(null);
   const [selectedImages, setSelectedImages] = useState({
     favImg: null,
@@ -43,6 +45,11 @@ export default function ProductEdit() {
   const handleImageSelect = (e, field) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        // Check if file size exceeds 2 MB
+        showAlert("error", "Image size must be less than 2 MB."); // Show error alert
+        return;
+      }
       setSelectedImages((prev) => ({ ...prev, [field]: file }));
       const fileURL = URL.createObjectURL(file); // Create a temporary URL for preview
       setFormData((prev) => ({ ...prev, [field]: fileURL })); // Update formData for preview
@@ -63,7 +70,10 @@ export default function ProductEdit() {
       uploadTask.on(
         "state_changed",
         null,
-        (error) => reject(error),
+        (error) => {
+          showAlert("error", `Image upload failed: ${error.message}`); // Show error alert
+          reject(error);
+        },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then(resolve);
         }
@@ -98,11 +108,14 @@ export default function ProductEdit() {
       const data = await res.json();
       if (data.success === false) {
         setError(data.message);
+        showAlert("error", `Update failed: ${data.message}`); // Show error alert
       } else {
+        showAlert("success", "Product updated successfully!"); // Show success alert
         navigate(`/cookshop/${formData.tagType}/${id}`);
       }
     } catch (err) {
       setError(err.message);
+      showAlert("error", `Update failed: ${err.message}`); // Show error alert
     } finally {
       setUploading(false);
     }

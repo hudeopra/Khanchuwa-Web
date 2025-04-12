@@ -79,6 +79,10 @@ const recipeSchema = new mongoose.Schema(
     mealCourse: { type: [String] }, // E.g., Appetizer, Main Course
     mealType: { type: [String] }, // E.g., Lunch, Dinner, Breakfast
     cookingMethod: { type: [String] }, // E.g., Baking, Frying
+
+    // New fields for dietary restrictions, allergies, and taste preferences
+    dietaryRestrictions: { type: [String], default: [] }, // New field for dietary restrictions
+    allergies: { type: [String], default: [] }, // New field for allergies
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields

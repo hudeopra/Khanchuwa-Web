@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true,
     unique: true,
   },
   password: {
@@ -36,8 +35,17 @@ const userSchema = new mongoose.Schema({
     default: "user"
   },
   userFavRecipe: [{
-    favrefs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Recipe' }], // Reference to Recipe object IDs
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'recipe',
+    required: false,
+    default: [], // Ensure it defaults to an empty array
   }],
+  preferences: {
+    dietaryRestrictions: [{ type: String, required: false }],
+    allergies: [{ type: String, required: false }],
+    language: { type: String, required: false },
+    flavourTag: [{ type: String, required: false }], // Added flavourTag as an array of strings
+  },
 }, {
   timestamps: true,
 });

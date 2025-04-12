@@ -371,7 +371,7 @@ export default function EditRecipe() {
                     <div className="col-12">
                       <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                         <label>Meal Course</label>
-                        <div className="d-flex flex-wrap gap-2">
+                        <div className="kh-input-item">
                           {[
                             "Appetizer",
                             "Soup",
@@ -401,7 +401,7 @@ export default function EditRecipe() {
                       </div>
                       <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                         <label>Meal Time</label>
-                        <div className="d-flex flex-wrap gap-2">
+                        <div className="kh-input-item">
                           {[
                             "Snack",
                             "Breakfast",
@@ -435,7 +435,7 @@ export default function EditRecipe() {
 
                       <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                         <label>Cooking Method</label>
-                        <div className="d-flex flex-wrap gap-2">
+                        <div className="kh-input-item">
                           {[
                             "Stir-fried",
                             "Grilled",

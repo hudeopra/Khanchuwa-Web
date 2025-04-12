@@ -12,6 +12,27 @@ import MainMenu from "./MainMenu"; // Add import for MainMenu
 import { useAlert } from "./AlertContext"; // Import the alert context
 import BootstrapAlert from "./BootstrapAlert"; // Import BootstrapAlert
 
+export const fetchRandomRecipeId = async () => {
+  try {
+    const response = await fetch("/api/recipe/all");
+    const text = await response.text(); // get raw text
+    if (!text) {
+      console.error("No data received from /api/recipe/all");
+      return null;
+    }
+    const data = JSON.parse(text); // parse only if text exists
+    if (data.length === 0) {
+      console.error("No recipes available in the data");
+      return null;
+    }
+    const randomIndex = Math.floor(Math.random() * data.length);
+    return data[randomIndex];
+  } catch (error) {
+    console.error("Error fetching recipes:", error);
+    return null;
+  }
+};
+
 export default function Header({ pagename }) {
   const currentUser = useSelector((state) => state.user.currentUser);
   const userCart = useSelector((state) => state.userCart);
@@ -49,33 +70,25 @@ export default function Header({ pagename }) {
     }
   }, [window.location.search]);
 
-  const fetchRandomRecipeId = async () => {
-    try {
-      const response = await fetch("/api/recipe/all");
-      const text = await response.text(); // get raw text
-      if (!text) {
-        console.error("No data received from /api/recipe/all");
-        return;
-      }
-      const data = JSON.parse(text); // parse only if text exists
-      if (data.length === 0) {
-        console.error("No recipes available in the data");
-        return;
-      }
-      const randomIndex = Math.floor(Math.random() * data.length);
-      setRandomRecipeId(data[randomIndex]._id);
-    } catch (error) {
-      console.error("Error fetching recipes:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchRandomRecipeId();
+    const fetchRecipe = async () => {
+      const recipe = await fetchRandomRecipeId();
+      if (recipe) {
+        setRandomRecipeId(recipe._id);
+      }
+    };
+    fetchRecipe();
     setIsMenuActive(false);
   }, []);
 
   const handleRandomRecipeClick = () => {
-    fetchRandomRecipeId();
+    const fetchRecipe = async () => {
+      const recipe = await fetchRandomRecipeId();
+      if (recipe) {
+        setRandomRecipeId(recipe._id);
+      }
+    };
+    fetchRecipe();
   };
 
   const toggleMenu = () => {
@@ -180,7 +193,7 @@ export default function Header({ pagename }) {
                   <div className="kh-header__user--profile">
                     <Link to="/profile" onClick={handleLinkClick}>
                       <img
-                        className="rounded-full h-7 w-7 object-cover"
+                        className="kh-header__user--profile-img"
                         src={currentUser?.user?.avatar || currentUser?.avatar}
                         alt="User Avatar"
                       />

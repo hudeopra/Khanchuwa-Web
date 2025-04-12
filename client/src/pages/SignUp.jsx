@@ -99,6 +99,7 @@ export default function SignUp() {
             <button disabled={loading}>
               {loading ? "Loading..." : "Sign Up"}
             </button>
+            {/* <OAuth /> */}
           </form>
           <div className="kh-signup__gotacc">
             <p>

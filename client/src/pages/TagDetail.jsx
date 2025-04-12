@@ -283,7 +283,7 @@ const TagDetail = () => {
                   <div className="col-md-4" key={`recipe-${recipe._id}`}>
                     <div className="card">
                       <img
-                        src={recipe.bannerImgUrl || ""}
+                        src={recipe.favImgUrl || ""}
                         alt={recipe.recipeName || "Recipe"}
                         className="card-img-top"
                       />

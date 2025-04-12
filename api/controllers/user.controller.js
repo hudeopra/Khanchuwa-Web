@@ -32,6 +32,13 @@ export const updateUserInfo = async (req, res, next) => {
           bio: req.body.bio, // Include bio
           socialMedia: req.body.socialMedia,
           role: req.body.role,
+          preferences: {
+            notifications: req.body.preferences.notifications,
+            dietaryRestrictions: req.body.preferences.dietaryRestrictions,
+            allergies: req.body.preferences.allergies,
+            language: req.body.preferences.language,
+            flavourTag: req.body.preferences.flavourTag, // Added flavourTag handling
+          }, // Include preferences
         },
       },
       { new: true }
@@ -58,35 +65,38 @@ export const deleteUser = async (req, res, next) => {
 
 // NEW: Toggle favorite recipe endpoint
 export const toggleFavoriteRecipe = async (req, res, next) => {
-  try {
-    const userId = req.user.id;
-    const { recipeId, favRecipeId } = req.body; // Include favRecipeId
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+  const { recipeId } = req.params;
+  const userId = req.user.id;
 
-    const recipeIndex = user.userFavRecipe.findIndex(fav => fav.recipeId.equals(recipeId));
-    if (recipeIndex !== -1) {
-      // Recipe exists, toggle favorite recipe
-      const favrefs = user.userFavRecipe[recipeIndex].favrefs || [];
-      const favRecipeIndex = favrefs.findIndex(id => id.equals(favRecipeId));
-      if (favRecipeIndex !== -1) {
-        favrefs.splice(favRecipeIndex, 1); // Remove favorite recipe
-      } else {
-        favrefs.push(favRecipeId); // Add favorite recipe
-      }
-      user.userFavRecipe[recipeIndex].favrefs = favrefs;
+  try {
+    const user = await User.findById(userId);
+    const recipe = await Recipe.findById(recipeId);
+
+    if (!user || !recipe) {
+      return res.status(404).json({ message: 'User or Recipe not found' });
+    }
+
+    const isFavorited = user.userFavRecipe.some(favId => favId.toString() === recipeId);
+
+    if (isFavorited) {
+      // Remove from favorites
+      user.userFavRecipe = user.userFavRecipe.filter(favId => favId.toString() !== recipeId);
+      recipe.recipeFav = Math.max(0, recipe.recipeFav - 1);
     } else {
-      // Add new recipe with favorite recipe
-      user.userFavRecipe.push({
-        recipeId,
-        favrefs: [favRecipeId]
-      });
+      // Add to favorites only if not already present
+      user.userFavRecipe.push(recipeId);
+      recipe.recipeFav += 1;
     }
 
     await user.save();
-    return res.status(200).json({ message: 'Favorite updated', userFavRecipe: user.userFavRecipe });
+    await recipe.save();
+
+    res.status(200).json({
+      message: isFavorited ? 'Recipe removed from favorites' : 'Recipe added to favorites',
+      recipeFavCount: recipe.recipeFav,
+    });
   } catch (error) {
-    next(error);
+    res.status(500).json({ message: 'An error occurred', error: error.message });
   }
 };
 
@@ -120,5 +130,41 @@ export const getCurrentUser = async (req, res, next) => {
     res.status(200).json(user);
   } catch (error) {
     next(errorHandler(500, 'api/user.controller: Internal Server Error'));
+  }
+};
+
+// NEW: Create user
+export const createUser = async (req, res, next) => {
+  try {
+    const hashedPassword = await bcrypt.hash(req.body.password, 12);
+    const newUser = new User({
+      username: req.body.username,
+      email: req.body.email,
+      password: hashedPassword,
+    });
+
+    const savedUser = await newUser.save();
+    const { password, ...rest } = savedUser._doc; // Exclude password from the response
+    res.status(201).json(rest);
+  } catch (error) {
+    next(errorHandler(500, 'api/user.controller: Internal Server Error'));
+  }
+};
+
+// NEW: Validate current password
+export const validatePassword = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ isValid: false, message: "User not found" });
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(200).json({ isValid: false });
+
+    res.status(200).json({ isValid: true });
+  } catch (error) {
+    next(errorHandler(500, "api/user.controller: Internal Server Error"));
   }
 };

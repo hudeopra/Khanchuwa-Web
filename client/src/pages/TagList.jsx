@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/user/userCart";
 import { useAlert } from "../components/AlertContext"; // Import the alert context
 
-const TagList = () => {
+const TagList = ({ tagType }) => {
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,7 +16,7 @@ const TagList = () => {
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await fetch("/api/tag");
+        const response = await fetch(`/api/tag?type=${tagType}`); // Fetch tags by type
         if (!response.ok) throw new Error("Failed to fetch tags");
         const data = await response.json();
         setTags(data);
@@ -34,7 +34,7 @@ const TagList = () => {
     };
 
     fetchTags();
-  }, []);
+  }, [tagType]); // Re-fetch when tagType changes
 
   const handleQuantityChange = (tagId, value) => {
     setQuantities((prev) => ({
@@ -74,11 +74,11 @@ const TagList = () => {
           <h2>{title}</h2>
           <ul className="d-flex flex-wrap gap-3">
             {filteredTags.map((tag) => (
-              <li key={tag._id}>
-                <Link
-                  to={`/cookshop/${tag.tagType}/${tag._id}`}
-                  data-discover="true"
-                >
+              <li
+                key={tag._id}
+                // className={`tag-card ${tag.inStock ? "Yes" : "No"}`}
+              >
+                <Link to={`/cookshop/${tag.tagType}/${tag._id}`}>
                   <h3>{tag.name}</h3>
                   {tag.favImg && (
                     <img
@@ -89,7 +89,9 @@ const TagList = () => {
                   )}
                   {type === "ingredientTag" && (
                     <>
-                      <p>In Stock: {tag.inStock ? "Yes" : "No"}</p>
+                      {tag.inStock !== undefined && (
+                        <p>In Stock: {tag.inStock ? "Yes" : "No"}</p>
+                      )}
                       <p>
                         Price:{" "}
                         <span className={tag.disPrice ? "offer" : ""}>
@@ -132,10 +134,23 @@ const TagList = () => {
       <section className="container">
         <div className="row">
           <div className="col-12">
-            <h1>Tag List</h1>
-            {renderTagsByType("cuisineTag", "Cuisine Tags")}
-            {renderTagsByType("ingredientTag", "Ingredient Tags")}
-            {renderTagsByType("flavourTag", "Flavour Tags")}
+            <h1>
+              {tagType === "ingredientTag"
+                ? "Ingredients"
+                : tagType === "cuisineTag"
+                ? "Cuisines"
+                : "Flavours"}
+            </h1>
+            {renderTagsByType(
+              tagType,
+              `${
+                tagType === "ingredientTag"
+                  ? "Ingredient"
+                  : tagType === "cuisineTag"
+                  ? "Cuisine"
+                  : "Flavour"
+              } Tags`
+            )}
           </div>
         </div>
       </section>

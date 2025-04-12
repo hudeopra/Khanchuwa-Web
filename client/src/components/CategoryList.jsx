@@ -92,7 +92,7 @@ const CategoryList = ({ taglink }) => {
                 </Link>
               </div>
               <h3>{item.name}</h3>
-              <p>{item.recipeRefs.length} Recipes</p>
+              {/* <p>{item.recipeRefs.length} Recipes</p> */}
             </div>
           ))}
         </div>

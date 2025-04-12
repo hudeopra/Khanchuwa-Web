@@ -43,6 +43,8 @@ export default function CreateRecipe() {
     prepInstructions: "", // Initialize the new instructions as empty strings
     mealType: [], // UPDATED: multiple meal types can be selected
     cookingMethod: [], // UPDATED: cooking methods (multiple), will include extra +1 option
+    dietaryRestrictions: [], // NEW: dietary restrictions
+    allergies: [], // NEW: allergies
   });
   const [imageUploadError, setImageUploadError] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -297,7 +299,7 @@ export default function CreateRecipe() {
                 Create a Recipe
               </h1>
             </div>
-            <div className="col-8">
+            <div className="col-12 col-md-8">
               <AccordionItem title="Recipe Information">
                 <div className="div-input-wrapper">
                   <h4>Recipe Information</h4>
@@ -305,7 +307,7 @@ export default function CreateRecipe() {
                     <div className="col-8">
                       <div className="row">
                         <div className="col-6">
-                          <div className="kh-recipe-form__form--item">
+                          <div className="kh-recipe-form__form--item kh-input-item">
                             <input
                               type="hidden"
                               id="userRef"
@@ -325,7 +327,7 @@ export default function CreateRecipe() {
                           </div>
                         </div>
                         <div className="col-6">
-                          <div className="kh-recipe-form__form--item">
+                          <div className="kh-recipe-form__form--item kh-input-item">
                             <label htmlFor="videoUrl">Video URL</label>
                             <input
                               type="text"
@@ -338,7 +340,7 @@ export default function CreateRecipe() {
                           </div>
                         </div>
                       </div>
-                      <div className="kh-recipe-form__form--item">
+                      <div className="kh-recipe-form__form--item kh-input-item">
                         <label htmlFor="description">Long Description</label>
                         <textarea
                           id="description"
@@ -350,7 +352,7 @@ export default function CreateRecipe() {
                       </div>
                     </div>
                     <div className="col-4">
-                      <div className="kh-recipe-form__form--item">
+                      <div className="kh-recipe-form__form--item kh-input-item">
                         <label htmlFor="shortDescription">
                           Short Description
                         </label>
@@ -364,9 +366,9 @@ export default function CreateRecipe() {
                       </div>
                     </div>
                     <div className="col-12">
-                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
+                      <div className="kh-recipe-form__form--item  kh-recipe-form__checkbox">
                         <label>Meal Course</label>
-                        <div className="d-flex flex-wrap gap-2">
+                        <div className="kh-input-checkbox-wrapper">
                           {[
                             "Appetizer",
                             "Soup",
@@ -394,9 +396,9 @@ export default function CreateRecipe() {
                           ))}
                         </div>
                       </div>
-                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
+                      <div className="kh-recipe-form__form--item  kh-recipe-form__checkbox">
                         <label>Meal Time</label>
-                        <div className="d-flex flex-wrap gap-2">
+                        <div className="kh-input-checkbox-wrapper">
                           {[
                             "Snack",
                             "Breakfast",
@@ -429,7 +431,7 @@ export default function CreateRecipe() {
                       </div>
                       <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                         <label>Cooking Method</label>
-                        <div className="d-flex flex-wrap gap-2">
+                        <div className="kh-input-checkbox-wrapper">
                           {[
                             "Stir-fried",
                             "Grilled",
@@ -463,6 +465,69 @@ export default function CreateRecipe() {
                           ))}
                         </div>
                       </div>
+                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
+                        <label>Dietary Restrictions:</label>
+                        <div className="kh-input-checkbox-wrapper">
+                          {[
+                            "Vegetarian",
+                            "Vegan",
+                            "Gluten-Free",
+                            "Dairy-Free",
+                            "Nut-Free",
+                          ].map((opt) => (
+                            <div
+                              className={`kh-recipe-form__checkbox--item ${
+                                formData.dietaryRestrictions?.includes(opt)
+                                  ? "checked"
+                                  : ""
+                              }`}
+                              key={opt}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.dietaryRestrictions?.includes(opt) ||
+                                  false
+                                }
+                                onChange={() =>
+                                  toggleOption("dietaryRestrictions", opt)
+                                }
+                              />
+                              <label>{opt}</label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
+                        <label>Allergies:</label>
+                        <div className="kh-input-checkbox-wrapper">
+                          {[
+                            "Peanuts",
+                            "Shellfish",
+                            "Dairy",
+                            "Gluten",
+                            "Soy",
+                          ].map((opt) => (
+                            <div
+                              className={`kh-recipe-form__checkbox--item ${
+                                formData.allergies?.includes(opt)
+                                  ? "checked"
+                                  : ""
+                              }`}
+                              key={opt}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.allergies?.includes(opt) || false
+                                }
+                                onChange={() => toggleOption("allergies", opt)}
+                              />
+                              <label>{opt}</label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -474,7 +539,7 @@ export default function CreateRecipe() {
                     {formData.nutritionalInfo.map((item, idx) => (
                       <div
                         key={idx}
-                        className="kh-recipe-form__nutritional__item"
+                        className="kh-recipe-form__nutritional__item kh-input-item"
                       >
                         <label className="" htmlFor={`nutritional-info-${idx}`}>
                           {item.name}
@@ -504,11 +569,10 @@ export default function CreateRecipe() {
                   </div>
                 </div>
               </AccordionItem>
-              <AccordionItem title="Fivegrid ">
+              <AccordionItem title="Cooking and Prep ">
                 <div className="div-input-wrapper">
-                  <h4>Cooking and Prep</h4>
-                  <div className="kh-recipe-form__fiveGrid">
-                    <div className="kh-recipe-form__form--item">
+                  <div className="kh-recipe-form__wrapper">
+                    <div className="kh-recipe-form__form--item kh-input-item">
                       <label htmlFor="diet">Diet</label>
                       <select
                         id="diet"
@@ -524,7 +588,7 @@ export default function CreateRecipe() {
                         <option value="High Protein">High Protein</option>
                       </select>
                     </div>
-                    <div className="kh-recipe-form__form--item">
+                    <div className="kh-recipe-form__form--item kh-input-item">
                       <label htmlFor="difficulty">Difficulty</label>
                       <select
                         id="difficulty"
@@ -540,7 +604,7 @@ export default function CreateRecipe() {
                         <option value="Very Hard">Very Hard</option>
                       </select>
                     </div>
-                    <div className="kh-recipe-form__form--item">
+                    <div className="kh-recipe-form__form--item kh-input-item">
                       <label htmlFor="prepTime">Prep Time</label>
                       <input
                         type="number"
@@ -551,7 +615,7 @@ export default function CreateRecipe() {
                         value={formData.prepTime}
                       />
                     </div>
-                    <div className="kh-recipe-form__form--item">
+                    <div className="kh-recipe-form__form--item kh-input-item">
                       <label htmlFor="cookTime">Cook Time</label>
                       <input
                         type="number"
@@ -562,7 +626,7 @@ export default function CreateRecipe() {
                         value={formData.cookTime}
                       />
                     </div>
-                    <div className="kh-recipe-form__form--item">
+                    <div className="kh-recipe-form__form--item kh-input-item">
                       <label htmlFor="servings">Servings:</label>
                       <select
                         id="servings"
@@ -578,7 +642,7 @@ export default function CreateRecipe() {
                         ))}
                       </select>
                     </div>
-                    <div className="kh-recipe-form__form--item">
+                    <div className="kh-recipe-form__form--item kh-input-item">
                       <label>Ingredients:</label>
                       {formData.ingredients.map((ingredient, index) => (
                         <div key={index} className="kh-recipe-form__ingredient">
@@ -689,7 +753,7 @@ export default function CreateRecipe() {
                 </div>
               </AccordionItem>
             </div>
-            <div className="col-4">
+            <div className="col-12 col-md-4">
               <div className="kh-recipe-form__admin">
                 <p>
                   Author: <span>@{formData.chefName}</span>
@@ -710,7 +774,7 @@ export default function CreateRecipe() {
               <AccordionItem title="Media Upload ">
                 <div className="div-input-wrapper kh-media-upload">
                   <h4>Media Upload</h4>
-                  <div className="kh-recipe-form__form--item">
+                  <div className="kh-recipe-form__form--item kh-input-item">
                     <label htmlFor="bannerImg">Banner Image</label>
                     <input
                       type="file"
@@ -740,7 +804,7 @@ export default function CreateRecipe() {
                       </div>
                     )}
                   </div>
-                  <div className="kh-recipe-form__form--item">
+                  <div className="kh-recipe-form__form--item kh-input-item">
                     <label htmlFor="favImg">Favorite Image</label>
                     <input
                       type="file"
@@ -770,7 +834,7 @@ export default function CreateRecipe() {
                       </div>
                     )}
                   </div>
-                  <div className="kh-recipe-form__form--item">
+                  <div className="kh-recipe-form__form--item kh-input-item">
                     <label htmlFor="images">Gallery Images:</label>
                     <input
                       onChange={handleFileSelect}
@@ -804,7 +868,7 @@ export default function CreateRecipe() {
               <AccordionItem title="Tags">
                 <div className="div-input-wrapper">
                   <h4>Tags</h4>
-                  <div className="kh-recipe-form__form--item">
+                  <div className="kh-recipe-form__form--item ">
                     <span>Cuisine Tags</span>
                     <TagSelector
                       attribute="cuisineTag"
@@ -817,7 +881,7 @@ export default function CreateRecipe() {
                       }
                     />
                   </div>
-                  <div className="kh-recipe-form__form--item">
+                  <div className="kh-recipe-form__form--item ">
                     <span>Flavour Tags</span>
                     <TagSelector
                       attribute="flavourTag"
@@ -830,7 +894,7 @@ export default function CreateRecipe() {
                       }
                     />
                   </div>
-                  <div className="kh-recipe-form__form--item">
+                  <div className="kh-recipe-form__form--item ">
                     <span>Ingredient Tags</span>
                     <TagSelector
                       attribute="ingredientTag"
