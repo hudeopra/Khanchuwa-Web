@@ -31,7 +31,7 @@ export default function Home() {
       {/* <TestingComponent /> */}
       {/* <HomeBanner /> */}
       <div className="container py-5 mt-5">
-        <div className="kh-recipeList">
+        <div className="kh-recipeList ">
           <h2>Food. Where Happiness Begins</h2>
           <CategoryList taglink="cuisineTag" />
         </div>

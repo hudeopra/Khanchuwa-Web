@@ -74,6 +74,8 @@ export default function EditRecipe() {
           cookingMethod: data.cookingMethod || [],
           mealCourse: data.mealCourse || [], // Ensure default array
           mealType: data.mealType || [], // Ensure default array
+          dietaryRestrictions: data.dietaryRestrictions || [], // Ensure default array
+          allergies: data.allergies || [], // Ensure default array
         });
         // Save the original tag arrays for future diff
         setPreviousTags({
@@ -300,7 +302,7 @@ export default function EditRecipe() {
                 Edit a Recipe
               </h1>
             </div>
-            <div className="col-8">
+            <div className="col-12 col-md-8">
               <AccordionItem title="Recipe Information">
                 <div className="div-input-wrapper">
                   <h4>Recipe Information</h4>
@@ -371,7 +373,7 @@ export default function EditRecipe() {
                     <div className="col-12">
                       <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                         <label>Meal Course</label>
-                        <div className="kh-input-item">
+                        <div className="kh-input-checkbox-wrapper">
                           {[
                             "Appetizer",
                             "Soup",
@@ -401,7 +403,7 @@ export default function EditRecipe() {
                       </div>
                       <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                         <label>Meal Time</label>
-                        <div className="kh-input-item">
+                        <div className="kh-input-checkbox-wrapper">
                           {[
                             "Snack",
                             "Breakfast",
@@ -435,7 +437,7 @@ export default function EditRecipe() {
 
                       <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
                         <label>Cooking Method</label>
-                        <div className="kh-input-item">
+                        <div className="kh-input-checkbox-wrapper">
                           {[
                             "Stir-fried",
                             "Grilled",
@@ -469,48 +471,308 @@ export default function EditRecipe() {
                           ))}
                         </div>
                       </div>
+                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
+                        <label>Dietary Restrictions:</label>
+                        <div className="kh-input-checkbox-wrapper">
+                          {[
+                            "Vegetarian",
+                            "Vegan",
+                            "Gluten-Free",
+                            "Dairy-Free",
+                            "Nut-Free",
+                          ].map((opt) => (
+                            <div
+                              className={`kh-recipe-form__checkbox--item ${
+                                formData.dietaryRestrictions?.includes(opt)
+                                  ? "checked"
+                                  : ""
+                              }`}
+                              key={opt}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.dietaryRestrictions?.includes(opt) ||
+                                  false
+                                }
+                                onChange={() =>
+                                  toggleOption("dietaryRestrictions", opt)
+                                }
+                              />
+                              <label>{opt}</label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="kh-recipe-form__form--item kh-recipe-form__checkbox">
+                        <label>Allergies:</label>
+                        <div className="kh-input-checkbox-wrapper">
+                          {[
+                            "Peanuts",
+                            "Shellfish",
+                            "Dairy",
+                            "Gluten",
+                            "Soy",
+                          ].map((opt) => (
+                            <div
+                              className={`kh-recipe-form__checkbox--item ${
+                                formData.allergies?.includes(opt)
+                                  ? "checked"
+                                  : ""
+                              }`}
+                              key={opt}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.allergies?.includes(opt) || false
+                                }
+                                onChange={() => toggleOption("allergies", opt)}
+                              />
+                              <label>{opt}</label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </AccordionItem>
-              <AccordionItem title="Nutritional Info ">
+              <AccordionItem title="Tags">
                 <div className="div-input-wrapper">
-                  <h4>Nutritional Info</h4>
-                  <div className="kh-recipe-form__nutritional">
-                    {formData.nutritionalInfo.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="kh-recipe-form__nutritional__item"
+                  <h4>Tags</h4>
+                  <div className="kh-tagselector__tag-wrapper">
+                    <div className="kh-recipe-form__form--item ">
+                      <span>Cuisine Tags</span>
+                      <TagSelector
+                        attribute="cuisineTag"
+                        value={formData.cuisineTag.map((t) => t.tagName)} // Map to tagName
+                        onSelect={(selected) =>
+                          setFormData((prev) => {
+                            const existingTags = prev.cuisineTag || [];
+                            const updatedTags = selected.map((t) => ({
+                              tagId: t.tagId || t._id, // Preserve tagId or fallback to _id
+                              tagName: t.tagName,
+                            }));
+                            return {
+                              ...prev,
+                              cuisineTag: [
+                                ...existingTags,
+                                ...updatedTags,
+                              ].filter(
+                                (tag, index, self) =>
+                                  index ===
+                                  self.findIndex((t) => t.tagId === tag.tagId)
+                              ), // Ensure no duplicates
+                            };
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="kh-recipe-form__form--item  ">
+                      <span>Flavour Tags</span>
+                      <TagSelector
+                        attribute="flavourTag"
+                        value={formData.flavourTag.map((t) => t.tagName)} // Map to tagName
+                        onSelect={(selected) =>
+                          setFormData((prev) => {
+                            const existingTags = prev.flavourTag || [];
+                            const updatedTags = selected.map((t) => ({
+                              tagId: t.tagId || t._id, // Preserve tagId or fallback to _id
+                              tagName: t.tagName,
+                            }));
+                            return {
+                              ...prev,
+                              flavourTag: [
+                                ...existingTags,
+                                ...updatedTags,
+                              ].filter(
+                                (tag, index, self) =>
+                                  index ===
+                                  self.findIndex((t) => t.tagId === tag.tagId)
+                              ), // Ensure no duplicates
+                            };
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="kh-recipe-form__form--item">
+                    <span>Ingredient Tags</span>
+                    <TagSelector
+                      attribute="ingredientTag"
+                      value={formData.ingredientTag.map((t) => t.tagName)} // Map to tagName
+                      onSelect={(selected) =>
+                        setFormData((prev) => {
+                          const existingTags = prev.ingredientTag || [];
+                          const updatedTags = selected.map((t) => ({
+                            tagId: t.tagId || t._id, // Preserve tagId or fallback to _id
+                            tagName: t.tagName,
+                          }));
+                          return {
+                            ...prev,
+                            ingredientTag: [
+                              ...existingTags,
+                              ...updatedTags,
+                            ].filter(
+                              (tag, index, self) =>
+                                index ===
+                                self.findIndex((t) => t.tagId === tag.tagId)
+                            ), // Ensure no duplicates
+                            ingredients: [
+                              ...prev.ingredients,
+                              ...selected.map((t) => ({
+                                name: t.tagName,
+                                quantity: "",
+                              })),
+                            ].filter(
+                              (ingredient, index, self) =>
+                                index ===
+                                self.findIndex(
+                                  (i) => i.name === ingredient.name
+                                )
+                            ), // Ensure no duplicate ingredients
+                          };
+                        })
+                      }
+                    />
+
+                    <div className="kh-recipe-form__form--item">
+                      <label>Ingredients:</label>
+                      {formData.ingredients.map((ingredient, index) => (
+                        <div key={index} className="kh-recipe-form__ingredient">
+                          <div className="kh-recipe-form__ingredient--item">
+                            <label htmlFor={`ingredient-name-${index}`}>
+                              Name {index + 1}
+                            </label>
+                            <input
+                              id={`ingredient-name-${index}`}
+                              type="text"
+                              placeholder="Ingredient name"
+                              className="   my-1"
+                              value={ingredient.name || ""} // Ensure default value
+                              onChange={(e) => {
+                                const newIngredients = formData.ingredients.map(
+                                  (ing, idx) =>
+                                    idx === index
+                                      ? { ...ing, name: e.target.value }
+                                      : ing
+                                );
+                                setFormData({
+                                  ...formData,
+                                  ingredients: newIngredients,
+                                });
+                              }}
+                              required
+                            />
+                          </div>
+                          <div className="kh-recipe-form__ingredient--item">
+                            {" "}
+                            <label htmlFor={`ingredient-qty-${index}`}>
+                              Quantity {index + 1}
+                            </label>
+                            <input
+                              id={`ingredient-qty-${index}`}
+                              type="text"
+                              placeholder="Quantity"
+                              className="   my-1"
+                              value={ingredient.quantity || ""} // Ensure default value
+                              onChange={(e) => {
+                                const newIngredients = formData.ingredients.map(
+                                  (ing, idx) =>
+                                    idx === index
+                                      ? { ...ing, quantity: e.target.value }
+                                      : ing
+                                );
+                                setFormData({
+                                  ...formData,
+                                  ingredients: newIngredients,
+                                });
+                              }}
+                              required
+                            />
+                            <div className="kh-recipe-form__ingredient--remove">
+                              {formData.ingredients.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setFormData({
+                                      ...formData,
+                                      ingredients: formData.ingredients.filter(
+                                        (_, i) => i !== index
+                                      ),
+                                    })
+                                  }
+                                  className="kh-btn kh-btn__x"
+                                >
+                                  x
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {/* <button
+                        type="button"
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            ingredients: [
+                              ...formData.ingredients,
+                              { name: "", quantity: "" },
+                            ],
+                          })
+                        }
+                        className=""
                       >
-                        <label className="" htmlFor={`nutritional-info-${idx}`}>
-                          {item.name}
-                        </label>
-                        <input
-                          id={`nutritional-info-${idx}`}
-                          name={`nutritional-info-${idx}`}
-                          type="text"
-                          value={item.value}
-                          onChange={(e) => {
-                            const newInfo = formData.nutritionalInfo.map(
-                              (info, i) =>
-                                i === idx
-                                  ? { ...info, value: e.target.value }
-                                  : info
-                            );
-                            setFormData({
-                              ...formData,
-                              nutritionalInfo: newInfo,
-                            });
-                          }}
-                          placeholder="Enter amount"
-                          className="  "
-                          required
-                        />
-                      </div>
-                    ))}
+                        Add Ingredient
+                      </button> */}
+                    </div>
                   </div>
                 </div>
               </AccordionItem>
+              <AccordionItem title="Instructions">
+                <div className="div-input-wrapper">
+                  <label>Preparation Instructions:</label>
+                  <TextEditor
+                    value={formData.prepInstructions || ""} // Ensure default value
+                    onChange={(val) =>
+                      setFormData({ ...formData, prepInstructions: val })
+                    }
+                  />
+                  <label>Cooking Instructions:</label>
+                  <TextEditor
+                    value={formData.cookInstructions || ""} // Ensure default value
+                    onChange={(val) =>
+                      setFormData({ ...formData, cookInstructions: val })
+                    }
+                  />
+                </div>
+              </AccordionItem>
+            </div>
+            <div className="col-12 col-md-3">
+              <div className="kh-recipe-form__admin">
+                <label htmlFor="chefName"></label>
+                <input
+                  type="text"
+                  id="chefName"
+                  className="  text-center"
+                  value={formData.chefName}
+                  onChange={handleChange}
+                />
+                <div className="kh-recipe-form__admin--submit">
+                  <input type="hidden" id="userRef" value={currentUser._id} />
+
+                  <button
+                    type="submit"
+                    disabled={loading || uploading}
+                    className=" "
+                  >
+                    {loading ? "Updating..." : "Update Recipe"}
+                  </button>
+                  {error && <p className="text-red-700 text-sm">{error}</p>}
+                </div>
+              </div>
               <AccordionItem title="Fivegrid ">
                 <div className="div-input-wrapper">
                   <h4>Cooking and Prep</h4>
@@ -590,141 +852,46 @@ export default function EditRecipe() {
                       </select>
                     </div>
                   </div>
-                  <div className="kh-recipe-form__form--item">
-                    <label>Ingredients:</label>
-                    {formData.ingredients.map((ingredient, index) => (
-                      <div key={index} className="kh-recipe-form__ingredient">
-                        <div className="kh-recipe-form__ingredient--item">
-                          <label htmlFor={`ingredient-name-${index}`}>
-                            Name {index + 1}
-                          </label>
-                          <input
-                            id={`ingredient-name-${index}`}
-                            type="text"
-                            placeholder="Ingredient name"
-                            className="   my-1"
-                            value={ingredient.name || ""} // Ensure default value
-                            onChange={(e) => {
-                              const newIngredients = formData.ingredients.map(
-                                (ing, idx) =>
-                                  idx === index
-                                    ? { ...ing, name: e.target.value }
-                                    : ing
-                              );
-                              setFormData({
-                                ...formData,
-                                ingredients: newIngredients,
-                              });
-                            }}
-                            required
-                          />
-                        </div>
-                        <div className="kh-recipe-form__ingredient--item">
-                          {" "}
-                          <label htmlFor={`ingredient-qty-${index}`}>
-                            Quantity {index + 1}
-                          </label>
-                          <input
-                            id={`ingredient-qty-${index}`}
-                            type="text"
-                            placeholder="Quantity"
-                            className="   my-1"
-                            value={ingredient.quantity || ""} // Ensure default value
-                            onChange={(e) => {
-                              const newIngredients = formData.ingredients.map(
-                                (ing, idx) =>
-                                  idx === index
-                                    ? { ...ing, quantity: e.target.value }
-                                    : ing
-                              );
-                              setFormData({
-                                ...formData,
-                                ingredients: newIngredients,
-                              });
-                            }}
-                            required
-                          />
-                        </div>
-                        <div className="kh-recipe-form__ingredient--remove">
-                          {formData.ingredients.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setFormData({
-                                  ...formData,
-                                  ingredients: formData.ingredients.filter(
-                                    (_, i) => i !== index
-                                  ),
-                                })
-                              }
-                              className="kh-btn kh-btn__x"
-                            >
-                              x
-                            </button>
-                          )}
-                        </div>
+                </div>
+              </AccordionItem>
+              <AccordionItem title="Nutritional Info ">
+                <div className="div-input-wrapper">
+                  <h4>Nutritional Info</h4>
+                  <div className="kh-recipe-form__nutritional">
+                    {formData.nutritionalInfo.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="kh-recipe-form__nutritional__item"
+                      >
+                        <label className="" htmlFor={`nutritional-info-${idx}`}>
+                          {item.name}
+                        </label>
+                        <input
+                          id={`nutritional-info-${idx}`}
+                          name={`nutritional-info-${idx}`}
+                          type="text"
+                          value={item.value}
+                          onChange={(e) => {
+                            const newInfo = formData.nutritionalInfo.map(
+                              (info, i) =>
+                                i === idx
+                                  ? { ...info, value: e.target.value }
+                                  : info
+                            );
+                            setFormData({
+                              ...formData,
+                              nutritionalInfo: newInfo,
+                            });
+                          }}
+                          placeholder="Enter amount"
+                          className="  "
+                          required
+                        />
                       </div>
                     ))}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({
-                          ...formData,
-                          ingredients: [
-                            ...formData.ingredients,
-                            { name: "", quantity: "" },
-                          ],
-                        })
-                      }
-                      className=""
-                    >
-                      Add Ingredient
-                    </button>
                   </div>
                 </div>
               </AccordionItem>
-              <AccordionItem title="Instructions">
-                <div className="div-input-wrapper">
-                  <label>Preparation Instructions:</label>
-                  <TextEditor
-                    value={formData.prepInstructions || ""} // Ensure default value
-                    onChange={(val) =>
-                      setFormData({ ...formData, prepInstructions: val })
-                    }
-                  />
-                  <label>Cooking Instructions:</label>
-                  <TextEditor
-                    value={formData.cookInstructions || ""} // Ensure default value
-                    onChange={(val) =>
-                      setFormData({ ...formData, cookInstructions: val })
-                    }
-                  />
-                </div>
-              </AccordionItem>
-            </div>
-            <div className="col-3">
-              <div className="kh-recipe-form__admin">
-                <label htmlFor="chefName"></label>
-                <input
-                  type="text"
-                  id="chefName"
-                  className="  text-center"
-                  value={formData.chefName}
-                  onChange={handleChange}
-                />
-                <div className="kh-recipe-form__admin--submit">
-                  <input type="hidden" id="userRef" value={currentUser._id} />
-
-                  <button
-                    type="submit"
-                    disabled={loading || uploading}
-                    className=" "
-                  >
-                    {loading ? "Updating..." : "Update Recipe"}
-                  </button>
-                  {error && <p className="text-red-700 text-sm">{error}</p>}
-                </div>
-              </div>
               <AccordionItem title="Media Upload ">
                 <div className="div-input-wrapper kh-media-upload">
                   <h4>Media Upload</h4>
@@ -816,105 +983,6 @@ export default function EditRecipe() {
                           </div>
                         ))}
                     </div>
-                  </div>
-                </div>
-              </AccordionItem>
-              <AccordionItem title="Tags">
-                <div className="div-input-wrapper">
-                  <h4>Tags</h4>
-                  <div className="kh-recipe-form__form--item">
-                    <span>Cuisine Tags</span>
-                    <TagSelector
-                      attribute="cuisineTag"
-                      value={formData.cuisineTag.map((t) => t.tagName)} // Map to tagName
-                      onSelect={(selected) =>
-                        setFormData((prev) => {
-                          const existingTags = prev.cuisineTag || [];
-                          const updatedTags = selected.map((t) => ({
-                            tagId: t.tagId || t._id, // Preserve tagId or fallback to _id
-                            tagName: t.tagName,
-                          }));
-                          return {
-                            ...prev,
-                            cuisineTag: [
-                              ...existingTags,
-                              ...updatedTags,
-                            ].filter(
-                              (tag, index, self) =>
-                                index ===
-                                self.findIndex((t) => t.tagId === tag.tagId)
-                            ), // Ensure no duplicates
-                          };
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="kh-recipe-form__form--item">
-                    <span>Flavour Tags</span>
-                    <TagSelector
-                      attribute="flavourTag"
-                      value={formData.flavourTag.map((t) => t.tagName)} // Map to tagName
-                      onSelect={(selected) =>
-                        setFormData((prev) => {
-                          const existingTags = prev.flavourTag || [];
-                          const updatedTags = selected.map((t) => ({
-                            tagId: t.tagId || t._id, // Preserve tagId or fallback to _id
-                            tagName: t.tagName,
-                          }));
-                          return {
-                            ...prev,
-                            flavourTag: [
-                              ...existingTags,
-                              ...updatedTags,
-                            ].filter(
-                              (tag, index, self) =>
-                                index ===
-                                self.findIndex((t) => t.tagId === tag.tagId)
-                            ), // Ensure no duplicates
-                          };
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="kh-recipe-form__form--item">
-                    <span>Ingredient Tags</span>
-                    <TagSelector
-                      attribute="ingredientTag"
-                      value={formData.ingredientTag.map((t) => t.tagName)} // Map to tagName
-                      onSelect={(selected) =>
-                        setFormData((prev) => {
-                          const existingTags = prev.ingredientTag || [];
-                          const updatedTags = selected.map((t) => ({
-                            tagId: t.tagId || t._id, // Preserve tagId or fallback to _id
-                            tagName: t.tagName,
-                          }));
-                          return {
-                            ...prev,
-                            ingredientTag: [
-                              ...existingTags,
-                              ...updatedTags,
-                            ].filter(
-                              (tag, index, self) =>
-                                index ===
-                                self.findIndex((t) => t.tagId === tag.tagId)
-                            ), // Ensure no duplicates
-                            ingredients: [
-                              ...prev.ingredients,
-                              ...selected.map((t) => ({
-                                name: t.tagName,
-                                quantity: "",
-                              })),
-                            ].filter(
-                              (ingredient, index, self) =>
-                                index ===
-                                self.findIndex(
-                                  (i) => i.name === ingredient.name
-                                )
-                            ), // Ensure no duplicate ingredients
-                          };
-                        })
-                      }
-                    />
                   </div>
                 </div>
               </AccordionItem>

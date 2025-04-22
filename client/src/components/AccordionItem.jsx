@@ -6,7 +6,7 @@ const AccordionItem = ({ title, children }) => {
   return (
     <div className="kh-accordion">
       <div className="kh-accordion__head">
-        <h3 className="text-lg font-semibold">{title}</h3>
+        <h3>{title}</h3>
         <span className="cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? "▲" : "▼"}
         </span>

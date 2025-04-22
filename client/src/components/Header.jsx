@@ -230,13 +230,16 @@ export default function Header({ pagename }) {
           </div>
         </div>
       </div>
-      {alert && (
-        <BootstrapAlert
-          type={alert.type}
-          message={alert.message}
-          duration={5000}
-        />
-      )}
+
+      <div className="kh-alert__wrapper">
+        {alert && (
+          <BootstrapAlert
+            type={alert.type}
+            message={alert.message}
+            duration={3000}
+          />
+        )}
+      </div>
       <div
         className={`kh-header__overlay ${isOverlayActive ? "active" : ""}`}
         onClick={closeOverlay}

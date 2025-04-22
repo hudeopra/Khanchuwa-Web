@@ -31,13 +31,16 @@
   }
 }
 
+label {
+  font-weight: 400;
+}
 $dark-charcol: #f2f2f2;
 $white: #fff;
 $primary-color: #e66120;
 $gray: #838383;
 $border-light: #4f4f4f;
 $hover-color: #595959;
-$bg-dark: #303030;
+$bg-dark: #030303;
 
 * {
   margin: 0;
@@ -47,6 +50,7 @@ $bg-dark: #303030;
   text-decoration: none;
   transition: all 0.5s;
   color: $white;
+  font-weight: 300;
 }
 
 html,
@@ -94,8 +98,13 @@ figure {
   margin: 0;
   padding: 0;
 }
+img {
+  width: 100%;
+  height: auto;
+}
 a {
   text-decoration: none;
+  color: $white;
 }
 a:focus,
 a:hover {
@@ -112,6 +121,13 @@ nav ul {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+option {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+textarea {
+  width: 100%;
+  min-height: 150px;
 }
 .nice-select {
   background-color: rgba(255, 255, 255, 0.1);
@@ -482,7 +498,7 @@ main {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 30px;
+    padding: 10px 30px;
     position: relative;
   }
   &__head {
@@ -681,6 +697,15 @@ main {
     }
   }
 }
+.kh-alert {
+  &__wrapper {
+    position: relative;
+  }
+  position: fixed;
+  top: 100px;
+  right: 30px;
+  z-index: 99;
+}
 // Header ends
 
 /* flabor tag start */
@@ -725,16 +750,169 @@ main {
     flex-wrap: wrap;
     gap: 5px;
     .kh-media-upload__preview {
-      min-width: calc((100% - 10px) / 3);
+      max-width: calc((100% - 10px) / 3);
     }
   }
   &__preview {
     position: relative;
     img {
       width: 100%;
-      height: 100px;
+      height: 80px;
       object-fit: cover;
       border-radius: 4px;
     }
+  }
+}
+
+/* tagdetailpage starts*/
+.kh-tag-detail-page {
+  .card {
+    img {
+      max-height: 300px;
+      object-fit: cover;
+    }
+  }
+  .card-body {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+.kh-tag-detail {
+  &__wrapper {
+  }
+  &__banner {
+    position: relative;
+    img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      border-radius: 12px;
+      opacity: 0.8;
+    }
+  }
+  &__admin-actions {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+  }
+  &__tag-name {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+}
+
+/* tagdetail page ends*/
+
+/* recipelist page starts*/
+.kh-recipe-list {
+  .kh-recipe-block__item {
+    height: 100%;
+  }
+}
+/* recipelist page ends*/
+/* single-recipe page starts*/
+.kh-recipe-single {
+  &__head {
+    &--title {
+      width: 100%;
+    }
+    &--author {
+      position: absolute;
+      left: 15px;
+      bottom: 15px;
+      background-color: $bg-dark;
+      padding: 10px 15px;
+      border-top-right-radius: 8px;
+    }
+    &--title,
+    &--actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 30px;
+    }
+    &--banner {
+      position: relative;
+      margin-bottom: 30px;
+    }
+    &--info-wrapper,
+    &--fav-img {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: var(--dark-charcol);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    &--fav-img {
+      background-color: $bg-dark;
+      right: auto;
+      top: 100px;
+      left: 20px;
+      img {
+        width: 300px;
+        height: 320px;
+        object-fit: cover;
+      }
+    }
+  }
+  &__banner {
+    max-height: 350px;
+    width: 100%;
+    object-fit: cover;
+    object-position: center 25%;
+  }
+  &__tags {
+    margin-top: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 6px;
+    &:last-child {
+    }
+    &--list {
+    }
+    &--item {
+      border: 1px solid $border-light;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: inline-block;
+      margin: 0 6px 6px 0;
+      text-transform: capitalize;
+    }
+  }
+  &__ingredient-list {
+    li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    label {
+      margin-bottom: 0;
+    }
+    span {
+      text-transform: capitalize;
+    }
+    input {
+      min-height: 24px;
+      &:checked ~ label {
+        text-decoration: line-through;
+      }
+    }
+  }
+  &__content {
+    ul {
+      margin-left: 20px;
+      margin-bottom: 30px;
+    }
+    li {
+      list-style-type: disc;
+    }
+  }
+}
+/* single-recipe page ends*/
+.kh-accordion {
+  h3 {
+    font-size: 20px;
   }
 }

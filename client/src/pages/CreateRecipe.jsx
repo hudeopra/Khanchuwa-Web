@@ -210,7 +210,7 @@ export default function CreateRecipe() {
 
     const bodyData = {
       ...formData,
-      cuisineTag: formatTags(formData.cuisineTag, formData.cuisineTagDb || []),
+      cuisineTag: formatTags(formData.cuisineTag, formData.cuisineTagDb || []), // Ensure cuisineTag is included
       flavourTag: formatTags(formData.flavourTag, formData.flavourTagDb || []),
       ingredientTag: formatTags(
         formData.ingredientTag,
@@ -323,6 +323,7 @@ export default function CreateRecipe() {
                               minLength="10"
                               onChange={handleChange}
                               value={formData.recipeName}
+                              required
                             />
                           </div>
                         </div>
@@ -532,43 +533,91 @@ export default function CreateRecipe() {
                   </div>
                 </div>
               </AccordionItem>
-              <AccordionItem title="Nutritional Info ">
+              <AccordionItem title="Tags">
                 <div className="div-input-wrapper">
-                  <h4>Nutritional Info</h4>
-                  <div className="kh-recipe-form__nutritional">
-                    {formData.nutritionalInfo.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="kh-recipe-form__nutritional__item kh-input-item"
-                      >
-                        <label className="" htmlFor={`nutritional-info-${idx}`}>
-                          {item.name}
-                        </label>
-                        <input
-                          id={`nutritional-info-${idx}`}
-                          name={`nutritional-info-${idx}`}
-                          type="text"
-                          value={item.value}
-                          onChange={(e) => {
-                            const newInfo = formData.nutritionalInfo.map(
-                              (info, i) =>
-                                i === idx
-                                  ? { ...info, value: e.target.value }
-                                  : info
-                            );
-                            setFormData({
-                              ...formData,
-                              nutritionalInfo: newInfo,
-                            });
-                          }}
-                          placeholder="Enter amount"
-                          className="  "
-                        />
-                      </div>
-                    ))}
+                  <h4>Tags</h4>
+                  <div className="kh-recipe-form__form--item ">
+                    <span>Cuisine Tags</span>
+                    <TagSelector
+                      attribute="cuisineTag"
+                      value={formData.cuisineTag.map((t) => t._id)} // Map to tag IDs
+                      onSelect={(selected) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          cuisineTag: selected.map((t) => t._id), // Store only tag IDs
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="kh-recipe-form__form--item ">
+                    <span>Flavour Tags</span>
+                    <TagSelector
+                      attribute="flavourTag"
+                      value={formData.flavourTag.map((t) => t._id)} // Map to tag IDs
+                      onSelect={(selected) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          flavourTag: selected.map((t) => t._id), // Store only tag IDs
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="kh-recipe-form__form--item ">
+                    <span>Ingredient Tags</span>
+                    <TagSelector
+                      attribute="ingredientTag"
+                      value={formData.ingredientTag.map((t) => t._id)} // Map to tag IDs
+                      onSelect={(selected) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          ingredientTag: selected.map((t) => t._id), // Store only tag IDs
+                          ingredients: selected.map((t) => ({
+                            name: t.name,
+                            quantity: "",
+                          })),
+                        }))
+                      }
+                    />
                   </div>
                 </div>
               </AccordionItem>
+              <AccordionItem title="Instructions">
+                <div className="div-input-wrapper">
+                  <label>Preparation Instructions:</label>
+                  <TextEditor
+                    value={formData.prepInstructions}
+                    onChange={(val) =>
+                      setFormData({ ...formData, prepInstructions: val })
+                    }
+                  />
+                  <label>Cooking Instructions:</label>
+                  <TextEditor
+                    value={formData.cookInstructions}
+                    onChange={(val) =>
+                      setFormData({ ...formData, cookInstructions: val })
+                    }
+                  />
+                </div>
+              </AccordionItem>
+            </div>
+            <div className="col-12 col-md-4">
+              <div className="kh-recipe-form__admin">
+                <p>
+                  Author: <span>@{formData.chefName}</span>
+                </p>
+                <div className="kh-recipe-form__admin--submit">
+                  <input type="hidden" id="userRef" value={currentUser._id} />
+
+                  <button
+                    type="submit"
+                    disabled={loading || uploading}
+                    className=" "
+                  >
+                    {loading ? "Creating..." : "Create Recipe"}
+                  </button>
+                  {error && <p className="text-red-700 text-sm">{error}</p>}
+                </div>
+              </div>
               <AccordionItem title="Cooking and Prep ">
                 <div className="div-input-wrapper">
                   <div className="kh-recipe-form__wrapper">
@@ -734,43 +783,43 @@ export default function CreateRecipe() {
                   </div>
                 </div>
               </AccordionItem>
-              <AccordionItem title="Instructions">
+              <AccordionItem title="Nutritional Info ">
                 <div className="div-input-wrapper">
-                  <label>Preparation Instructions:</label>
-                  <TextEditor
-                    value={formData.prepInstructions}
-                    onChange={(val) =>
-                      setFormData({ ...formData, prepInstructions: val })
-                    }
-                  />
-                  <label>Cooking Instructions:</label>
-                  <TextEditor
-                    value={formData.cookInstructions}
-                    onChange={(val) =>
-                      setFormData({ ...formData, cookInstructions: val })
-                    }
-                  />
+                  <h4>Nutritional Info</h4>
+                  <div className="kh-recipe-form__nutritional">
+                    {formData.nutritionalInfo.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="kh-recipe-form__nutritional__item kh-input-item"
+                      >
+                        <label className="" htmlFor={`nutritional-info-${idx}`}>
+                          {item.name}
+                        </label>
+                        <input
+                          id={`nutritional-info-${idx}`}
+                          name={`nutritional-info-${idx}`}
+                          type="text"
+                          value={item.value}
+                          onChange={(e) => {
+                            const newInfo = formData.nutritionalInfo.map(
+                              (info, i) =>
+                                i === idx
+                                  ? { ...info, value: e.target.value }
+                                  : info
+                            );
+                            setFormData({
+                              ...formData,
+                              nutritionalInfo: newInfo,
+                            });
+                          }}
+                          placeholder="Enter amount"
+                          className="  "
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </AccordionItem>
-            </div>
-            <div className="col-12 col-md-4">
-              <div className="kh-recipe-form__admin">
-                <p>
-                  Author: <span>@{formData.chefName}</span>
-                </p>
-                <div className="kh-recipe-form__admin--submit">
-                  <input type="hidden" id="userRef" value={currentUser._id} />
-
-                  <button
-                    type="submit"
-                    disabled={loading || uploading}
-                    className=" "
-                  >
-                    {loading ? "Creating..." : "Create Recipe"}
-                  </button>
-                  {error && <p className="text-red-700 text-sm">{error}</p>}
-                </div>
-              </div>
               <AccordionItem title="Media Upload ">
                 <div className="div-input-wrapper kh-media-upload">
                   <h4>Media Upload</h4>
@@ -862,54 +911,6 @@ export default function CreateRecipe() {
                           </div>
                         ))}
                     </div>
-                  </div>
-                </div>
-              </AccordionItem>
-              <AccordionItem title="Tags">
-                <div className="div-input-wrapper">
-                  <h4>Tags</h4>
-                  <div className="kh-recipe-form__form--item ">
-                    <span>Cuisine Tags</span>
-                    <TagSelector
-                      attribute="cuisineTag"
-                      value={formData.cuisineTag.map((t) => t._id)} // Map to tag IDs
-                      onSelect={(selected) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          cuisineTag: selected.map((t) => t._id), // Store only tag IDs
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="kh-recipe-form__form--item ">
-                    <span>Flavour Tags</span>
-                    <TagSelector
-                      attribute="flavourTag"
-                      value={formData.flavourTag.map((t) => t._id)} // Map to tag IDs
-                      onSelect={(selected) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          flavourTag: selected.map((t) => t._id), // Store only tag IDs
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="kh-recipe-form__form--item ">
-                    <span>Ingredient Tags</span>
-                    <TagSelector
-                      attribute="ingredientTag"
-                      value={formData.ingredientTag.map((t) => t._id)} // Map to tag IDs
-                      onSelect={(selected) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          ingredientTag: selected.map((t) => t._id), // Store only tag IDs
-                          ingredients: selected.map((t) => ({
-                            name: t.name,
-                            quantity: "",
-                          })),
-                        }))
-                      }
-                    />
                   </div>
                 </div>
               </AccordionItem>

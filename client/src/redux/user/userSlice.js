@@ -14,8 +14,8 @@ const userSlice = createSlice({
       state.loading = true;
     },
     signInSuccess: (state, action) => {
-      const { _id, username, fullname, avatar, userFavRecipe, gender } = action.payload.user; // Include _id and remove username
-      state.currentUser = { _id, username, fullname, avatar, userFavRecipe, gender }; // Add _id to currentUser
+      const { _id, username, fullname, avatar, userFavRecipe, gender, preferences } = action.payload.user; // Include _id and remove username
+      state.currentUser = { _id, username, fullname, avatar, userFavRecipe, gender, preferences }; // Add _id to currentUser
       state.loading = false;
       state.error = null;
     },
@@ -27,8 +27,8 @@ const userSlice = createSlice({
       state.loading = true;
     },
     updateUserSuccess: (state, action) => {
-      const { _id, username, fullname, userFavRecipe, gender, avatar } = action.payload; // Include _id and remove username
-      state.currentUser = { _id, username, fullname, avatar, userFavRecipe, gender }; // Add _id to currentUser
+      const { _id, username, fullname, userFavRecipe, gender, avatar, preferences } = action.payload; // Include _id and remove username
+      state.currentUser = { _id, username, fullname, avatar, userFavRecipe, gender, preferences }; // Add _id to currentUser
       state.loading = false;
       state.error = null;
     },

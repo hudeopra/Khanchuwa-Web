@@ -6,10 +6,7 @@ export const getTagsByType = async (req, res, next) => {
     const { type } = req.params; // Expecting a tag type in the URL
     const filter = { tagType: type };
 
-    // Apply inStock filter only for ingredientTag
-    if (type === 'ingredientTag') {
-      filter.inStock = { $in: [true, 1] };
-    }
+
 
     const tags = await RecipeTag.find(filter);
     console.log(`Fetched tags of type ${type}:`, tags);

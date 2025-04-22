@@ -73,7 +73,7 @@ const CategoryList = ({ taglink }) => {
   };
 
   return (
-    <div className="container">
+    <div className="container py-4">
       <h2>Categories</h2>
       <div className="slider-container">
         <div
@@ -92,7 +92,7 @@ const CategoryList = ({ taglink }) => {
                 </Link>
               </div>
               <h3>{item.name}</h3>
-              {/* <p>{item.recipeRefs.length} Recipes</p> */}
+              <p>{item.recipeRefs.length} Recipes</p>
             </div>
           ))}
         </div>

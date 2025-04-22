@@ -5,7 +5,7 @@ import {
   useParams,
 } from "react-router-dom"; // Import useParams
 import PrivateRoute from "./components/PrivateRoute";
-import { AlertProvider } from "./components/AlertContext";
+import { AlertProvider, useAlert } from "./components/AlertContext"; // Import useAlert
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -40,7 +40,11 @@ import NotFound from "./pages/404"; // Import NotFound component
 import PrivacyPolicy from "./pages/PrivacyPolicy"; // Import PrivacyPolicy
 import TermsAndConditions from "./pages/TermsAndConditions"; // Import TermsAndConditions
 // import AdminCookshop from "./pages/AdminCookshop"; // Import AdminCookshop component
+import PaymentSuccess from "./pages/PaymentSuccess";
 
+import Failure from "./components/Failure";
+import PaymentForm from "./components/PaymentForm";
+import Success from "./components/Success";
 function CookshopPageWrapper() {
   const { tagType } = useParams(); // Get tagType from the URL
   const pagename = tagType === "ingredientTag" ? "Cookshop" : "Category"; // Determine pagename based on tagType
@@ -50,6 +54,52 @@ function CookshopPageWrapper() {
       <Header pagename={pagename} />
       <TagDetail />
     </>
+  );
+}
+
+function AlertRenderer() {
+  const { alert, dismissAlert, progress } = useAlert();
+
+  if (!alert) return null;
+
+  return (
+    <div
+      className={`alert alert-${alert.type}`}
+      style={{
+        position: "fixed",
+        top: "10px",
+        right: "10px",
+        zIndex: 1000,
+        padding: "10px",
+        border: "1px solid #ccc",
+        borderRadius: "5px",
+        backgroundColor: alert.type === "success" ? "#d4edda" : "#f8d7da",
+        color: alert.type === "success" ? "#155724" : "#721c24",
+      }}
+    >
+      <span>{alert.message}</span>
+      <button
+        style={{
+          marginLeft: "10px",
+          background: "none",
+          border: "none",
+          fontSize: "16px",
+          cursor: "pointer",
+        }}
+        onClick={dismissAlert}
+      >
+        &times;
+      </button>
+      <div
+        style={{
+          height: "5px",
+          background: "rgba(0, 0, 0, 0.2)",
+          width: `${progress}%`,
+          transition: "width 0.1s linear",
+          marginTop: "5px",
+        }}
+      ></div>
+    </div>
   );
 }
 
@@ -262,6 +312,36 @@ export default function App() {
             path="/cookshop/:tagType/:id"
             element={<CookshopPageWrapper />}
           />
+
+          {/* payment */}
+
+          <Route
+            path="/esewa"
+            element={
+              <>
+                <Header pagename="payment form" />
+                <PaymentForm />
+              </>
+            }
+          />
+          <Route
+            path="/paymentsuccess"
+            element={
+              <>
+                <Header pagename="payment form" />
+                <Success />
+              </>
+            }
+          />
+          <Route
+            path="/payment-failure"
+            element={
+              <>
+                <Header pagename="payment form" />
+                <Failure />
+              </>
+            }
+          />
           <Route
             path="*"
             element={
@@ -289,8 +369,18 @@ export default function App() {
               </>
             }
           />
+          <Route
+            path="/payment-success"
+            element={
+              <>
+                <Header pagename="Payment Success" />
+                <PaymentSuccess />
+              </>
+            }
+          />
         </Routes>
         <Footer />
+        <AlertRenderer />
       </Router>
     </AlertProvider>
   );

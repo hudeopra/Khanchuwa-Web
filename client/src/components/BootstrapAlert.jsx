@@ -28,7 +28,7 @@ export default function BootstrapAlert({
 
   return (
     <div
-      className={`alert ${typeClass} alert-dismissible fade show`}
+      className={`kh-alert alert ${typeClass} alert-dismissible fade show`}
       role="alert"
     >
       {message}

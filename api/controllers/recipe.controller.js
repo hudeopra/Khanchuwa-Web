@@ -30,7 +30,32 @@ const updateRecipeReferences = async (tags, recipeId) => {
 // Create a recipe using properly formatted data from the client.
 export const createRecipe = async (req, res, next) => {
   try {
-    const { cuisineTag, flavourTag, ingredientTag, dietaryRestrictions, allergies, ...rest } = req.body;
+    const {
+      recipeName,
+      description,
+      diet,
+      ingredients,
+      prepTime,
+      cookTime,
+      servings,
+      difficulty,
+      chefName,
+      videoUrl,
+      flavourTag,
+      cuisineTag, // Ensure cuisineTag is destructured
+      ingredientTag,
+      bannerImgUrl,
+      favImgUrl,
+      shortDescription,
+      nutritionalInfo,
+      cookInstructions,
+      prepInstructions,
+      mealType,
+      cookingMethod,
+      dietaryRestrictions,
+      allergies,
+      userRef,
+    } = req.body;
 
     // Populate tagName for each tag type
     const populatedCuisineTag = await populateTags(cuisineTag || []);
@@ -38,12 +63,30 @@ export const createRecipe = async (req, res, next) => {
     const populatedIngredientTag = await populateTags(ingredientTag || []);
 
     const recipe = await Recipe.create({
-      ...rest,
-      cuisineTag: populatedCuisineTag,
+      recipeName,
+      description,
+      diet,
+      ingredients,
+      prepTime,
+      cookTime,
+      servings,
+      difficulty,
+      chefName,
+      videoUrl,
       flavourTag: populatedFlavourTag,
+      cuisineTag: populatedCuisineTag,
       ingredientTag: populatedIngredientTag,
+      bannerImgUrl,
+      favImgUrl,
+      shortDescription,
+      nutritionalInfo,
+      cookInstructions,
+      prepInstructions,
+      mealType,
+      cookingMethod,
       dietaryRestrictions: dietaryRestrictions || [], // Handle new field
       allergies: allergies || [], // Handle new field
+      userRef,
     });
 
     // Update recipe references in tags
@@ -53,14 +96,15 @@ export const createRecipe = async (req, res, next) => {
 
     return res.status(201).json(recipe);
   } catch (error) {
-    next(error);
+    console.error("Error creating recipe:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
 // Update a recipe with new data from the client (used by EditRecipe page)
 export const updateRecipe = async (req, res, next) => {
   try {
-    const { cuisineTag, flavourTag, ingredientTag, dietaryRestrictions, allergies, ...rest } = req.body;
+    const { dietaryRestrictions, allergies, ...rest } = req.body;
 
     // Populate tagName for each tag type
     const populatedCuisineTag = await populateTags(cuisineTag || []);

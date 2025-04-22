@@ -40,7 +40,7 @@ const RecipeCardBig = () => {
       {/* Render horizontal cards */}
       {horizontalCards.map((item, index) => (
         <Link
-          key={index}
+          key={item._id} // Add unique key
           to={`/recipes/${item._id}`}
           className="kh-recipe-block__item kh-recipe__item--horizontal"
         >
@@ -57,6 +57,7 @@ const RecipeCardBig = () => {
           </div>
           <div className="kh-recipe-block__content">
             <h3>{item.recipeName}</h3>
+            <span> fav: </span> {item.recipeFav || "N/A"}
             <p>
               {item.description.length > 150
                 ? `${item.description.slice(0, 110)}...`
@@ -74,7 +75,7 @@ const RecipeCardBig = () => {
       {/* Render vertical cards */}
       {verticalCards.map((item, index) => (
         <Link
-          key={index}
+          key={item._id} // Add unique key
           to={`/recipes/${item._id}`}
           className="kh-recipe-block__item"
         >
@@ -90,6 +91,7 @@ const RecipeCardBig = () => {
           </div>
           <div className="kh-recipe-block__content">
             <h3>{item.recipeName}</h3>
+            <span> fav: </span> {item.recipeFav || "N/A"}
             <p>
               {item.description.length > 200
                 ? `${item.description.slice(0, 120)}...`

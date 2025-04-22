@@ -211,16 +211,38 @@ export default function RecipeDetail() {
       ? recipe.recipeViews.filter((v) => v) // remove null/undefined
       : [];
   const hasViewed = currentUserId ? viewedIds.includes(currentUserId) : false;
-  const mainClass = hasViewed
-    ? "kh-recipe-single"
-    : "kh-recipe-single hasnot-viewed";
+
   return (
-    <main className={mainClass}>
+    <main>
       <div className="container py-5">
         <div className="row">
           <div className="col-12">
             <div className="kh-recipe-single__head">
-              <h1 className="mb-2">{recipe.recipeName || "N/A"}</h1>
+              <div className="kh-recipe-single__head--title">
+                <h1 className="mb-2">{recipe.recipeName || "N/A"}</h1>
+                <div className="kh-recipe-single__head--actions">
+                  {currentUserId && recipe.userRef === currentUserId && (
+                    <div className="py-4">
+                      <button
+                        onClick={() => navigate(`/recipes/edit/${id}`)}
+                        className="p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
+                      >
+                        Edit Recipe
+                      </button>
+                    </div>
+                  )}
+                  {currentUserId && recipe.userRef === currentUserId && (
+                    <div className="py-4">
+                      <button
+                        onClick={() => setShowDeleteConfirmation(true)}
+                        className="p-3 bg-red-600 text-white rounded-lg hover:opacity-90"
+                      >
+                        Delete Recipe
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className="kh-recipe-single__head--banner">
                 <img
                   src={recipe.bannerImgUrl || backupBannerUrl}
@@ -231,6 +253,18 @@ export default function RecipeDetail() {
                     e.target.src = backupBannerUrl;
                   }}
                 />
+
+                <div className="kh-recipe-single__head--fav-img d-none">
+                  <img
+                    src={recipe.favImgUrl || backupFavUrl}
+                    alt="Favourite"
+                    className=" "
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = backupFavUrl;
+                    }}
+                  />
+                </div>
                 <div className="kh-recipe-single__head--info-wrapper">
                   <div className="kh-recipe-single__head--info">
                     <span>Prep:</span>{" "}
@@ -250,6 +284,9 @@ export default function RecipeDetail() {
                     <span>Diet:</span> {recipe.diet || "N/A"}
                   </div>
                   <div className="kh-recipe-single__head--info">
+                    <span>fav count:</span> {recipe.recipeFav || "N/A"}
+                  </div>
+                  <div className="kh-recipe-single__head--info">
                     <button
                       className={`toggle-favorite-btn ${
                         isFavorite ? "active" : ""
@@ -263,16 +300,14 @@ export default function RecipeDetail() {
                   </div>
                 </div>
               </div>
-              <div className="kh-recipe-single__head--title">
-                <p>
-                  <strong>By:</strong> {recipe.chefName || "N/A"}
-                </p>
+              <div className="kh-recipe-single__head--author">
+                <p>@{recipe.chefName || "N/A"}</p>
               </div>
             </div>
           </div>
           <div className="col-4">
             <div className="kh-recipe-single__ingredient-list">
-              <strong>Ingredients:</strong>{" "}
+              <h5>Ingredients:</h5>{" "}
               {recipe.ingredients && recipe.ingredients.length > 0 ? (
                 <ul>
                   {recipe.ingredients.map((ing, idx) => (
@@ -289,7 +324,7 @@ export default function RecipeDetail() {
               )}
             </div>
             <div className="kh-recipe-single__tags">
-              <h4>Cuisine:</h4>
+              <h5>Cuisine:</h5>
               <ul className="kh-recipe-single__tags--list">
                 {recipe.cuisineTag && recipe.cuisineTag.length > 0 ? (
                   recipe.cuisineTag
@@ -314,7 +349,7 @@ export default function RecipeDetail() {
               </ul>
             </div>
             <div className="kh-recipe-single__tags">
-              <h4>Flavour Tags:</h4>
+              <h5>Flavour Tags:</h5>
               <ul className="kh-recipe-single__tags--list">
                 {recipe.flavourTag && recipe.flavourTag.length > 0 ? (
                   recipe.flavourTag
@@ -339,7 +374,7 @@ export default function RecipeDetail() {
               </ul>
             </div>
             <div className="kh-recipe-single__tags">
-              <h4>Ingredient Tags:</h4>
+              <h5>Ingredient Tags:</h5>
               <ul className="kh-recipe-single__tags--list">
                 {recipe.ingredientTag && recipe.ingredientTag.length > 0 ? (
                   recipe.ingredientTag
@@ -410,6 +445,7 @@ export default function RecipeDetail() {
                   </ul>
                 ) : (
                   <div
+                    className="kh-recipe-single__content--steps"
                     dangerouslySetInnerHTML={{
                       __html: recipe.prepInstructions,
                     }}
@@ -426,6 +462,7 @@ export default function RecipeDetail() {
                   </ol>
                 ) : (
                   <div
+                    className="kh-recipe-single__content--steps"
                     dangerouslySetInnerHTML={{
                       __html: recipe.cookInstructions,
                     }}
@@ -448,18 +485,6 @@ export default function RecipeDetail() {
       <p>
         <strong>User Reference:</strong> {recipe.userRef || "N/A"}
       </p>
-      <div>
-        <strong>Favourite Image:</strong>
-        <img
-          src={recipe.favImgUrl || backupFavUrl}
-          alt="Favourite"
-          className="w-64 h-auto rounded-lg my-2"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = backupFavUrl;
-          }}
-        />
-      </div>
       <div>
         <strong>Images:</strong>{" "}
         {recipe.imageUrls && recipe.imageUrls.length > 0 ? (
@@ -493,7 +518,7 @@ export default function RecipeDetail() {
         )}
       </div>
       {/* Reviews Section */}
-      <div className="my-4">
+      <div className="py-4">
         <h2 className="text-2xl font-semibold">Comments</h2>
         {recipe.reviews && recipe.reviews.length > 0 ? (
           recipe.reviews.map((rev, idx) => (
@@ -509,7 +534,7 @@ export default function RecipeDetail() {
         )}
       </div>
       {userData.currentUser && (
-        <form onSubmit={handleCommentSubmit} className="border p-4 my-4">
+        <form onSubmit={handleCommentSubmit} className="border p-4 py-4">
           <h3 className="text-xl font-semibold">Add a Comment</h3>
           <label htmlFor="commentRating">Rating:</label>
           <input
@@ -533,44 +558,14 @@ export default function RecipeDetail() {
           )}
           <button
             type="submit"
-            className="p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
+            className="p-3 text-white rounded-lg hover:opacity-90"
           >
             Submit Comment
           </button>
         </form>
       )}
-      {currentUser?._id === recipe.userRef?.$oid && (
-        <div className="my-4">
-          <a
-            href={`/recipe/edit/${recipe._id.$oid}`}
-            className="mt-2 ml-4 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
-          >
-            Edit Recipe
-          </a>
-        </div>
-      )}
-      {currentUserId && recipe.userRef === currentUserId && (
-        <div className="my-4">
-          <button
-            onClick={() => navigate(`/recipes/edit/${id}`)}
-            className="p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
-          >
-            Edit Recipe
-          </button>
-        </div>
-      )}
-      {currentUserId && recipe.userRef === currentUserId && (
-        <div className="my-4">
-          <button
-            onClick={() => setShowDeleteConfirmation(true)}
-            className="p-3 bg-red-600 text-white rounded-lg hover:opacity-90"
-          >
-            Delete Recipe
-          </button>
-        </div>
-      )}
       {showDeleteConfirmation && (
-        <form onSubmit={handleDeleteRecipe} className="border p-4 my-4">
+        <form onSubmit={handleDeleteRecipe} className="border p-4 py-4">
           <h3 className="text-xl font-semibold">Confirm Deletion</h3>
           <p>Type "DELETE" to permanently remove this recipe.</p>
           <input

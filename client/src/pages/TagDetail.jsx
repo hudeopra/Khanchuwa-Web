@@ -171,11 +171,35 @@ const TagDetail = () => {
       <section className="container">
         <div className="row">
           <div className="col-12">
-            <h1>{tag.name}</h1>
-            <p>
-              <strong>Type:</strong> {tag.tagType}
-            </p>
-            {tag.favImg && (
+            <div className="kh-tag-detail__wrapper">
+              <div className=" d-flex justify-content-between align-items-end mb-2">
+                <h1>{tag.name}</h1>
+                <p class="kh-tag-detail__tag-name">{tag.tagType}</p>
+              </div>
+              <div className="kh-tag-detail__banner">
+                {tag.bannerImg && (
+                  <img
+                    src={tag.bannerImg}
+                    alt={`${tag.name} banner`}
+                    width="400"
+                  />
+                )}
+                {currentUser?.role === "admin" &&
+                  ["ingredientTag", "cuisineTag", "flavourTag"].includes(
+                    tag.tagType
+                  ) && ( // Show only for admin and specific tag types
+                    <div className="kh-tag-detail__admin-actions">
+                      <a
+                        href={`/product/edit/${tag._id}`}
+                        className="mt-2 ml-4 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
+                      >
+                        Edit Product
+                      </a>
+                    </div>
+                  )}
+              </div>
+            </div>
+            {/* {tag.favImg && (
               <div>
                 <strong>Favorite Image:</strong>
                 <img
@@ -184,17 +208,7 @@ const TagDetail = () => {
                   width="200"
                 />
               </div>
-            )}
-            {tag.bannerImg && (
-              <div>
-                <strong>Banner Image:</strong>
-                <img
-                  src={tag.bannerImg}
-                  alt={`${tag.name} banner`}
-                  width="400"
-                />
-              </div>
-            )}
+            )} */}
             {tag.description && (
               <p>
                 <strong>Description:</strong> {tag.description}
@@ -254,19 +268,6 @@ const TagDetail = () => {
                 {/* New Edit Product Link */}
               </div>
             )}
-            {currentUser?.role === "admin" &&
-              ["ingredientTag", "cuisineTag", "flavorTag"].includes(
-                tag.tagType
-              ) && ( // Show only for admin and specific tag types
-                <div className="my-4">
-                  <a
-                    href={`/product/edit/${tag._id}`}
-                    className="mt-2 ml-4 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
-                  >
-                    Edit Product
-                  </a>
-                </div>
-              )}
             {tag.category && tag.category.length > 0 && (
               <p>
                 <strong>Categories:</strong> {tag.category.join(", ")}
@@ -275,12 +276,12 @@ const TagDetail = () => {
           </div>
         </div>
         <div className="row">
-          <div className="col-12">
+          <div className="col-12 py-5">
             <h2>Recipes list</h2>
             <div className="row">
               {recipes.length > 0 ? (
                 recipes.map((recipe) => (
-                  <div className="col-md-4" key={`recipe-${recipe._id}`}>
+                  <div className="col-md-4 mb-4" key={`recipe-${recipe._id}`}>
                     <div className="card">
                       <img
                         src={recipe.favImgUrl || ""}
@@ -291,8 +292,12 @@ const TagDetail = () => {
                         <h5 className="card-title">
                           {recipe.recipeName || "N/A"}
                         </h5>
-                        <p className="card-text">
-                          {recipe.description || "No description available."}
+                        <p className="card-text mb-2">
+                          <p>
+                            {recipe.description.length > 150
+                              ? `${recipe.description.slice(0, 110)}...`
+                              : recipe.description}
+                          </p>{" "}
                         </p>
                         <a
                           href={`/recipes/${recipe._id}`}
@@ -309,7 +314,7 @@ const TagDetail = () => {
               )}
             </div>
           </div>
-          <div className="col-12">
+          <div className="col-12 py-5">
             <h2>Blogs list</h2>
             <div className="row">
               {blogs.length > 0 ? (

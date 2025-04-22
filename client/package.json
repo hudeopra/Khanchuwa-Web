@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.5.0",
+    "axios": "^1.8.4",
+    "esewajs": "^2.0.0",
     "firebase": "^11.1.0",
     "jquery": "^3.7.1",
     "jquery-nice-select": "^1.1.0",

@@ -103,15 +103,18 @@ export default function RecipeList() {
     fetchAllTags();
   }, []);
 
+  useEffect(() => {
+    if (searchTerm) {
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set("searchTerm", searchTerm);
+      const searchQuery = urlParams.toString();
+      navigate(`/search?${searchQuery}`);
+    }
+  }, [searchTerm, navigate]);
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
-  const handleSubmit = (e) => {
-    const urlParams = new URLSearchParams(window.location.search);
-    urlParams.set("searchTerm", searchTerm);
-    const searchQuery = urlParams.toString();
-    navigate(`/search?${searchQuery}`);
-  };
-  handleSubmit();
+
   // Ensure recipes are correctly accessed if wrapped in an object
   const recipesToFilter = Array.isArray(recipes) ? recipes : [];
   const filteredRecipes = recipesToFilter.filter((recipe) => {
@@ -124,14 +127,14 @@ export default function RecipeList() {
     return true;
   });
 
-  // Debugging log to verify filteredRecipes
-  console.log("Filtered Recipes:", filteredRecipes);
+  // // Debugging log to verify filteredRecipes
+  // console.log("Filtered Recipes:", filteredRecipes);
 
   return (
-    <main className="kh-recipe-list" onLoad={handleSubmit}>
+    <main className="kh-recipe-list">
       <div className="container">
         <div className="row">
-          <div className="col-12">
+          <div className="col-12 mb-5">
             <h1 className="text-3xl font-semibold text-center my-7">
               All Recipes
             </h1>
@@ -163,7 +166,7 @@ export default function RecipeList() {
                   >
                     Toggle Logic: {cuisineLogic}
                   </button>
-                  <div className="d-flex gap-2 flex-wrap">
+                  <div className="kh-recipe-list__filter--wrapper">
                     {cuisineTags.map((tag) => (
                       <div
                         key={tag.name || tag._id}
@@ -235,7 +238,7 @@ export default function RecipeList() {
                   >
                     Toggle Logic: {flavourLogic}
                   </button>
-                  <div className="d-flex gap-2 flex-wrap">
+                  <div className="kh-recipe-list__filter--wrapper">
                     {ingredientTags.map((tag) => (
                       <div
                         key={tag.name || tag._id}
@@ -306,7 +309,7 @@ export default function RecipeList() {
                   >
                     Toggle Logic: {flavourLogic}
                   </button>
-                  <div className="d-flex gap-2 flex-wrap">
+                  <div className="kh-recipe-list__filter--wrapper">
                     {flavourTags.map((tag) => (
                       <div
                         key={tag.name || tag._id}
@@ -365,6 +368,7 @@ export default function RecipeList() {
                       <h3 className="">{recipe.recipeName}</h3>
                       <p className="">{recipe.shortDescription}</p>
                       <span className="">By {recipe.chefName}</span>
+                      <span> fav: </span> {recipe.recipeFav || "N/A"}
                     </div>
                     <div className="kh-recipe-block__item--img">
                       <img
@@ -373,31 +377,37 @@ export default function RecipeList() {
                         className=""
                       />
                     </div>
-                    <p>Cook Time: {recipe.cookTime}</p>
-                    <p>Diet: {recipe.diet}</p>
-                    <p>Difficulty: {recipe.difficulty}</p>
-                    <p>
-                      Ingredient Tags:{" "}
-                      {Array.isArray(recipe.ingredientTag)
-                        ? recipe.ingredientTag
-                            .map((tag) => tag.tagName)
-                            .join(", ")
-                        : recipe.ingredientTag}
-                    </p>
-                    <p>Prep Time: {recipe.prepTime}</p>
-                    <p>Portion: {recipe.portion}</p>
-                    <p>
-                      Flavour Tags:{" "}
-                      {Array.isArray(recipe.flavourTag)
-                        ? recipe.flavourTag.map((tag) => tag.tagName).join(", ")
-                        : recipe.flavourTag}
-                    </p>
-                    <p>
-                      Cuisine Tags:{" "}
-                      {Array.isArray(recipe.cuisineTag)
-                        ? recipe.cuisineTag.map((tag) => tag.tagName).join(", ")
-                        : recipe.cuisineTag}
-                    </p>
+                    <div className="d-none">
+                      <p>Cook Time: {recipe.cookTime}</p>
+                      <p>Diet: {recipe.diet}</p>
+                      <p>Difficulty: {recipe.difficulty}</p>
+                      <p>
+                        Ingredient Tags:{" "}
+                        {Array.isArray(recipe.ingredientTag)
+                          ? recipe.ingredientTag
+                              .map((tag) => tag.tagName)
+                              .join(", ")
+                          : recipe.ingredientTag}
+                      </p>
+                      <p>Prep Time: {recipe.prepTime}</p>
+                      <p>Portion: {recipe.portion}</p>
+                      <p>
+                        Flavour Tags:{" "}
+                        {Array.isArray(recipe.flavourTag)
+                          ? recipe.flavourTag
+                              .map((tag) => tag.tagName)
+                              .join(", ")
+                          : recipe.flavourTag}
+                      </p>
+                      <p>
+                        Cuisine Tags:{" "}
+                        {Array.isArray(recipe.cuisineTag)
+                          ? recipe.cuisineTag
+                              .map((tag) => tag.tagName)
+                              .join(", ")
+                          : recipe.cuisineTag}
+                      </p>
+                    </div>
                   </Link>
                 </div>
               </div>

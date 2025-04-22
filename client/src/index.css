@@ -1,7 +1,7 @@
 /* Tailwind css import */
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
 
 /* Default react css */
 /* :root {
@@ -311,6 +311,15 @@ main {
 .kh-recipe-block__item:hover .kh-recipe-block__item--img img {
   transform: scale(1.2); /* Scale up the div to zoom in */
 }
+.kh-category__item:hover .kh-category__item--img img:after,
+.kh-recipe-block__item:hover .kh-recipe-block__item--img img:after {
+  background: rgba(0, 0, 0, 0.5);
+  background: linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.5) 40%
+  );
+}
 .kh-category__item:hover .kh-category__item--img {
   height: 180px;
 }
@@ -416,7 +425,7 @@ main {
   top: 0;
   left: 0;
   padding: 30px;
-  z-index: 1;
+  z-index: 2;
 }
 .kh-recipe-block__content h3 {
   font-size: 28px;
@@ -770,17 +779,15 @@ ul.kh-profile__menu--sub-menu-block.active {
 
 /* TagSelector.css */
 .tag-selector {
-  max-width: 400px;
-  padding: 12px;
-  border-radius: 8px;
-  background-color: var(--dark-charcol);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+
+  margin-top: -24px;
 }
 .selected-tags {
-  margin-bottom: 20px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  justify-content: flex-end;
 }
 .selected-tags-header h3,
 .tags-dictionary h3 {
@@ -894,7 +901,7 @@ ul.kh-profile__menu--sub-menu-block.active {
   margin-bottom: 30px;
 }
 .kh-accordion {
-  background-color: rgba(48, 48, 48, 0.75);
+  background-color: rgba(48, 48, 48, 0.9);
   margin-bottom: 30px;
   padding: 20px;
   border-radius: 8px;
@@ -904,6 +911,7 @@ ul.kh-profile__menu--sub-menu-block.active {
 }
 .kh-recipe-form__form--item {
   margin-bottom: 15px;
+  width: 100%;
 }
 .kh-recipe-form__form--item input,
 .kh-recipe-form__form--item textarea {
@@ -937,13 +945,19 @@ ul.kh-profile__menu--sub-menu-block.active {
   flex-wrap: wrap;
 }
 .kh-recipe-form__nutritional,
-.kh-recipe-form__ingredient {
+.kh-recipe-form__ingredient,
+.kh-tagselector__tag-wrapper {
   display: flex;
   gap: 30px;
 }
-.kh-recipe-form__ingredient--remove {
+.kh-recipe-form__ingredient--item {
   position: relative;
-  display: none;
+  width: 100%;
+}
+.kh-recipe-form__ingredient--remove {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 .kh-profile__menu--menu-block {
   margin-bottom: 20px;
@@ -1043,12 +1057,13 @@ ul.kh-profile__menu--sub-menu-block.active {
   position: relative;
 }
 .kh-recipe-form__checkbox--item label {
-  border: 1px solid #fff;
+  border: 1px solid var(--border-light);
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 14px;
   opacity: 0.8;
   text-transform: capitalize;
+  font-weight: 300;
 }
 
 .kh-recipe-form__checkbox--item input {
@@ -1067,57 +1082,7 @@ ul.kh-profile__menu--sub-menu-block.active {
   opacity: 1;
 }
 /* create-recipe page ends*/
-/* single-recipe page starts*/
-.kh-recipe-single__head--banner {
-  position: relative;
-  margin-bottom: 30px;
-}
-.kh-recipe-single__head--info-wrapper {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background-color: var(--dark-charcol);
-  padding: 10px;
-  border-radius: 8px;
-}
-.kh-recipe-single__banner {
-  max-height: 350px;
-  width: 100%;
-  object-fit: cover;
-  object-position: center 25%;
-}
-.kh-recipe-single__tags--list {
-  margin-bottom: 20px;
-}
-li.kh-recipe-single__tags--item {
-  border: 1px solid #fff;
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 14px;
-  display: inline-block;
-  margin: 0 6px 6px 0;
-}
-.kh-recipe-single__ingredient-list li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 
-.kh-recipe-single__ingredient-list label {
-  margin-bottom: 0;
-}
-.kh-recipe-single__ingredient-list label span {
-  opacity: 0.68;
-  font-weight: 300;
-}
-.kh-recipe-single__ingredient-list input {
-  min-height: 24px;
-}
-
-.kh-recipe-single__ingredient-list input:checked ~ label {
-  text-decoration: line-through;
-}
-/* single-recipe page ends*/
 /* recipe list  starts*/
 .kh-recipe-list__filter-wrapper {
   display: flex;
@@ -1129,22 +1094,17 @@ li.kh-recipe-single__tags--item {
 }
 .kh-recipe-list__filter-wrapper--tags h3 {
   padding: 8px 15px;
-  border: 1px solid var(--border-light);
   display: inline-block;
+  background-color: var(--primary-color);
 }
 .kh-recipe-list__filter {
-  display: flex;
-  align-items: center;
-  margin-bottom: 30px;
-  gap: 10px;
-  flex-wrap: wrap;
   background-color: var(--hover-color);
   position: fixed;
   top: 270px;
   left: 50%;
   transform: translateX(-50%);
-  height: 100%;
-  width: 100%;
+  height: auto;
+  width: 50%;
   z-index: 3;
   visibility: hidden;
   opacity: 0;
@@ -1176,6 +1136,11 @@ li.kh-recipe-single__tags--item {
 
 .kh-recipe-list__filter-wrapper--overlay.filter-popup {
   z-index: 2;
+}
+.kh-recipe-list__filter--wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 /* recipe List Ends */
 
@@ -1301,7 +1266,7 @@ li.kh-recipe-single__tags--item {
   position: absolute;
   min-height: 100vh;
   background: var(--bg-dark);
-  top: -43px;
+  top: -30px;
   right: -600px;
   z-index: -1;
   transition: all 0.5s;
@@ -1314,7 +1279,7 @@ li.kh-recipe-single__tags--item {
   right: -15px;
 }
 .kh-header__cart--body {
-  min-height: calc(100vh - 140px);
+  min-height: calc(100vh - 180px);
   display: flex;
   flex-wrap: wrap;
   align-content: space-between;
@@ -1357,6 +1322,7 @@ li.kh-recipe-single__tags--item {
   gap: 10px;
   margin-bottom: 30px;
   font-size: 14px;
+  width: 100%;
 }
 .kh-header__cart--item {
   padding: 10px;
@@ -1416,16 +1382,19 @@ li.kh-recipe-single__tags--item {
   width: 16px !important;
   color: #fff;
   margin-left: 5px;
+  min-height: 1px;
+  height: 20px;
 }
 
 .kh-header__cart--item--price:after {
   content: "x";
   margin-left: 5px;
 }
+.kh-header__cart--totals {
+  width: 100%;
+}
 .kh-header__cart--totals--items {
   border-bottom: 2px solid var(--border-light);
-  width: 70%;
-  margin-left: auto;
   margin-bottom: 6px;
   padding-bottom: 6px;
 }
@@ -1438,5 +1407,16 @@ li.kh-recipe-single__tags--item {
 .kh-header__cart--totals--item span {
   display: inline-block;
   width: 80px;
+}
+.kh-header__cart--checkout {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.kh-header__cart--checkout a {
+  display: block;
+  text-align: center;
 }
 /* header cart ends */

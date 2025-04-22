@@ -8,6 +8,7 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { app } from "../firebase";
+import AccordionItem from "../components/AccordionItem.jsx"; // Import AccordionItem
 
 export default function ProductEdit() {
   const { id } = useParams();
@@ -126,133 +127,152 @@ export default function ProductEdit() {
 
   return (
     <main className="product-edit-form">
-      <h1>Edit Product</h1>
+      <h1 className="text-3xl font-semibold text-center my-7">Edit Product</h1>
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="favImg">Favorite Image</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleImageSelect(e, "favImg")}
-          />
-          {formData.favImg && (
-            <div>
-              <img src={formData.favImg} alt="Favorite" width="100" />
-              <button type="button" onClick={() => handleImageRemove("favImg")}>
-                Remove
-              </button>
+        <div className="container">
+          <div className="row">
+            <div className="col-12 col-md-8">
+              <AccordionItem title="Product Information">
+                <div>
+                  <label htmlFor="name">Product Name</label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="tagType">Tag Type</label>
+                  <input
+                    type="text"
+                    id="tagType"
+                    value={formData.tagType}
+                    onChange={(e) =>
+                      setFormData({ ...formData, tagType: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </AccordionItem>
+              {formData.tagType === "ingredientTag" && (
+                <AccordionItem title="Ingredient Details">
+                  <div>
+                    <label htmlFor="inStock">In Stock</label>
+                    <select
+                      id="inStock"
+                      value={formData.inStock}
+                      onChange={(e) =>
+                        setFormData({ ...formData, inStock: e.target.value })
+                      }
+                    >
+                      <option value={1}>Yes</option>
+                      <option value={0}>No</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="quantity">Quantity</label>
+                    <input
+                      type="number"
+                      id="quantity"
+                      value={formData.quantity}
+                      onChange={(e) =>
+                        setFormData({ ...formData, quantity: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="mrkPrice">Market Price</label>
+                    <input
+                      type="number"
+                      id="mrkPrice"
+                      value={formData.mrkPrice}
+                      onChange={(e) =>
+                        setFormData({ ...formData, mrkPrice: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="disPrice">Discounted Price</label>
+                    <input
+                      type="number"
+                      id="disPrice"
+                      value={formData.disPrice}
+                      onChange={(e) =>
+                        setFormData({ ...formData, disPrice: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="description">Description</label>
+                    <textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </AccordionItem>
+              )}
             </div>
-          )}
+            <div className="col-12 col-md-4">
+              <div className="kh-recipe-form__admin">
+                <button type="submit" disabled={uploading}>
+                  {uploading ? "Uploading..." : "Update Product"}
+                </button>
+                {error && <p className="text-red-700 text-sm">{error}</p>}
+              </div>
+              <AccordionItem title="Media Upload">
+                <div>
+                  <label htmlFor="favImg">Favorite Image</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageSelect(e, "favImg")}
+                  />
+                  {formData.favImg && (
+                    <div>
+                      <img src={formData.favImg} alt="Favorite" width="100" />
+                      <button
+                        type="button"
+                        onClick={() => handleImageRemove("favImg")}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="bannerImg">Banner Image</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageSelect(e, "bannerImg")}
+                  />
+                  {formData.bannerImg && (
+                    <div>
+                      <img src={formData.bannerImg} alt="Banner" width="100" />
+                      <button
+                        type="button"
+                        onClick={() => handleImageRemove("bannerImg")}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </AccordionItem>
+            </div>
+          </div>
         </div>
-        <div>
-          <label htmlFor="bannerImg">Banner Image</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleImageSelect(e, "bannerImg")}
-          />
-          {formData.bannerImg && (
-            <div>
-              <img src={formData.bannerImg} alt="Banner" width="100" />
-              <button
-                type="button"
-                onClick={() => handleImageRemove("bannerImg")}
-              >
-                Remove
-              </button>
-            </div>
-          )}
-        </div>
-        {formData.tagType === "ingredientTag" ? (
-          <>
-            <div>
-              <label htmlFor="inStock">In Stock</label>
-              <select
-                id="inStock"
-                value={formData.inStock}
-                onChange={(e) =>
-                  setFormData({ ...formData, inStock: e.target.value })
-                }
-              >
-                <option value={1}>Yes</option>
-                <option value={0}>No</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="quantity">Quantity</label>
-              <input
-                type="number"
-                id="quantity"
-                value={formData.quantity}
-                onChange={(e) =>
-                  setFormData({ ...formData, quantity: e.target.value })
-                }
-              />
-            </div>
-            <div>
-              <label htmlFor="mrkPrice">Market Price</label>
-              <input
-                type="number"
-                id="mrkPrice"
-                value={formData.mrkPrice}
-                onChange={(e) =>
-                  setFormData({ ...formData, mrkPrice: e.target.value })
-                }
-              />
-            </div>
-            <div>
-              <label htmlFor="disPrice">Discounted Price</label>
-              <input
-                type="number"
-                id="disPrice"
-                value={formData.disPrice}
-                onChange={(e) =>
-                  setFormData({ ...formData, disPrice: e.target.value })
-                }
-              />
-            </div>
-            <div>
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-              />
-            </div>
-          </>
-        ) : null}
-        <button type="submit" disabled={uploading}>
-          {uploading ? "Uploading..." : "Update Product"}
-        </button>
-        {error && <p>{error}</p>}
       </form>
-      <div>
-        <h2>Product Details</h2>
-        <p>
-          <strong>Name:</strong> {formData.name}
-        </p>
-        <p>
-          <strong>Tag Type:</strong> {formData.tagType}
-        </p>
-        <p>
-          <strong>Used In Recipes:</strong> {formData.usedIn?.recipe || 0}
-        </p>
-        <p>
-          <strong>Used In Blogs:</strong> {formData.usedIn?.blog || 0}
-        </p>
-        {formData.recipeRefs?.length > 0 && (
-          <p>
-            <strong>Recipe References:</strong> {formData.recipeRefs.join(", ")}
-          </p>
-        )}
-        {formData.blogRefs?.length > 0 && (
-          <p>
-            <strong>Blog References:</strong> {formData.blogRefs.join(", ")}
-          </p>
-        )}
-      </div>
     </main>
   );
 }
