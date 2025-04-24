@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import * as images from "../assets/js/images.js";
+import { sortByPropertyDesc } from "../utilities/SortItems";
 
 const RecipeCardBig = () => {
   const [recipes, setRecipes] = useState([]);
@@ -25,6 +26,11 @@ const RecipeCardBig = () => {
 
     fetchRecipes();
   }, []);
+
+  // Sort recipes by favorite count in descending order before rendering
+  useEffect(() => {
+    setRecipes((prevRecipes) => sortByPropertyDesc(prevRecipes, "recipeFav"));
+  }, [recipes]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;

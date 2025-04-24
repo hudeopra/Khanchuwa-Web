@@ -1,4 +1,5 @@
 import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
+import { sortByPropertyDesc } from "../utilities/SortItems";
 
 const CategorySlider = ({ keyParam, valueParam, tag }) => {
   const sliderRef = useRef(null);
@@ -31,6 +32,11 @@ const CategorySlider = ({ keyParam, valueParam, tag }) => {
     };
     fetchRecipes();
   }, [keyParam, valueParam]);
+
+  // Sort items by favorite count in descending order before rendering
+  useEffect(() => {
+    setItems((prevItems) => sortByPropertyDesc(prevItems, "recipeFav"));
+  }, [items]);
 
   // Calculate dimensions and update slider container height
   useLayoutEffect(() => {

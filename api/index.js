@@ -17,6 +17,12 @@ import cookieParser from 'cookie-parser';
 dotenv.config();
 connectDB();
 
+mongoose.connect(process.env.MONGODB_AUTH_URI).then(() => {
+  console.log('api/index: Connected to MongoDB');
+}).catch((error) => {
+  console.log(error);
+});
+
 const app = express();
 app.use(express.json());
 

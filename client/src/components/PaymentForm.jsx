@@ -40,7 +40,7 @@ export const PaymentForm = () => {
         );
       } else if (error.request) {
         // Request was made but no response received
-        setErrorMessage("Server not responding. Is it running on port 4500?");
+        setErrorMessage("Esewa Server down");
       } else {
         // Error setting up the request
         setErrorMessage("Request setup error: " + error.message);

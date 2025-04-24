@@ -205,17 +205,6 @@ export default function Header({ pagename }) {
                     <span className="kh-header__user--label">SignOut</span>
                   </div>
                 </div>
-                <div className="kh-header__user--cart">
-                  <Cart
-                    cartItems={cartItems}
-                    isCartActive={isCartActive}
-                    toggleCart={toggleCart}
-                    handleClearCart={handleClearCart}
-                    handleQuantityChange={handleQuantityChange}
-                    handleRemoveFromCart={handleRemoveFromCart}
-                    userCart={userCart}
-                  />
-                </div>
               </div>
             ) : (
               <>
@@ -227,6 +216,18 @@ export default function Header({ pagename }) {
                 </Link>
               </>
             )}
+
+            <div className="kh-header__user--cart">
+              <Cart
+                cartItems={cartItems}
+                isCartActive={isCartActive}
+                toggleCart={toggleCart}
+                handleClearCart={handleClearCart}
+                handleQuantityChange={handleQuantityChange}
+                handleRemoveFromCart={handleRemoveFromCart}
+                userCart={userCart}
+              />
+            </div>
           </div>
         </div>
       </div>

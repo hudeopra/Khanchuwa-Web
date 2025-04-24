@@ -1,5 +1,6 @@
 import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { sortByPropertyDesc } from "../utilities/SortItems";
 
 const CategoryList = ({ taglink }) => {
   const sliderRef = useRef(null);
@@ -17,6 +18,13 @@ const CategoryList = ({ taglink }) => {
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching categories:", error));
   }, [taglink]);
+
+  // Sort categories by recipe count in descending order before rendering
+  useEffect(() => {
+    setCategories((prevCategories) =>
+      sortByPropertyDesc(prevCategories, "recipeRefs.length")
+    );
+  }, [categories]);
 
   // Calculate dimensions and update slider container
   useLayoutEffect(() => {

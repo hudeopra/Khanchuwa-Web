@@ -1,5 +1,6 @@
-import React from "react";
-import { flavorTags } from "../assets/js/dummyContent";
+import React, { useEffect, useState } from "react";
+import { flavorTags as initialFlavorTags } from "../assets/js/dummyContent";
+import { sortByPropertyDesc } from "../utilities/SortItems";
 
 // Function to divide tags into 6 parts
 const divideTags = (tags, parts) => {
@@ -12,6 +13,13 @@ const divideTags = (tags, parts) => {
 };
 
 const FlavorTagSlider = () => {
+  const [flavorTags, setFlavorTags] = useState(initialFlavorTags);
+
+  // Sort flavor tags by favorite count in descending order before rendering
+  useEffect(() => {
+    setFlavorTags((prevTags) => sortByPropertyDesc(prevTags, "recipeFav"));
+  }, [initialFlavorTags]);
+
   const dividedTags = divideTags(flavorTags, 6);
 
   return (
