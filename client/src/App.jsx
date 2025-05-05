@@ -41,10 +41,13 @@ import PrivacyPolicy from "./pages/PrivacyPolicy"; // Import PrivacyPolicy
 import TermsAndConditions from "./pages/TermsAndConditions"; // Import TermsAndConditions
 // import AdminCookshop from "./pages/AdminCookshop"; // Import AdminCookshop component
 import PaymentSuccess from "./pages/PaymentSuccess";
+import Checkout from "./pages/checkout"; // Import Checkout component
 
 import Failure from "./components/Failure";
-import PaymentForm from "./components/PaymentForm";
 import Success from "./components/Success";
+import Orderlist from "./pages/Orderlist"; // Import Orderlist component
+import OrderDetail from "./pages/OrderDetail"; // Import OrderDetail component
+
 function CookshopPageWrapper() {
   const { tagType } = useParams(); // Get tagType from the URL
   const pagename = tagType === "ingredientTag" ? "Cookshop" : "Category"; // Determine pagename based on tagType
@@ -316,15 +319,6 @@ export default function App() {
           {/* payment */}
 
           <Route
-            path="/esewa"
-            element={
-              <>
-                <Header pagename="payment form" />
-                <PaymentForm />
-              </>
-            }
-          />
-          <Route
             path="/paymentsuccess"
             element={
               <>
@@ -339,6 +333,33 @@ export default function App() {
               <>
                 <Header pagename="payment form" />
                 <Failure />
+              </>
+            }
+          />
+          <Route
+            path="/checkout"
+            element={
+              <>
+                <Header pagename="Checkout" />
+                <Checkout />
+              </>
+            }
+          />
+          <Route
+            path="/orderlist"
+            element={
+              <>
+                <Header pagename="Order List" />
+                <Orderlist />
+              </>
+            }
+          />
+          <Route
+            path="/orderdetail/:id"
+            element={
+              <>
+                <Header pagename="Order Detail" />
+                <OrderDetail />
               </>
             }
           />

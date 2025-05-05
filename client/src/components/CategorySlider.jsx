@@ -1,5 +1,6 @@
 import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { sortByPropertyDesc } from "../utilities/SortItems";
+import ToggleFavorite from "./ToggleFavorite";
 
 const CategorySlider = ({ keyParam, valueParam, tag }) => {
   const sliderRef = useRef(null);
@@ -13,6 +14,7 @@ const CategorySlider = ({ keyParam, valueParam, tag }) => {
   const [slideWidth, setSlideWidth] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
   const [items, setItems] = useState([]); // State for fetched recipes
+  const [sortedItems, setSortedItems] = useState([]); // State for sorted recipes
 
   // Fetch recipes based on provided key and value props
   useEffect(() => {
@@ -25,6 +27,7 @@ const CategorySlider = ({ keyParam, valueParam, tag }) => {
         console.log("Fetched recipes:", data);
         if (data.success && Array.isArray(data.recipes)) {
           setItems(data.recipes);
+          setSortedItems(sortByPropertyDesc(data.recipes, "recipeFav"));
         }
       } catch (error) {
         console.error("Error fetching recipes:", error);
@@ -32,11 +35,6 @@ const CategorySlider = ({ keyParam, valueParam, tag }) => {
     };
     fetchRecipes();
   }, [keyParam, valueParam]);
-
-  // Sort items by favorite count in descending order before rendering
-  useEffect(() => {
-    setItems((prevItems) => sortByPropertyDesc(prevItems, "recipeFav"));
-  }, [items]);
 
   // Calculate dimensions and update slider container height
   useLayoutEffect(() => {
@@ -112,7 +110,7 @@ const CategorySlider = ({ keyParam, valueParam, tag }) => {
   };
 
   return (
-    <div className="container">
+    <div className="">
       {tag ? <h2>{tag}</h2> : <h2>Default Category Slider</h2>}
       <div
         className="slider-container"
@@ -126,10 +124,8 @@ const CategorySlider = ({ keyParam, valueParam, tag }) => {
             transition: "transform 0.3s ease-out",
           }}
         >
-          {items.map((item, index) => (
-            <a
-              key={item._id}
-              href={`/recipes/${item._id}`} // Link to the recipe's page
+          {sortedItems.map((item, index) => (
+            <div
               className={`kh-recipe-block__item ${
                 hoveredIndex !== null
                   ? index === hoveredIndex
@@ -139,38 +135,45 @@ const CategorySlider = ({ keyParam, valueParam, tag }) => {
                   ? "activeSlide"
                   : ""
               }`}
-              onMouseEnter={() => {
-                if (index !== activeIndex) {
-                  setHoveredIndex(index);
-                }
-              }}
-              onMouseLeave={() => {
-                setHoveredIndex(null);
-              }}
             >
-              <div className="kh-recipe-block__item--img">
-                {item.imageUrls && item.imageUrls[0] && (
-                  <img
-                    src={item.imageUrls[0]}
-                    alt={item.recipeName}
-                    className="card-image"
-                  />
-                )}
-              </div>
-              <div className="kh-recipe-block__content">
-                <h3>{item.recipeName}</h3>
-                <p>
-                  {item.shortDescription && item.shortDescription.length > 150
-                    ? `${item.shortDescription.slice(0, 110)}...`
-                    : item.shortDescription}
-                </p>
-              </div>
-              <div className="kh-recipe-block__info">
-                <span>{item.cookTime} mins</span>
-                <span>{item.servings} servings</span>
-                <span>{item.difficulty}</span>
-              </div>
-            </a>
+              <ToggleFavorite recipeId={item._id} />
+
+              <a
+                key={item._id}
+                href={`/recipes/${item._id}`} // Link to the recipe's page
+                onMouseEnter={() => {
+                  if (index !== activeIndex) {
+                    setHoveredIndex(index);
+                  }
+                }}
+                onMouseLeave={() => {
+                  setHoveredIndex(null);
+                }}
+              >
+                <div className="kh-recipe-block__item--img">
+                  {item.imageUrls && item.imageUrls[0] && (
+                    <img
+                      src={item.imageUrls[0]}
+                      alt={item.recipeName}
+                      className="card-image"
+                    />
+                  )}
+                </div>
+                <div className="kh-recipe-block__content">
+                  <h3>{item.recipeName}</h3>
+                  <p>
+                    {item.shortDescription && item.shortDescription.length > 150
+                      ? `${item.shortDescription.slice(0, 110)}...`
+                      : item.shortDescription}
+                  </p>
+                </div>
+                <div className="kh-recipe-block__info">
+                  <span>{item.cookTime} mins</span>
+                  <span>{item.servings} servings</span>
+                  <span>{item.difficulty}</span>
+                </div>
+              </a>
+            </div>
           ))}
         </div>
         <div className="controls">

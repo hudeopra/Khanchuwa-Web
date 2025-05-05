@@ -10,7 +10,6 @@ import {
 import Cart from "./Cart"; // Import the new Cart component
 import MainMenu from "./MainMenu"; // Add import for MainMenu
 import { useAlert } from "./AlertContext"; // Import the alert context
-import BootstrapAlert from "./BootstrapAlert"; // Import BootstrapAlert
 
 export const fetchRandomRecipeId = async () => {
   try {
@@ -149,6 +148,18 @@ export default function Header({ pagename }) {
     setIsOverlayActive(false); // Remove overlay when route changes
   }, [location]); // Dependency on route changes
 
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setIsOverlayActive(false);
+      setIsCartActive(false);
+    };
+
+    window.addEventListener("popstate", handleRouteChange);
+    return () => {
+      window.removeEventListener("popstate", handleRouteChange);
+    };
+  }, []);
+
   return (
     <header className="kh-header header">
       <div className="container-fluid">
@@ -211,7 +222,7 @@ export default function Header({ pagename }) {
                 <Link to="/signin" className="" onClick={handleLinkClick}>
                   Sign In
                 </Link>
-                <Link to="/signup" className="ml-4 " onClick={handleLinkClick}>
+                <Link to="/signup" className=" " onClick={handleLinkClick}>
                   Sign Up
                 </Link>
               </>
@@ -232,15 +243,6 @@ export default function Header({ pagename }) {
         </div>
       </div>
 
-      <div className="kh-alert__wrapper">
-        {alert && (
-          <BootstrapAlert
-            type={alert.type}
-            message={alert.message}
-            duration={3000}
-          />
-        )}
-      </div>
       <div
         className={`kh-header__overlay ${isOverlayActive ? "active" : ""}`}
         onClick={closeOverlay}

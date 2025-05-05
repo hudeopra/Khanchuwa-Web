@@ -68,12 +68,6 @@ const recipeSchema = new mongoose.Schema(
       },
     ],
     recipeFav: { type: Number, default: 0 }, // Number of times the recipe is favorited
-    recipeViews: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Users who viewed the recipe
-      },
-    ],
 
     // Categorization
     mealCourse: { type: [String] }, // E.g., Appetizer, Main Course

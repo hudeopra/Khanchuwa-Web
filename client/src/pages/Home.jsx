@@ -42,35 +42,35 @@ export default function Home() {
         <div className="kh-recipeBlock">
           <RecipeCardBig />
         </div>
-      </div>
-      <div className="kh-tag py-5 mt-5">
-        <FlavorTagSlider />
-      </div>
-      <div className="kh-recipe-fav py-5">
-        <FavRecipeBlock />
-      </div>
-      <div className="kh-slider py-5">
-        <CategorySlider tag="Popular Recipes" />
-      </div>
-      <div className="kh-slider py-5">
-        <CategorySlider
-          tag="Dinner Ideas"
-          keyParam="mealType"
-          valueParam="Dinner"
-        />
-      </div>
-      <div className="kh-slider py-5">
-        <CategorySlider
-          tag="Vegan Recipes"
-          keyParam="diet"
-          valueParam="Vegan"
-        />
-      </div>
-      {/* <div className="test">
+        <div className="kh-tag py-5 mt-5">
+          <FlavorTagSlider />
+        </div>
+        <div className="kh-recipe-fav py-5">
+          <FavRecipeBlock />
+        </div>
+        <div className="kh-slider py-5">
+          <CategorySlider tag="Popular Recipes" />
+        </div>
+        <div className="kh-slider py-5">
+          <CategorySlider
+            tag="Dinner Ideas"
+            keyParam="mealType"
+            valueParam="Dinner"
+          />
+        </div>
+        <div className="kh-slider py-5">
+          <CategorySlider
+            tag="Vegan Recipes"
+            keyParam="diet"
+            valueParam="Vegan"
+          />
+        </div>
+        {/* <div className="test">
         <CustomSelect />
       </div> */}
-      <div className="kh-recipe-fav py-5">
-        <FavRecipeBlock variant="inverted" />
+        <div className="kh-recipe-fav py-5">
+          <FavRecipeBlock variant="inverted" />
+        </div>
       </div>
     </main>
   );

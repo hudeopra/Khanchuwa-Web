@@ -5,6 +5,7 @@ import { sortByPropertyDesc } from "../utilities/SortItems";
 const CategoryList = ({ taglink }) => {
   const sliderRef = useRef(null);
   const [categories, setCategories] = useState([]);
+  const [sortedCategories, setSortedCategories] = useState([]);
   const [position, setPosition] = useState(0);
   const [slideWidth, setSlideWidth] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -15,16 +16,12 @@ const CategoryList = ({ taglink }) => {
   useEffect(() => {
     fetch(`http://localhost:3000/api/tag/${taglink}`)
       .then((response) => response.json())
-      .then((data) => setCategories(data))
+      .then((data) => {
+        setCategories(data);
+        setSortedCategories(sortByPropertyDesc(data, "recipeRefs.length"));
+      })
       .catch((error) => console.error("Error fetching categories:", error));
   }, [taglink]);
-
-  // Sort categories by recipe count in descending order before rendering
-  useEffect(() => {
-    setCategories((prevCategories) =>
-      sortByPropertyDesc(prevCategories, "recipeRefs.length")
-    );
-  }, [categories]);
 
   // Calculate dimensions and update slider container
   useLayoutEffect(() => {
@@ -81,7 +78,7 @@ const CategoryList = ({ taglink }) => {
   };
 
   return (
-    <div className="container py-4">
+    <div className=" py-4">
       <h2>Categories</h2>
       <div className="slider-container">
         <div
@@ -92,7 +89,7 @@ const CategoryList = ({ taglink }) => {
             transition: "transform 0.3s ease-out",
           }}
         >
-          {categories.map((item, index) => (
+          {sortedCategories.map((item, index) => (
             <div key={index} className="kh-category__item">
               <div className="kh-category__item--img">
                 <Link to={`/cookshop/${taglink}/${item._id}`}>

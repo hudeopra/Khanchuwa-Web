@@ -1,7 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useAlert } from "../components/AlertContext"; // Import AlertContext
+import SliderSyncing from "../components/SliderSyncing";
+import ToggleFavorite from "../components/ToggleFavorite";
+import TagList from "../components/RecipeTags";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 // Helper to format minutes into hr and min string
 const formatTime = (minutes) => {
@@ -35,9 +40,29 @@ export default function RecipeDetail() {
   const dispatch = useDispatch();
   const { showAlert } = useAlert(); // Use AlertContext
 
+  const sliderForRef = useRef(null);
+  const sliderNavRef = useRef(null);
+
   console.log("User data:", userData);
   if (userData.currentUser) {
   }
+
+  const sliderForSettings = {
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: false,
+    fade: true,
+    asNavFor: sliderNavRef.current,
+  };
+
+  const sliderNavSettings = {
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    asNavFor: sliderForRef.current,
+    dots: true,
+    centerMode: true,
+    focusOnSelect: true,
+  };
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -205,12 +230,6 @@ export default function RecipeDetail() {
   // console.log("Recipe User Ref:", recipe.userRef, typeof recipe.userRef);
   const currentUserId =
     userData.currentUser?._id || userData.currentUser?.user?._id;
-  // Filter out null values and ensure recipeViews is an array of strings
-  const viewedIds =
-    recipe && Array.isArray(recipe.recipeViews)
-      ? recipe.recipeViews.filter((v) => v) // remove null/undefined
-      : [];
-  const hasViewed = currentUserId ? viewedIds.includes(currentUserId) : false;
 
   return (
     <main>
@@ -219,7 +238,7 @@ export default function RecipeDetail() {
           <div className="col-12">
             <div className="kh-recipe-single__head">
               <div className="kh-recipe-single__head--title">
-                <h1 className="mb-2">{recipe.recipeName || "N/A"}</h1>
+                <h1>{recipe.recipeName || "N/A"}</h1>
                 <div className="kh-recipe-single__head--actions">
                   {currentUserId && recipe.userRef === currentUserId && (
                     <div className="py-4">
@@ -241,6 +260,60 @@ export default function RecipeDetail() {
                       </button>
                     </div>
                   )}
+                  <div className="kh-video py-4">
+                    <div className="kh-video__item">
+                      {recipe.videoUrl ? (
+                        <iframe
+                          width="640"
+                          height="360"
+                          src={recipe.videoUrl.replace("watch?v=", "embed/")}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        ></iframe>
+                      ) : (
+                        "N/A"
+                      )}
+                      <button
+                        onClick={() => {
+                          const videoWrapper =
+                            document.querySelector(".kh-video");
+                          const overlay = document.querySelector(
+                            ".kh-header__overlay"
+                          );
+                          if (videoWrapper) {
+                            videoWrapper.classList.remove("active");
+                          }
+                          if (overlay) {
+                            overlay.classList.remove("active");
+                          }
+                        }}
+                        className="kh-video__close"
+                        aria-label="Close Video"
+                      >
+                        Close Video
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => {
+                        const videoWrapper =
+                          document.querySelector(".kh-video");
+                        const overlay = document.querySelector(
+                          ".kh-header__overlay"
+                        );
+                        if (videoWrapper) {
+                          videoWrapper.classList.toggle("active");
+                        }
+                        if (overlay) {
+                          overlay.classList.add("active");
+                        }
+                      }}
+                      className="kh-video__toggle p-3 bg-red-600 text-white rounded-lg hover:opacity-90"
+                      aria-label="Toggle Video"
+                    >
+                      Toggle Video
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="kh-recipe-single__head--banner">
@@ -284,20 +357,9 @@ export default function RecipeDetail() {
                     <span>Diet:</span> {recipe.diet || "N/A"}
                   </div>
                   <div className="kh-recipe-single__head--info">
-                    <span>fav count:</span> {recipe.recipeFav || "N/A"}
+                    <span>fav count:</span> {recipe.recipeFav ?? "N/A"}
                   </div>
-                  <div className="kh-recipe-single__head--info">
-                    <button
-                      className={`toggle-favorite-btn ${
-                        isFavorite ? "active" : ""
-                      }`}
-                      onClick={handleToggleFavorite}
-                    >
-                      {isFavorite
-                        ? "Remove from Favorites"
-                        : "Add to Favorites"}
-                    </button>
-                  </div>
+                  <ToggleFavorite recipeId={id} />
                 </div>
               </div>
               <div className="kh-recipe-single__head--author">
@@ -323,95 +385,26 @@ export default function RecipeDetail() {
                 "N/A"
               )}
             </div>
-            <div className="kh-recipe-single__tags">
-              <h5>Cuisine:</h5>
-              <ul className="kh-recipe-single__tags--list">
-                {recipe.cuisineTag && recipe.cuisineTag.length > 0 ? (
-                  recipe.cuisineTag
-                    .filter((tag) => {
-                      const tagName =
-                        typeof tag === "object"
-                          ? tag.tagName || "Unknown Tag"
-                          : tag;
-                      return tagName !== "Unknown"; // Exclude "Unknown" tags
-                    })
-                    .map((tag) => (
-                      <li
-                        className="kh-recipe-single__tags--item"
-                        key={tag.tagId || tag._id}
-                      >
-                        {tag.tagName || "N/A"}
-                      </li>
-                    ))
-                ) : (
-                  <li>N/A</li>
-                )}
-              </ul>
-            </div>
-            <div className="kh-recipe-single__tags">
-              <h5>Flavour Tags:</h5>
-              <ul className="kh-recipe-single__tags--list">
-                {recipe.flavourTag && recipe.flavourTag.length > 0 ? (
-                  recipe.flavourTag
-                    .filter((tag) => {
-                      const tagName =
-                        typeof tag === "object"
-                          ? tag.tagName || "Unknown Tag"
-                          : tag;
-                      return tagName !== "Unknown"; // Exclude "Unknown" tags
-                    })
-                    .map((tag) => (
-                      <li
-                        className="kh-recipe-single__tags--item"
-                        key={tag.tagId || tag._id}
-                      >
-                        {tag.tagName || "N/A"}
-                      </li>
-                    ))
-                ) : (
-                  <li>N/A</li>
-                )}
-              </ul>
-            </div>
-            <div className="kh-recipe-single__tags">
-              <h5>Ingredient Tags:</h5>
-              <ul className="kh-recipe-single__tags--list">
-                {recipe.ingredientTag && recipe.ingredientTag.length > 0 ? (
-                  recipe.ingredientTag
-                    .filter((tag) => {
-                      const tagName =
-                        typeof tag === "object"
-                          ? tag.tagName || "Unknown Tag"
-                          : tag;
-                      return tagName !== "Unknown"; // Exclude "Unknown" tags
-                    })
-                    .map((tag, index) => {
-                      const tagName =
-                        typeof tag === "object"
-                          ? tag.tagName || "Unknown Tag"
-                          : tag;
-                      const tagType =
-                        typeof tag === "object" && tag.tagType
-                          ? tag.tagType
-                          : "ingredientTag"; // Fallback to "ingredientTag"
-                      const tagId = typeof tag === "object" ? tag.tagId : tag; // Use tagId instead of _id
-
-                      return (
-                        <li
-                          className="kh-recipe-single__tags--item"
-                          key={tagId || `${tagName}-${index}`} // Ensure a unique key
-                        >
-                          <a href={`/cookshop/${tagType}/${tagId || index}`}>
-                            {tagName}
-                          </a>
-                        </li>
-                      );
-                    })
-                ) : (
-                  <li>N/A</li>
-                )}
-              </ul>
-            </div>
+            <TagList
+              tags={recipe.cuisineTag}
+              tagType="cuisineTag"
+              title="Cuisine"
+            />
+            <TagList
+              tags={recipe.flavourTag}
+              tagType="flavourTag"
+              title="Flavour Tags"
+            />
+            <TagList
+              tags={recipe.ingredientTag}
+              tagType="ingredientTag"
+              title="Ingredient Tags"
+            />
+            {recipe.imageUrls && recipe.imageUrls.length > 0 ? (
+              <SliderSyncing imageUrls={recipe.imageUrls} />
+            ) : (
+              "N/A"
+            )}
           </div>
           <div className="col-8">
             <div className="kh-recipe-single__content">
@@ -469,54 +462,26 @@ export default function RecipeDetail() {
                   />
                 )}
               </div>
+
+              <p className="text-lg">{recipe.mealType || "N/A"}</p>
+              <p className="text-lg">{recipe.mealCourse || "N/A"}</p>
+              <p className="text-lg">{recipe.cookingMethod || "N/A"}</p>
+              <p className="text-lg">{recipe.allergies || "N/A"}</p>
+              <p className="text-lg">{recipe.dietaryRestrictions || "N/A"}</p>
             </div>
           </div>
         </div>
       </div>
       {/* <p>
         <strong>Short Description:</strong> {recipe.shortDescription || "N/A"}
-      </p> */}
-
-      <p></p>
-
+      </p> 
       <p>
         <strong>Rating:</strong> {recipe.rating || "N/A"}
       </p>
       <p>
         <strong>User Reference:</strong> {recipe.userRef || "N/A"}
-      </p>
-      <div>
-        <strong>Images:</strong>{" "}
-        {recipe.imageUrls && recipe.imageUrls.length > 0 ? (
-          <div className="flex gap-4">
-            {recipe.imageUrls.map((url, index) => (
-              <img
-                key={index}
-                src={url}
-                alt={`Recipe image ${index + 1}`}
-                className="w-32 h-32 object-cover rounded-lg"
-              />
-            ))}
-          </div>
-        ) : (
-          "N/A"
-        )}
-      </div>
-      <div>
-        <strong>Video:</strong>{" "}
-        {recipe.videoUrl ? (
-          <iframe
-            width="640"
-            height="360"
-            src={recipe.videoUrl.replace("watch?v=", "embed/")}
-            frameBorder="0"
-            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        ) : (
-          "N/A"
-        )}
-      </div>
+      </p>*/}
+      <div className="container"></div>
       {/* Reviews Section */}
       <div className="py-4">
         <h2 className="text-2xl font-semibold">Comments</h2>

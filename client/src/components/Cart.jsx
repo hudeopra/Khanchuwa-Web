@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Add useNavigate import
 import { useAlert } from "./AlertContext"; // Import the alert context
 
 export default function Cart({
@@ -12,6 +12,7 @@ export default function Cart({
   userCart,
 }) {
   const { showAlert } = useAlert(); // Access the showAlert function
+  const navigate = useNavigate(); // Initialize navigate hook
 
   const handleClearCartWithAlert = () => {
     handleClearCart();
@@ -38,6 +39,14 @@ export default function Cart({
     }
 
     handleQuantityChange(itemId, newQuantity);
+  };
+
+  const handleCheckout = () => {
+    document.querySelector(".kh-header__overlay").classList.remove("active");
+    document
+      .querySelector(".kh-header__cart--content")
+      .classList.remove("active");
+    navigate("/checkout");
   };
 
   return (
@@ -71,13 +80,13 @@ export default function Cart({
               <ul className="kh-header__cart--items">
                 {cartItems.map((item) => (
                   <li className="kh-header__cart--item" key={item.id}>
-                    <div className="kh-header__cart--item--wrapper">
-                      <div className="kh-header__cart--item--details">
-                        <div className="kh-header__cart--item--img">
+                    <div className="kh-header__cart--item-wrapper">
+                      <div className="kh-header__cart--item-details">
+                        <div className="kh-header__cart--item-img">
                           <img
                             src={item.favImg}
                             alt={item.productName}
-                            className="kh-header__cart--item--fav"
+                            className="kh-header__cart--item-fav"
                           />
                           <button
                             onClick={() =>
@@ -91,12 +100,12 @@ export default function Cart({
                             <span>+</span>
                           </button>
                         </div>
-                        <div className="kh-header__cart--item--content">
-                          <p className="kh-header__cart--item--name">
+                        <div className="kh-header__cart--item-content">
+                          <p className="kh-header__cart--item-name text-capitalize">
                             {item.productName}
                           </p>
-                          <div className="kh-header__cart--item__inventory">
-                            <p className="kh-money kh-header__cart--item--price">
+                          <div className="kh-header__cart--inventory">
+                            <p className="kh-money kh-header__cart--item-price">
                               {item.mrkPrice || null}
                             </p>
                             <input
@@ -127,7 +136,7 @@ export default function Cart({
                       </div>
                       <button
                         onClick={() => handleRemoveFromCartWithAlert(item.id)}
-                        className="kh-header__cart--item--remove kh-btn kh-btn__x"
+                        className="kh-header__cart--item-remove kh-btn kh-btn__x"
                       >
                         x
                       </button>
@@ -136,8 +145,8 @@ export default function Cart({
                 ))}
               </ul>
               <div className="kh-header__cart--totals">
-                <div className="kh-header__cart--totals--items">
-                  <div className="kh-header__cart--totals--item">
+                <div className="kh-header__cart--totals-items">
+                  <div className="kh-header__cart--totals-item">
                     <small>Sub-Total:</small>
                     <span>
                       {cartItems
@@ -149,7 +158,7 @@ export default function Cart({
                         .toFixed(2)}
                     </span>
                   </div>
-                  <div className="kh-header__cart--totals--item">
+                  <div className="kh-header__cart--totals-item">
                     <small>Discount:</small>
                     <span>
                       {(
@@ -167,7 +176,7 @@ export default function Cart({
                     </span>
                   </div>
                 </div>
-                <div className="kh-header__cart--totals--item">
+                <div className="kh-header__cart--totals-item">
                   <small>Checkout :</small>
                   <span>
                     {cartItems
@@ -185,15 +194,12 @@ export default function Cart({
             <p>Cart is empty</p>
           )}
           <div className="kh-header__cart--checkout">
-            <Link
-              to=""
+            <button
               className="bg-green-500 text-white py-2 px-4 rounded"
-              onClick={() =>
-                console.log("Cart Data:", JSON.stringify(userCart, null, 2))
-              }
+              onClick={handleCheckout}
             >
               Checkout
-            </Link>
+            </button>
           </div>
         </div>
       </div>

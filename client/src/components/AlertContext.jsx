@@ -45,16 +45,18 @@ export const AlertProvider = ({ children }) => {
         {alerts.map((alert) => (
           <div
             key={alert.id}
-            className={`alert alert-${alert.type} d-flex justify-content-between align-items-center`}
+            className={`kh-alert alert-${alert.type} d-flex justify-content-between align-items-center`}
             style={{ marginBottom: "10px", minWidth: "300px" }}
           >
             <span>{alert.message}</span>
             <button
               type="button"
-              className="btn-close"
+              className="kh-btn kh-btn__x btn-close"
               aria-label="Close"
               onClick={() => dismissAlert(alert.id)}
-            ></button>
+            >
+              x
+            </button>
             <div
               className="progress"
               style={{

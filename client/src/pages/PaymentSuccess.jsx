@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import axios from "axios";
 
 function PaymentSuccess() {
   const location = useLocation();
@@ -12,6 +13,34 @@ function PaymentSuccess() {
   } catch (error) {
     decodedData = null;
   }
+
+  useEffect(() => {
+    if (decodedData) {
+      const handleEsewaResponse = async () => {
+        try {
+          // Create a new transaction
+          await axios.post("http://localhost:3000/transactions/create", {
+            product_id: decodedData.transaction_uuid,
+            amount: decodedData.total_amount,
+            status: decodedData.status,
+          });
+
+          // Update the order status
+          await axios.put(
+            "http://localhost:3000/orders/update-by-transaction",
+            {
+              transaction_uuid: decodedData.transaction_uuid,
+              status: decodedData.status,
+            }
+          );
+        } catch (error) {
+          console.error("Error handling eSewa response:", error);
+        }
+      };
+
+      handleEsewaResponse();
+    }
+  }, [decodedData]);
 
   if (!decodedData) {
     return <div>Error: Invalid or missing data</div>;

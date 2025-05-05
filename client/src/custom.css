@@ -673,9 +673,20 @@ textarea {
   top: 100px;
   right: 30px;
   z-index: 99;
+  padding: 15px;
+  color: #fff;
+  background-color: #4f4f4f;
+  border-radius: 4px;
 }
-.kh-alert__wrapper {
-  position: relative;
+
+.progress-bar {
+  background-color: #e66120;
+}
+
+.kh-togglefav svg {
+  width: 80px;
+  padding: 15px;
+  height: auto;
 }
 
 /* flabor tag start */
@@ -790,25 +801,13 @@ textarea {
   position: relative;
   margin-bottom: 30px;
 }
-.kh-recipe-single__head--info-wrapper, .kh-recipe-single__head--fav-img {
+.kh-recipe-single__head--info-wrapper {
   position: absolute;
   top: 20px;
   right: 20px;
   background-color: var(--dark-charcol);
   padding: 10px;
   border-radius: 8px;
-}
-.kh-recipe-single__head--fav-img {
-  background-color: #030303;
-  right: auto;
-  top: 100px;
-  left: 20px;
-}
-.kh-recipe-single__head--fav-img img {
-  width: 300px;
-  height: 320px;
-  -o-object-fit: cover;
-     object-fit: cover;
 }
 .kh-recipe-single__banner {
   max-height: 350px;
@@ -861,4 +860,67 @@ textarea {
 /* single-recipe page ends*/
 .kh-accordion h3 {
   font-size: 20px;
+}
+
+.kh-slider {
+  max-width: 600px;
+}
+.kh-slider .slider-for .slick-arrow {
+  font-size: 0;
+  border: 0;
+  background-color: unset;
+  padding: 10px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 30px;
+  z-index: 2;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.5s;
+}
+.kh-slider .slider-for .slick-next {
+  left: auto;
+  right: 30px;
+}
+.kh-slider .slider-for .slider-for img {
+  padding: 30px;
+  max-height: 500px;
+  -o-object-fit: contain;
+  object-fit: contain;
+  background-color: #fff;
+}
+.kh-slider .slider-nav {
+  margin-left: 15px;
+}
+.kh-slider .slider-nav .slick-list {
+  margin: 0 -15px;
+  padding: 0 !important;
+  width: 100%;
+}
+.kh-slider .slider-nav .slick-slide {
+  width: 33.3333333333%;
+  margin: 0 8px;
+}
+.kh-slider .slider-nav img {
+  height: 100px;
+  width: 100%;
+  -o-object-fit: cover;
+  object-fit: cover;
+  background-color: #f7f7fa;
+}
+.kh-slider .slider-nav .slick-slide {
+  height: 100%;
+}
+
+.kh-video__item {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: fixed;
+  z-index: -1;
+  transition: all 0.5s;
+}
+.kh-video.active .kh-video__item {
+  z-index: 99;
 }/*# sourceMappingURL=custom.css.map */

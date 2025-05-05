@@ -368,7 +368,7 @@ export default function RecipeList() {
                       <h3 className="">{recipe.recipeName}</h3>
                       <p className="">{recipe.shortDescription}</p>
                       <span className="">By {recipe.chefName}</span>
-                      <span> fav: </span> {recipe.recipeFav || "N/A"}
+                      <span> fav: </span> {recipe.recipeFav ?? "N/A"}
                     </div>
                     <div className="kh-recipe-block__item--img">
                       <img
