@@ -41,6 +41,7 @@ $gray: #838383;
 $border-light: #4f4f4f;
 $hover-color: #595959;
 $bg-dark: #030303;
+$bg-gray: #303030;
 
 * {
   margin: 0;
@@ -116,6 +117,9 @@ a:focus,
 button:focus {
   outline: none;
 }
+button:hover {
+  background-color: $primary-color;
+}
 nav ol,
 nav ul {
   list-style: none;
@@ -142,8 +146,8 @@ textarea {
     justify-content: center;
     padding: 100px;
     img {
-      height: 100px;
-      width: 100px;
+      height: 100%;
+      width: 100%;
       border-radius: 50%;
       object-fit: cover;
       object-position: top center;
@@ -161,16 +165,18 @@ textarea {
   &__items {
   }
   &__item-wrapper {
-    background-color: rgba(255, 255, 255, 0.1);
+    height: 220px;
+    margin-bottom: 10px;
     &:nth-child(odd) {
       background-color: transparent;
     }
   }
   &__item {
     position: relative;
-    padding: 15px 15px 30px;
     border-radius: 2px;
+    height: 100%;
     &--img {
+      height: 100%;
       img {
         height: 100%;
         width: 100%;
@@ -180,6 +186,9 @@ textarea {
       .kh-profile__item--details {
         display: flex;
         font-size: 16px;
+        h3 {
+          font-size: 24px;
+        }
       }
     }
     &--prep,
@@ -190,9 +199,17 @@ textarea {
       }
     }
     &--content {
-      display: grid;
-      grid-template-columns: 2fr 6fr;
       gap: 15px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 15px;
+      background-color: rgba(0, 0, 0, 0.5);
+      height: 100%;
+    }
+    &--details {
+      display: flex;
+      flex-wrap: wrap;
     }
     &--tags {
       ul {
@@ -533,19 +550,20 @@ main {
       position: absolute;
       top: -20px;
       left: -500px;
-      background: $bg-dark;
+      background: $bg-gray;
       color: $white;
-      max-width: 360px;
       height: 100vh;
-      padding-top: 140px;
+      padding-top: 117px;
       z-index: 0;
       overflow-y: scroll;
+      overflow-x: hidden;
+      max-width: 216px;
       &:before {
         content: "";
         position: absolute;
-        top: 120px;
-        left: 10px;
-        width: calc(100% - 20px);
+        top: 107px;
+        left: 0;
+        width: 100%;
         height: 1px;
         background-color: $border-light;
         z-index: -1;
@@ -556,8 +574,9 @@ main {
         top: 0;
         left: 0;
         width: 100%;
-        height: 138px;
-        background-color: $bg-dark;
+        height: 97px;
+        background-color: $bg-gray;
+        max-width: 216px;
       }
       &::-webkit-scrollbar-track {
         -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
@@ -575,7 +594,7 @@ main {
       }
 
       &.active {
-        left: -45px;
+        left: -30px;
       }
     }
     &--menu-block {
@@ -585,13 +604,14 @@ main {
         font-weight: 500;
         padding: 15px 15px 8px;
         font-size: 20px;
+        margin-bottom: 0;
       }
       li {
         a {
           display: flex;
           align-items: flex-end;
           gap: 20px;
-          padding: 15px 30px;
+          padding: 10px 20px;
           &:hover {
             color: $primary-color;
             background-color: $hover-color;
@@ -707,10 +727,7 @@ main {
   }
 }
 .kh-alert {
-  position: fixed;
-  top: 100px;
-  right: 30px;
-  z-index: 99;
+  position: relative;
   padding: 15px;
   color: $white;
   background-color: $border-light;
@@ -721,7 +738,7 @@ main {
 }
 .kh-togglefav {
   svg {
-    width: 80px;
+    width: 60px;
     padding: 15px;
     height: auto;
   }
@@ -927,8 +944,8 @@ main {
 
 // slider starts
 .kh-slider {
-  max-width: 600px;
   .slider-for {
+    max-width: 600px;
     .slick-arrow {
       font-size: 0;
       border: 0;
@@ -960,6 +977,7 @@ main {
 
   .slider-nav {
     margin-left: 15px;
+    max-width: 600px;
     .slick-list {
       margin: 0 -15px;
       padding: 0 !important;

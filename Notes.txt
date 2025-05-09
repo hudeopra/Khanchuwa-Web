@@ -80,3 +80,85 @@ The food industry is vast and diverse, and there are many different types of blo
 ---
 
 Each of these blog categories offers a unique angle on food, making the industry rich with possibilities. Depending on your specific interests, you can target one or multiple of these niches in a blog!
+
+# Recommendation System Working Logic
+
+## Overview
+The recommendation system is a **User-Based Collaborative Filtering (UBCF)** algorithm. It generates personalized recipe recommendations for a user by analyzing the preferences of other users with similar tastes. The system uses the following parameters to customize the recommendations:
+
+1. **userId**: The ID of the user for whom the recommendations are being generated.
+2. **topN**: The number of top recommendations to return (default is 5).
+3. **minSimilarity**: The minimum similarity threshold for considering other users in the recommendation process (default is 0.1).
+
+## How the Results are Generated
+
+### 1. **Input Data**
+The system uses two main datasets:
+- **Users**: Contains information about users, including their favorited recipes.
+- **Recipes**: Contains details about recipes, such as their names, dietary restrictions, and flavor tags.
+
+### 2. **Steps in the Algorithm**
+
+#### a. **User-Item Matrix Construction**
+A binary matrix is created where:
+- Rows represent users.
+- Columns represent recipes.
+- A value of `1` indicates that a user has favorited a recipe, while `0` indicates otherwise.
+
+#### b. **Similarity Calculation**
+The similarity between the target user (specified by `userId`) and other users is calculated using **Cosine Similarity**. This measures how similar the target user's preferences are to those of other users.
+
+#### c. **Filtering by Similarity**
+Only users with a similarity score greater than or equal to `minSimilarity` are considered for generating recommendations. This ensures that only users with sufficiently similar tastes influence the recommendations.
+
+#### d. **Recommendation Scoring**
+For each recipe not favorited by the target user, a score is calculated based on the weighted sum of similarities with other users who have favorited the recipe. The formula is:
+\[
+\text{Score} = \frac{\sum (\text{Similarity} \times \text{User's Interaction with Recipe})}{\sum \text{Similarity}}
+\]
+
+#### e. **Filtering by Preferences**
+The recommendations are filtered to exclude recipes that:
+- Violate the user's dietary restrictions.
+- Contain allergens specified by the user.
+- Do not match the user's flavor preferences (if specified).
+
+#### f. **Sorting and Selection**
+The filtered recommendations are sorted by their scores in descending order. The top `N` recipes (as specified by `topN`) are selected and returned.
+
+### 3. **Example Request and Response**
+
+#### Request:
+```
+GET http://localhost:3000/api/recommendation/recommendations?userId=67f8f85868cfdd633372367f&topN=5&minSimilarity=0.1
+```
+
+#### Response:
+```json
+{
+  "success": true,
+  "recommendations": [
+    {
+      "id": "67eeb9c9dfcdada08d78fc4f",
+      "name": "Chicken Fricassée"
+    },
+    {
+      "id": "67eec0fcdfcdada08d7900b8",
+      "name": "Pakora - Vegetable Fritters"
+    }
+  ]
+}
+```
+
+### Explanation of the Response
+1. **userId**: The recommendations are generated for the user with ID `67f8f85868cfdd633372367f`.
+2. **topN**: The system returns the top 2 recommendations (as specified in the request).
+3. **minSimilarity**: Only users with a similarity score of 0.1 or higher are considered.
+
+#### How the Results Were Chosen:
+- **"Chicken Fricassée"** and **"Pakora - Vegetable Fritters"** were favorited by users with high similarity to the target user.
+- These recipes do not violate the target user's dietary restrictions or allergies.
+- They match the target user's flavor preferences (if specified).
+
+## Summary
+The recommendation system uses collaborative filtering to analyze user preferences and generate personalized recipe suggestions. By adjusting parameters like `topN` and `minSimilarity`, the system can provide more tailored recommendations. The results are filtered and ranked to ensure they align with the user's dietary needs and preferences.

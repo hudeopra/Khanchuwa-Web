@@ -9,6 +9,7 @@ import FavRecipeBlock from "../components/FavRecipeBlock.jsx";
 import CustomSelect from "../components/CustomSelect.jsx";
 // import TestingComponent from "../components/TestingComponent.jsx";
 import TagSelector from "../components/TagSelector.jsx";
+import Recommendation from "../components/recommendation.jsx";
 
 export default function Home() {
   // useEffect(() => {
@@ -42,9 +43,12 @@ export default function Home() {
         <div className="kh-recipeBlock">
           <RecipeCardBig />
         </div>
-        <div className="kh-tag py-5 mt-5">
-          <FlavorTagSlider />
-        </div>
+      </div>
+
+      <div className="kh-tag py-5 mt-5">
+        <FlavorTagSlider />
+      </div>
+      <div className="container">
         <div className="kh-recipe-fav py-5">
           <FavRecipeBlock />
         </div>
@@ -70,6 +74,9 @@ export default function Home() {
       </div> */}
         <div className="kh-recipe-fav py-5">
           <FavRecipeBlock variant="inverted" />
+        </div>
+        <div className="kh-recommendation py-5">
+          <Recommendation userId="67f8f85868cfdd633372367f" />
         </div>
       </div>
     </main>

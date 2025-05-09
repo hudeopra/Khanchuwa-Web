@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema({
   },
   userFavRecipe: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'recipe',
+    ref: 'Recipe', // Updated to match the correct model name
     required: false,
     default: [], // Ensure it defaults to an empty array
   }],

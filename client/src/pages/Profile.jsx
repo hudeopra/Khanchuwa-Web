@@ -266,7 +266,6 @@ export default function Profile() {
 
   return (
     <main className="kh-profile">
-      <h1>Dashboard</h1>
       <div className="container">
         <div className="row">
           <div className="col-3">
@@ -274,7 +273,6 @@ export default function Profile() {
           </div>
           <div className="col-9">
             <div className="kh-profile__tab">
-              <h1>User Information</h1>
               {currentUser ? (
                 (() => {
                   const user = currentUser.user || currentUser;

@@ -6,7 +6,7 @@ export const AlertProvider = ({ children }) => {
   const [alerts, setAlerts] = useState([]); // Support multiple alerts
   const [progresses, setProgresses] = useState({}); // Track progress for each alert
 
-  const showAlert = (type, message, duration = 5000) => {
+  const showAlert = (type, message, duration = 3000) => {
     const id = Date.now(); // Unique ID for each alert
     setAlerts((prev) => [...prev, { id, type, message }]);
     setProgresses((prev) => ({ ...prev, [id]: 100 }));
@@ -36,11 +36,34 @@ export const AlertProvider = ({ children }) => {
     });
   };
 
+  const adjustAlertSpeeds = () => {
+    setProgresses((prev) => {
+      const updatedProgresses = { ...prev };
+      const alertCount = alerts.length;
+      const speedFactor = 0.5 * alertCount;
+
+      Object.keys(updatedProgresses).forEach((id) => {
+        updatedProgresses[id] -= speedFactor;
+        if (updatedProgresses[id] <= 0) {
+          dismissAlert(Number(id));
+        }
+      });
+
+      return updatedProgresses;
+    });
+  };
+
+  useEffect(() => {
+    if (alerts.length > 0) {
+      adjustAlertSpeeds();
+    }
+  }, [alerts]);
+
   return (
     <AlertContext.Provider value={{ showAlert, dismissAlert }}>
       {children}
       <div
-        style={{ position: "fixed", top: "10px", right: "10px", zIndex: 1050 }}
+        style={{ position: "fixed", top: "100px", right: "30px", zIndex: 1050 }}
       >
         {alerts.map((alert) => (
           <div

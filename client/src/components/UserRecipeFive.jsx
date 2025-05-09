@@ -38,175 +38,159 @@ export default function UserRecipeFive({ recentRecipes, currentUser }) {
         recentRecipes.map((recipe) => (
           <div key={recipe._id} className="kh-profile__item-wrapper">
             <div className="kh-profile__item">
-              <div className="kh-profile__item--content">
-                <div className="kh-profile__item--img">
-                  <img
-                    src={
-                      Array.isArray(recipe.imageUrls) &&
-                      recipe.imageUrls.length > 0
-                        ? recipe.imageUrls[0]
-                        : ""
-                    }
-                    alt={recipe.recipeName}
-                    className="recipe-fav-image"
-                  />
-                  {/* <div className="kh-profile__item--details">
-                    <span className="kh-profile__item--prep">
-                      {recipe.prepTime}{" "}
-                    </span>
-                    <span className="kh-profile__item--cook">
-                      {recipe.cookTime}{" "}
-                    </span>
-                    <span className="kh-profile__item--diff">
-                      {recipe.difficulty}
-                    </span>
-                    <span className="kh-profile__item--serv">
-                      {recipe.servings}
-                    </span>
-                  </div> */}
-                </div>
-                <div className="kh-profile__item--details">
-                  <h3>{recipe.recipeName}</h3>
-                  {/* <h3>{recipe.shortDescription}</h3> */}
-                  <span>{recipe.diet}</span>
+              <div className="kh-profile__item--img">
+                <img
+                  src={
+                    Array.isArray(recipe.imageUrls) &&
+                    recipe.imageUrls.length > 0
+                      ? recipe.imageUrls[0]
+                      : ""
+                  }
+                  alt={recipe.recipeName}
+                  className="recipe-fav-image"
+                />
+                <div className="kh-profile__item--content">
+                  <div className="kh-profile__item--details">
+                    <h3>{recipe.recipeName}</h3>
 
-                  <div className="kh-profile__item--tags">
-                    <div className="kh-profile__item--tag">
-                      <ul>
-                        {recipe.mealType.map((meal, index) => (
-                          <li
-                            className={`kh-bubble kh-bubble__mealtype ${
-                              typeof meal === "string"
-                                ? meal.replace(/\s+/g, "-").toLowerCase()
-                                : meal.name
-                                ? meal.name.replace(/\s+/g, "-").toLowerCase()
-                                : "unknown"
-                            }`}
-                            key={index}
-                          >
-                            {typeof meal === "string"
-                              ? meal
-                              : meal.name || "Unknown"}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="kh-profile__item--tag">
-                      <ul>
-                        {recipe.mealCourse.map((course, index) => (
-                          <li
-                            className={`kh-bubble kh-bubble__mealcourse ${course
-                              .replace(/\s+/g, "-")
-                              .toLowerCase()}`}
-                            key={index}
-                          >
-                            {course}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="kh-profile__item--tag">
-                      <ul>
-                        {recipe.cuisineTag.map((cuisine, index) => (
-                          <li
-                            className={`kh-bubble kh-bubble__cuisine ${cuisine.tagName
-                              .replace(/\s+/g, "-")
-                              .toLowerCase()}`}
-                            key={index}
-                          >
-                            {cuisine.tagName}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="kh-profile__item--tag">
-                      <ul>
-                        {recipe.flavourTag.map((flavour, index) => (
-                          <li
-                            className={`kh-bubble kh-bubble__flavour ${flavour.tagName
-                              .replace(/\s+/g, "-")
-                              .toLowerCase()}`}
-                            key={index}
-                          >
-                            {flavour.tagName}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="kh-profile__item--tag">
-                      <ul>
-                        {recipe.ingredients.map((ingredient) => (
-                          <li
-                            className={`kh-bubble kh-bubble__mealtype ${
-                              ingredient.name
-                                ? ingredient.name
-                                    .replace(/\s+/g, "-")
-                                    .toLowerCase()
-                                : "unknown"
-                            }`}
-                            key={ingredient._id}
-                          >
-                            {ingredient.name || "Unknown"}
-                          </li>
-                        ))}
-                      </ul>
+                    <div className="kh-profile__item--tags">
+                      <div className="kh-profile__item--tag">
+                        <ul>
+                          {recipe.mealType.map((meal, index) => (
+                            <li
+                              className={`kh-bubble kh-bubble__mealtype ${
+                                typeof meal === "string"
+                                  ? meal.replace(/\s+/g, "-").toLowerCase()
+                                  : meal.name
+                                  ? meal.name.replace(/\s+/g, "-").toLowerCase()
+                                  : "unknown"
+                              }`}
+                              key={index}
+                            >
+                              {typeof meal === "string"
+                                ? meal
+                                : meal.name || "Unknown"}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="kh-profile__item--tag">
+                        <ul>
+                          {recipe.mealCourse.map((course, index) => (
+                            <li
+                              className={`kh-bubble kh-bubble__mealcourse ${course
+                                .replace(/\s+/g, "-")
+                                .toLowerCase()}`}
+                              key={index}
+                            >
+                              {course}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="kh-profile__item--tag">
+                        <ul>
+                          {recipe.cuisineTag.map((cuisine, index) => (
+                            <li
+                              className={`kh-bubble kh-bubble__cuisine ${cuisine.tagName
+                                .replace(/\s+/g, "-")
+                                .toLowerCase()}`}
+                              key={index}
+                            >
+                              {cuisine.tagName}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="kh-profile__item--tag">
+                        <ul>
+                          {recipe.flavourTag.map((flavour, index) => (
+                            <li
+                              className={`kh-bubble kh-bubble__flavour ${flavour.tagName
+                                .replace(/\s+/g, "-")
+                                .toLowerCase()}`}
+                              key={index}
+                            >
+                              {flavour.tagName}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="kh-profile__item--tag">
+                        <ul>
+                          {recipe.ingredients.map((ingredient) => (
+                            <li
+                              className={`kh-bubble kh-bubble__mealtype ${
+                                ingredient.name
+                                  ? ingredient.name
+                                      .replace(/\s+/g, "-")
+                                      .toLowerCase()
+                                  : "unknown"
+                              }`}
+                              key={ingredient._id}
+                            >
+                              {ingredient.name || "Unknown"}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="kh-profile__item--btns">
-                  <Link
-                    to={`/recipe/edit/${recipe._id}`}
-                    className="kh-btn kh-btn__x"
-                  >
-                    e
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setShowDeleteConfirmation(true);
-                      setRecipeToDelete(recipe._id);
-                    }}
-                    className="kh-btn kh-btn__x"
-                  >
-                    x
-                  </button>
-                </div>
-                {/* Delete confirmation modal */}
-                {showDeleteConfirmation && recipeToDelete === recipe._id && (
-                  <div className="delete-confirmation-modal">
-                    <h3>Confirm Deletion</h3>
-                    <p>Type "DELETE" to permanently remove this recipe.</p>
-                    <input
-                      type="text"
-                      value={deleteConfirmInput}
-                      onChange={(e) => setDeleteConfirmInput(e.target.value)}
-                      className="delete-confirmation-input"
-                    />
-                    {deleteError && (
-                      <p className="delete-error-message">{deleteError}</p>
-                    )}
-                    <div className="delete-confirmation-actions">
-                      <button
-                        onClick={() => handleDeleteRecipe(recipe._id)}
-                        className="btn btn-confirm"
-                      >
-                        Confirm
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowDeleteConfirmation(false);
-                          setDeleteError(null);
-                          setDeleteConfirmInput("");
-                          setRecipeToDelete(null);
-                        }}
-                        className="btn btn-cancel"
-                      >
-                        Cancel
-                      </button>
-                    </div>
+                  <div className="kh-profile__item--btns">
+                    <Link
+                      to={`/recipe/edit/${recipe._id}`}
+                      className="kh-btn kh-btn__x"
+                    >
+                      e
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setShowDeleteConfirmation(true);
+                        setRecipeToDelete(recipe._id);
+                      }}
+                      className="kh-btn kh-btn__x"
+                    >
+                      x
+                    </button>
                   </div>
-                )}
+                </div>
               </div>
+              {/* Delete confirmation modal */}
+              {showDeleteConfirmation && recipeToDelete === recipe._id && (
+                <div className="delete-confirmation-modal">
+                  <h3>Confirm Deletion</h3>
+                  <p>Type "DELETE" to permanently remove this recipe.</p>
+                  <input
+                    type="text"
+                    value={deleteConfirmInput}
+                    onChange={(e) => setDeleteConfirmInput(e.target.value)}
+                    className="delete-confirmation-input"
+                  />
+                  {deleteError && (
+                    <p className="delete-error-message">{deleteError}</p>
+                  )}
+                  <div className="delete-confirmation-actions">
+                    <button
+                      onClick={() => handleDeleteRecipe(recipe._id)}
+                      className="btn btn-confirm"
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowDeleteConfirmation(false);
+                        setDeleteError(null);
+                        setDeleteConfirmInput("");
+                        setRecipeToDelete(null);
+                      }}
+                      className="btn btn-cancel"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
               <span className="kh-profile__item--uptime">
                 {(() => {
                   const updatedAt = new Date(recipe.updatedAt);

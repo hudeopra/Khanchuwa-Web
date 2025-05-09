@@ -1,6 +1,16 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { SignOut } from "./SignOut"; // Import SignOut component
+import {
+  FaTachometerAlt,
+  FaCog,
+  FaUtensils,
+  FaHeart,
+  FaPlus,
+  FaBlog,
+  FaUser,
+  FaChevronDown,
+} from "react-icons/fa";
 
 export default function ProfileNav({ active, subActive }) {
   const [menuToggles, setMenuToggles] = useState({
@@ -26,17 +36,15 @@ export default function ProfileNav({ active, subActive }) {
     <div className="kh-profile__menu mt-5">
       <nav className="kh-profile__menu--menu-wrapper">
         <div className="kh-profile__menu--menu-block">
+          <h1>User Information</h1>
           <ul>
             <li>
               <Link
                 to={"/profile"}
                 className={active === "Dashboard" ? "active" : ""}
               >
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
-                <span>Dashboard</span>
+                <FaUser />
+                <span>My Information</span>
               </Link>
             </li>
             <li>
@@ -44,10 +52,7 @@ export default function ProfileNav({ active, subActive }) {
                 to={"/profile-edit"}
                 className={active === "Settings" ? "active" : ""}
               >
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
+                <FaCog />
                 <span>Setting</span>
               </Link>
             </li>
@@ -56,10 +61,7 @@ export default function ProfileNav({ active, subActive }) {
                 to={"/user-recipe"}
                 className={active === "My Recipes" ? "active" : ""}
               >
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
+                <FaUtensils />
                 <div className="d-flex align-items-center">
                   <span>My Recipes</span>
                   <button
@@ -67,10 +69,7 @@ export default function ProfileNav({ active, subActive }) {
                     onClick={(e) => handleToggle("user-recipe", e)}
                     className="menu-toggle"
                   >
-                    <img
-                      src="../src/assets/img/search/down.png"
-                      alt="Khanchuwa Logo"
-                    />
+                    <FaChevronDown />
                   </button>
                 </div>
               </Link>
@@ -84,10 +83,7 @@ export default function ProfileNav({ active, subActive }) {
                     to={"/create-recipe"}
                     className={active === "New Recipe" ? "active" : ""}
                   >
-                    <img
-                      src="../src/assets/img/search/chefLogo.png"
-                      alt="Khanchuwa Logo"
-                    />
+                    <FaPlus />
                     <span>New Recipe</span>
                   </Link>
                 </li>
@@ -96,10 +92,7 @@ export default function ProfileNav({ active, subActive }) {
                     to={"/user-recipe/favorites"}
                     className={active === "Favorite Recipes" ? "active" : ""}
                   >
-                    <img
-                      src="../src/assets/img/search/chefLogo.png"
-                      alt="Khanchuwa Logo"
-                    />
+                    <FaHeart />
                     <span>Favorite Recipes</span>
                   </Link>
                 </li>
@@ -110,21 +103,15 @@ export default function ProfileNav({ active, subActive }) {
                 to={"/user-blog"}
                 className={active === "My Blogs" ? "active" : ""}
               >
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
-                <div className="d-flex  align-items-center">
+                <FaBlog />
+                <div className="d-flex align-items-center">
                   <span>My Blogs</span>
                   <button
                     type="button"
                     onClick={(e) => handleToggle("user-blog", e)}
                     className="menu-toggle"
                   >
-                    <img
-                      src="../src/assets/img/search/down.png"
-                      alt="Khanchuwa Logo"
-                    />
+                    <FaChevronDown />
                   </button>
                 </div>
               </Link>
@@ -138,10 +125,7 @@ export default function ProfileNav({ active, subActive }) {
                     to={"/create-blog"}
                     className={active === "New Blog" ? "active" : ""}
                   >
-                    <img
-                      src="../src/assets/img/search/chefLogo.png"
-                      alt="Khanchuwa Logo"
-                    />
+                    <FaPlus />
                     <span>New Blog</span>
                   </Link>
                 </li>
@@ -150,18 +134,14 @@ export default function ProfileNav({ active, subActive }) {
                     to={"/user-blog/favorites"}
                     className={active === "Favorite Blogs" ? "active" : ""}
                   >
-                    <img
-                      src="../src/assets/img/search/chefLogo.png"
-                      alt="Khanchuwa Logo"
-                    />
+                    <FaHeart />
                     <span>Favorite Blogs</span>
                   </Link>
                 </li>
               </ul>
             </li>
             <li>
-              <SignOut type="content" />{" "}
-              {/* Render SignOut content without <li> */}
+              <SignOut type="content" />
             </li>
           </ul>
         </div>

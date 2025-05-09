@@ -1,6 +1,24 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { SignOut } from "./SignOut"; // Changed to named import
+import {
+  FaHome,
+  FaInfoCircle,
+  FaUtensils,
+  FaRandom,
+  FaShoppingCart,
+  FaBlog,
+  FaSearch,
+  FaUser,
+  FaPlus,
+  FaPen,
+  FaSignInAlt,
+  FaUserPlus,
+  FaNewspaper,
+  FaPhone,
+  FaQuestionCircle,
+  FaSitemap,
+} from "react-icons/fa";
 
 export default function MainMenu({
   isMenuActive,
@@ -31,38 +49,20 @@ export default function MainMenu({
           <ul>
             <li onClick={handleLinkClick}>
               <Link to={"/"}>
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
+                <FaHome />
                 <span>Home</span>
               </Link>
             </li>
             <li onClick={handleLinkClick}>
+              <Link to={"/about"}>
+                <FaInfoCircle />
+                <span>About Khanchuwa</span>
+              </Link>
+            </li>
+            <li onClick={handleLinkClick}>
               <Link to={"/recipes"}>
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
+                <FaUtensils />
                 <span>Recipes</span>
-              </Link>
-            </li>
-            <li onClick={handleLinkClick}>
-              <Link to={"/blogs"}>
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
-                <span>Blogs</span>
-              </Link>
-            </li>
-            <li onClick={handleLinkClick}>
-              <Link to={"/cookshop"}>
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
-                <span>Cookshop</span>
               </Link>
             </li>
             <li onClick={handleLinkClick}>
@@ -71,30 +71,27 @@ export default function MainMenu({
                   to={`/recipes/${randomRecipeId}`}
                   onClick={handleRandomRecipeClick}
                 >
-                  <img
-                    src="../src/assets/img/search/chefLogo.png"
-                    alt="Khanchuwa Logo"
-                  />
+                  <FaRandom />
                   <span>Random Recipe</span>
                 </Link>
               )}
             </li>
             <li onClick={handleLinkClick}>
-              <Link to={"/search"}>
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
-                <span>Search</span>
+              <Link to={"/cookshop"}>
+                <FaShoppingCart />
+                <span>Cookshop</span>
               </Link>
             </li>
             <li onClick={handleLinkClick}>
-              <Link to={"/about"}>
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
-                <span>About Khanchuwa</span>
+              <Link to={"/blogs"}>
+                <FaBlog />
+                <span>Blogs</span>
+              </Link>
+            </li>
+            <li onClick={handleLinkClick}>
+              <Link to={"/search"}>
+                <FaSearch />
+                <span>Search</span>
               </Link>
             </li>
           </ul>
@@ -105,20 +102,20 @@ export default function MainMenu({
             <ul>
               <li onClick={handleLinkClick}>
                 <Link to="/profile">
-                  <img
-                    src="../src/assets/img/search/chefLogo.png"
-                    alt="Khanchuwa Logo"
-                  />
+                  <FaUser />
                   <span>My Profile</span>
                 </Link>
               </li>
               <li onClick={handleLinkClick}>
                 <Link to={"/create-recipe"}>
-                  <img
-                    src="../src/assets/img/search/chefLogo.png"
-                    alt="Khanchuwa Logo"
-                  />
-                  <span>Create Recipe</span>
+                  <FaPlus />
+                  <span>Add Recipe</span>
+                </Link>
+              </li>
+              <li onClick={handleLinkClick}>
+                <Link to={"/create-blog"}>
+                  <FaPen />
+                  <span>Food Blog</span>
                 </Link>
               </li>
               <SignOut type="list" />
@@ -127,19 +124,13 @@ export default function MainMenu({
             <ul>
               <li onClick={handleLinkClick}>
                 <Link to={"/signup"}>
-                  <img
-                    src="../src/assets/img/search/chefLogo.png"
-                    alt="Khanchuwa Logo"
-                  />
+                  <FaUserPlus />
                   <span>Create Account</span>
                 </Link>
               </li>
               <li onClick={handleLinkClick}>
                 <Link to={"/signin"}>
-                  <img
-                    src="../src/assets/img/search/chefLogo.png"
-                    alt="Khanchuwa Logo"
-                  />
+                  <FaSignInAlt />
                   <span>Sign In</span>
                 </Link>
               </li>
@@ -151,19 +142,13 @@ export default function MainMenu({
           <ul>
             <li onClick={handleLinkClick}>
               <Link to={"/whats-new"}>
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
+                <FaNewspaper />
                 <span>What’s New</span>
               </Link>
             </li>
             <li onClick={handleLinkClick}>
               <Link to={"/contact"}>
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
+                <FaPhone />
                 <span>Contact Us</span>
               </Link>
             </li>
@@ -174,19 +159,13 @@ export default function MainMenu({
           <ul>
             <li onClick={handleLinkClick}>
               <Link to={"/faq"}>
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
+                <FaQuestionCircle />
                 <span>FAQ</span>
               </Link>
             </li>
             <li onClick={handleLinkClick}>
               <Link to={"/site-map"}>
-                <img
-                  src="../src/assets/img/search/chefLogo.png"
-                  alt="Khanchuwa Logo"
-                />
+                <FaSitemap />
                 <span>Site Map</span>
               </Link>
             </li>

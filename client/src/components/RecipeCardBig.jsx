@@ -62,10 +62,9 @@ const RecipeCardBig = () => {
             </div>
             <div className="kh-recipe-block__content">
               <h3>{item.recipeName}</h3>
-              <span> fav: </span> {item.recipeFav ?? "N/A"}
               <p>
                 {item.description.length > 150
-                  ? `${item.description.slice(0, 110)}...`
+                  ? `${item.description.slice(0, 60)}...`
                   : item.description}
               </p>{" "}
             </div>
@@ -73,6 +72,7 @@ const RecipeCardBig = () => {
               <span>{item.cookTime} </span>
               <span>{item.servings} </span>
               <span>{item.difficulty} </span>
+              <span>{item.recipeFav} </span>
             </div>
           </Link>
         </div>
@@ -100,7 +100,6 @@ const RecipeCardBig = () => {
             </div>
             <div className="kh-recipe-block__content">
               <h3>{item.recipeName}</h3>
-              <span> fav: </span> {item.recipeFav ?? "N/A"}
               <p>
                 {item.description.length > 200
                   ? `${item.description.slice(0, 120)}...`
@@ -112,6 +111,7 @@ const RecipeCardBig = () => {
               <span>{item.cookTime} </span>
               <span>{item.servings} </span>
               <span>{item.difficulty} </span>
+              <span>{item.recipeFav} </span>
             </div>
           </Link>
         </div>

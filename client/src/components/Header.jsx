@@ -165,16 +165,14 @@ export default function Header({ pagename }) {
       <div className="container-fluid">
         <div className="kh-header__wrapper row">
           <div className="kh-header__head">
-            <div className="kh-header__head--nav">
-              <MainMenu
-                isMenuActive={isMenuActive}
-                toggleMenu={toggleMenu}
-                handleLinkClick={handleLinkClick}
-                randomRecipeId={randomRecipeId}
-                handleRandomRecipeClick={handleRandomRecipeClick}
-                currentUser={currentUser}
-              />
-            </div>
+            <MainMenu
+              isMenuActive={isMenuActive}
+              toggleMenu={toggleMenu}
+              handleLinkClick={handleLinkClick}
+              randomRecipeId={randomRecipeId}
+              handleRandomRecipeClick={handleRandomRecipeClick}
+              currentUser={currentUser}
+            />
             <div className="kh-header__head--main-logo">
               <Link to="/" onClick={handleLinkClick}>
                 <img

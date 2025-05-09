@@ -125,6 +125,10 @@ button:focus {
   outline: none;
 }
 
+button:hover {
+  background-color: #e66120;
+}
+
 nav ol,
 nav ul {
   list-style: none;
@@ -155,8 +159,8 @@ textarea {
   padding: 100px;
 }
 .kh-profile__user img {
-  height: 100px;
-  width: 100px;
+  height: 100%;
+  width: 100%;
   border-radius: 50%;
   -o-object-fit: cover;
      object-fit: cover;
@@ -173,15 +177,19 @@ textarea {
   width: 100%;
 }
 .kh-profile__item-wrapper {
-  background-color: rgba(255, 255, 255, 0.1);
+  height: 220px;
+  margin-bottom: 10px;
 }
 .kh-profile__item-wrapper:nth-child(odd) {
   background-color: transparent;
 }
 .kh-profile__item {
   position: relative;
-  padding: 15px 15px 30px;
   border-radius: 2px;
+  height: 100%;
+}
+.kh-profile__item--img {
+  height: 100%;
 }
 .kh-profile__item--img img {
   height: 100%;
@@ -194,14 +202,25 @@ textarea {
   display: flex;
   font-size: 16px;
 }
+.kh-profile__item--img .kh-profile__item--details h3 {
+  font-size: 24px;
+}
 .kh-profile__item--prep:after, .kh-profile__item--cook:after {
   content: "min";
   font-size: 12px;
 }
 .kh-profile__item--content {
-  display: grid;
-  grid-template-columns: 2fr 6fr;
   gap: 15px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.5);
+  height: 100%;
+}
+.kh-profile__item--details {
+  display: flex;
+  flex-wrap: wrap;
 }
 .kh-profile__item--tags ul {
   display: flex;
@@ -510,20 +529,21 @@ textarea {
   position: absolute;
   top: -20px;
   left: -500px;
-  background: #030303;
+  background: #303030;
   color: #fff;
-  max-width: 360px;
   height: 100vh;
-  padding-top: 140px;
+  padding-top: 117px;
   z-index: 0;
   overflow-y: scroll;
+  overflow-x: hidden;
+  max-width: 216px;
 }
 .kh-header__head--menu-wrapper:before {
   content: "";
   position: absolute;
-  top: 120px;
-  left: 10px;
-  width: calc(100% - 20px);
+  top: 107px;
+  left: 0;
+  width: 100%;
   height: 1px;
   background-color: #4f4f4f;
   z-index: -1;
@@ -534,8 +554,9 @@ textarea {
   top: 0;
   left: 0;
   width: 100%;
-  height: 138px;
-  background-color: #030303;
+  height: 97px;
+  background-color: #303030;
+  max-width: 216px;
 }
 .kh-header__head--menu-wrapper::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
@@ -550,7 +571,7 @@ textarea {
   border: 1px solid #555555;
 }
 .kh-header__head--menu-wrapper.active {
-  left: -45px;
+  left: -30px;
 }
 .kh-header__head--menu-block {
   margin-bottom: 20px;
@@ -560,12 +581,13 @@ textarea {
   font-weight: 500;
   padding: 15px 15px 8px;
   font-size: 20px;
+  margin-bottom: 0;
 }
 .kh-header__head--menu-block li a {
   display: flex;
   align-items: flex-end;
   gap: 20px;
-  padding: 15px 30px;
+  padding: 10px 20px;
 }
 .kh-header__head--menu-block li a:hover {
   color: #e66120;
@@ -669,10 +691,7 @@ textarea {
 }
 
 .kh-alert {
-  position: fixed;
-  top: 100px;
-  right: 30px;
-  z-index: 99;
+  position: relative;
   padding: 15px;
   color: #fff;
   background-color: #4f4f4f;
@@ -684,7 +703,7 @@ textarea {
 }
 
 .kh-togglefav svg {
-  width: 80px;
+  width: 60px;
   padding: 15px;
   height: auto;
 }
@@ -862,7 +881,7 @@ textarea {
   font-size: 20px;
 }
 
-.kh-slider {
+.kh-slider .slider-for {
   max-width: 600px;
 }
 .kh-slider .slider-for .slick-arrow {
@@ -892,6 +911,7 @@ textarea {
 }
 .kh-slider .slider-nav {
   margin-left: 15px;
+  max-width: 600px;
 }
 .kh-slider .slider-nav .slick-list {
   margin: 0 -15px;

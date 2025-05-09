@@ -8,6 +8,7 @@ import recipeRouter from './routes/recipe.route.js';
 import tagRouter from './routes/tag.route.js'; // Added tag router
 import blogRouter from './routes/blog.route.js'; // Added tag router
 import orderRoutes from './routes/order.route.js';
+import recommendationRouter from './routes/recommendation.route.js';
 import cors from 'cors';
 // esewa
 import { connectDB } from './esewa/DB/db.js';
@@ -44,6 +45,7 @@ app.use('/api/recipe', recipeRouter);
 app.use('/api/tag', tagRouter);
 app.use('/api/blog', blogRouter); // Set up tag routes
 app.use("/orders", orderRoutes);
+app.use('/api/recommendation', recommendationRouter);
 
 app.post("/initiate-payment", EsewaInitiatePayment);
 app.post("/payment-status", paymentStatus);
