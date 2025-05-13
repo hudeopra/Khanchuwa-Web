@@ -8,11 +8,15 @@ import {
   removeBlogRef,     // NEW IMPORT
   getAllTags,        // NEW IMPORT
   updateTag,         // NEW IMPORT
-  getTagByTypeAndId  // NEW IMPORT
+  getTagByTypeAndId, // NEW IMPORT
+  getInStockIngredients // NEW IMPORT
 } from '../controllers/tag.controller.js';
 // import { verifyToken } from '../utils/verifyUser.js'; // Temporarily disabled
 
 const router = express.Router();
+
+// New route to fetch in-stock ingredient tags
+router.get('/ingredients/inStock', getInStockIngredients);
 
 // Fetch tags by their type. E.g., GET /api/tag/flavourTag returns all flavour tags.
 router.get('/:type', getTagsByType);

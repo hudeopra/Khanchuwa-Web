@@ -44,9 +44,11 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import Checkout from "./pages/checkout"; // Import Checkout component
 
 import Failure from "./components/Failure";
-import Success from "./components/Success";
+// import Success from "./components/Success";
 import Orderlist from "./pages/Orderlist"; // Import Orderlist component
 import OrderDetail from "./pages/OrderDetail"; // Import OrderDetail component
+import UserFavourites from "./pages/UserFavourites"; // Import UserFavourites component
+import Cookshop from "./pages/Cookshop"; // Import Cookshop component
 
 function CookshopPageWrapper() {
   const { tagType } = useParams(); // Get tagType from the URL
@@ -229,6 +231,15 @@ export default function App() {
                 </>
               }
             />
+            <Route
+              path="/user-favourites"
+              element={
+                <>
+                  <Header pagename="My Favorites" />
+                  <UserFavourites />
+                </>
+              }
+            />
           </Route>
           <Route
             path="/recipes"
@@ -285,11 +296,20 @@ export default function App() {
             }
           /> */}
           <Route
+            path="/ingredient"
+            element={
+              <>
+                <Header pagename="Ingredient" />
+                <TagList tagType="ingredientTag" />
+              </>
+            }
+          />
+          <Route
             path="/cookshop"
             element={
               <>
                 <Header pagename="Cookshop" />
-                <TagList tagType="ingredientTag" />
+                <Cookshop />
               </>
             }
           />
@@ -318,7 +338,7 @@ export default function App() {
 
           {/* payment */}
 
-          <Route
+          {/* <Route
             path="/paymentsuccess"
             element={
               <>
@@ -326,7 +346,7 @@ export default function App() {
                 <Success />
               </>
             }
-          />
+          /> */}
           <Route
             path="/payment-failure"
             element={

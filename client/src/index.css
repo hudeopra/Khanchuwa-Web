@@ -122,14 +122,6 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
-.kh-input-item {
-  position: relative;
-}
-.kh-input-item label {
-  position: absolute;
-  top: -10px;
-  left: 5px;
-}
 .kh-btn {
   background-color: unset;
   color: var(--white);
@@ -1090,10 +1082,14 @@ ul.kh-profile__menu--sub-menu-block.active {
   justify-content: space-between;
   margin-bottom: 30px;
 }
+.kh-recipe-list__filter-wrapper h2 {
+  font-size: 18px;
+}
 .kh-recipe-list__filter-wrapper--tags {
   position: relative;
 }
 .kh-recipe-list__filter-wrapper--tags h3 {
+  font-size: 16px;
   padding: 8px 15px;
   display: inline-block;
   background-color: var(--primary-color);
@@ -1277,7 +1273,7 @@ ul.kh-profile__menu--sub-menu-block.active {
 }
 
 .kh-header__cart--content.active {
-  right: -15px;
+  right: 15px;
 }
 .kh-header__cart--body {
   min-height: calc(100vh - 180px);

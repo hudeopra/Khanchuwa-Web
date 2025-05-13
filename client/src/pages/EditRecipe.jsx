@@ -324,7 +324,6 @@ export default function EditRecipe() {
                               id="recipeName"
                               maxLength="62"
                               minLength="10"
-                              required
                               onChange={handleChange}
                               value={formData.recipeName}
                             />
@@ -350,7 +349,6 @@ export default function EditRecipe() {
                           id="description"
                           placeholder="Description"
                           className="  "
-                          required
                           onChange={handleChange}
                           value={formData.description}
                         />
@@ -663,7 +661,6 @@ export default function EditRecipe() {
                                   ingredients: newIngredients,
                                 });
                               }}
-                              required
                             />
                           </div>
                           <div className="kh-recipe-form__ingredient--item">
@@ -689,7 +686,6 @@ export default function EditRecipe() {
                                   ingredients: newIngredients,
                                 });
                               }}
-                              required
                             />
                             <div className="kh-recipe-form__ingredient--remove">
                               {formData.ingredients.length > 1 && (
@@ -784,7 +780,6 @@ export default function EditRecipe() {
                         className=" nice-select "
                         onChange={handleChange}
                         value={formData.diet}
-                        required
                       >
                         <option value="">Select Diet</option>
                         <option value="Vegetarian">Vegetarian</option>
@@ -799,7 +794,6 @@ export default function EditRecipe() {
                       <select
                         id="difficulty"
                         className=" nice-select "
-                        required
                         onChange={handleChange}
                         value={formData.difficulty}
                       >
@@ -818,7 +812,6 @@ export default function EditRecipe() {
                         placeholder="Prep Time"
                         className="  "
                         id="prepTime"
-                        required
                         onChange={handleChange}
                         value={formData.prepTime}
                       />
@@ -830,7 +823,6 @@ export default function EditRecipe() {
                         placeholder="Cook Time"
                         className="  "
                         id="cookTime"
-                        required
                         onChange={handleChange}
                         value={formData.cookTime}
                       />
@@ -885,7 +877,6 @@ export default function EditRecipe() {
                           }}
                           placeholder="Enter amount"
                           className="  "
-                          required
                         />
                       </div>
                     ))}

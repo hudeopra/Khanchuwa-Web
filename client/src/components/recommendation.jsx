@@ -148,6 +148,7 @@ const Recommendation = ({ userId, topN = 5, minSimilarity = 0.1 }) => {
         >
           {recommendedRecipes.map((item, index) => (
             <div
+              key={item._id || index} // Ensure unique key
               className={`kh-recipe-block__item ${
                 hoveredIndex !== null
                   ? index === hoveredIndex
@@ -161,7 +162,6 @@ const Recommendation = ({ userId, topN = 5, minSimilarity = 0.1 }) => {
               <ToggleFavorite recipeId={item._id} />
 
               <a
-                key={item._id}
                 href={`/recipes/${item._id}`}
                 onMouseEnter={() => {
                   if (index !== activeIndex) {

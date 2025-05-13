@@ -134,3 +134,14 @@ export const getTagByTypeAndId = async (req, res, next) => {
     next(error);
   }
 };
+
+// New endpoint: GET /api/tag/ingredients/inStock -> fetches all ingredient tags with inStock = 1
+export const getInStockIngredients = async (req, res, next) => {
+  try {
+    const filter = { tagType: 'ingredientTag', inStock: 1 };
+    const tags = await RecipeTag.find(filter);
+    res.status(200).json(tags);
+  } catch (error) {
+    next(error);
+  }
+};

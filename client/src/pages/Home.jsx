@@ -41,6 +41,7 @@ export default function Home() {
           <CategoryList taglink="flavourTag" />
         </div>
         <div className="kh-recipeBlock">
+          <h2>Recipe Card Big</h2>
           <RecipeCardBig />
         </div>
       </div>

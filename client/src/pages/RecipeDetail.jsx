@@ -174,50 +174,6 @@ export default function RecipeDetail() {
     }
   };
 
-  const handleToggleFavorite = async () => {
-    try {
-      const res = await fetch(`/api/user/favorite/${id}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await res.json();
-      console.log("Toggle favorite response:", data); // Debugging log
-
-      if (res.ok) {
-        // Fetch updated user data explicitly
-        const updatedUserRes = await fetch("/api/user/current", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        });
-        const updatedUserData = await updatedUserRes.json();
-        if (updatedUserRes.ok) {
-          dispatch({
-            type: "user/updateUserSuccess",
-            payload: updatedUserData, // Update Redux with the new user data
-          });
-          showAlert("success", data.message || "Favorite status updated!"); // Show success alert
-        } else {
-          console.error(
-            "Failed to fetch updated user data:",
-            updatedUserData.message
-          );
-          showAlert("error", "Failed to update favorite status."); // Show error alert
-        }
-      } else {
-        console.error("Failed to toggle favorite:", data.message);
-        showAlert("error", data.message || "Failed to toggle favorite."); // Show error alert
-      }
-    } catch (error) {
-      console.error("Error toggling favorite:", error.message);
-      showAlert("error", "An error occurred while toggling favorite."); // Show error alert
-    }
-  };
-
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
   // console.log("User state:", userData);

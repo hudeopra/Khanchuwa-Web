@@ -42,10 +42,11 @@ const RecipeCardBig = () => {
     <div className="kh-recipe-block__wrapper">
       {/* Render horizontal cards */}
       {horizontalCards.map((item, index) => (
-        <div className="kh-recipe-block__item">
+        <div key={item._id || index} className="kh-recipe-block__item">
+          {" "}
+          {/* Ensure unique key */}
           <ToggleFavorite recipeId={item._id} />
           <Link
-            key={item._id} // Add unique key
             to={`/recipes/${item._id}`}
             className=" kh-recipe__item--horizontal"
           >
@@ -81,13 +82,11 @@ const RecipeCardBig = () => {
       {/* Render vertical cards */}
 
       {verticalCards.map((item, index) => (
-        <div className="kh-recipe-block__item">
+        <div key={item._id || index} className="kh-recipe-block__item">
+          {" "}
+          {/* Ensure unique key */}
           <ToggleFavorite recipeId={item._id} />
-          <Link
-            key={item._id} // Add unique key
-            to={`/recipes/${item._id}`}
-            className=""
-          >
+          <Link to={`/recipes/${item._id}`} className="">
             <div className="kh-recipe-block__item--img">
               <img
                 src={

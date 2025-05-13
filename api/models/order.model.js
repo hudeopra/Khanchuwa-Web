@@ -18,6 +18,18 @@ const orderSchema = new mongoose.Schema(
         enum: ["PENDING", "COMPLETE", "FAILED", "REFUNDED"],
         default: "PENDING",
       },
+      transaction_code: {
+        type: String,
+        required: false,
+      },
+      product_code: {
+        type: String,
+        required: false,
+      },
+      signature: {
+        type: String,
+        required: false,
+      },
     },
     user: {
       type: String,

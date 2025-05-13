@@ -46,7 +46,7 @@ export const updateOrder = async (req, res) => {
 
 // Controller to update order status by transaction UUID
 export const updateOrderByTransaction = async (req, res) => {
-  const { transaction_uuid, status } = req.body;
+  const { transaction_uuid, status, transaction_code, product_code, signature } = req.body;
 
   if (!transaction_uuid || !status) {
     return res.status(400).json({ message: "Transaction UUID and status are required" });
@@ -55,7 +55,12 @@ export const updateOrderByTransaction = async (req, res) => {
   try {
     const updatedOrder = await Order.findOneAndUpdate(
       { "transaction.product_id": transaction_uuid },
-      { "transaction.status": status },
+      {
+        "transaction.status": status,
+        "transaction.transaction_code": transaction_code,
+        "transaction.product_code": product_code,
+        "transaction.signature": signature,
+      },
       { new: true }
     );
 
@@ -63,9 +68,9 @@ export const updateOrderByTransaction = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    res.status(200).json({ message: "Order status updated successfully", order: updatedOrder });
+    res.status(200).json({ message: "Order updated successfully", order: updatedOrder });
   } catch (error) {
-    res.status(500).json({ message: "Error updating order status", error: error.message });
+    res.status(500).json({ message: "Error updating order", error: error.message });
   }
 };
 

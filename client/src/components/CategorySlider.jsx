@@ -126,6 +126,7 @@ const CategorySlider = ({ keyParam, valueParam, tag }) => {
         >
           {sortedItems.map((item, index) => (
             <div
+              key={item._id || index} // Ensure unique key
               className={`kh-recipe-block__item ${
                 hoveredIndex !== null
                   ? index === hoveredIndex
@@ -139,7 +140,6 @@ const CategorySlider = ({ keyParam, valueParam, tag }) => {
               <ToggleFavorite recipeId={item._id} />
 
               <a
-                key={item._id}
                 href={`/recipes/${item._id}`} // Link to the recipe's page
                 onMouseEnter={() => {
                   if (index !== activeIndex) {

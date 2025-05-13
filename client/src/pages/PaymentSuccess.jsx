@@ -16,29 +16,25 @@ function PaymentSuccess() {
 
   useEffect(() => {
     if (decodedData) {
-      const handleEsewaResponse = async () => {
+      const updateOrderInDB = async () => {
         try {
-          // Create a new transaction
-          await axios.post("http://localhost:3000/transactions/create", {
-            product_id: decodedData.transaction_uuid,
-            amount: decodedData.total_amount,
-            status: decodedData.status,
-          });
-
-          // Update the order status
+          // Update the order status in the database
           await axios.put(
             "http://localhost:3000/orders/update-by-transaction",
             {
               transaction_uuid: decodedData.transaction_uuid,
               status: decodedData.status,
+              transaction_code: decodedData.transaction_code,
+              product_code: decodedData.product_code,
+              signature: decodedData.signature,
             }
           );
         } catch (error) {
-          console.error("Error handling eSewa response:", error);
+          console.error("Error updating order in database:", error);
         }
       };
 
-      handleEsewaResponse();
+      updateOrderInDB();
     }
   }, [decodedData]);
 
@@ -63,6 +59,9 @@ function PaymentSuccess() {
       </p>
       <p>
         <strong>Product Code:</strong> {decodedData.product_code}
+      </p>
+      <p>
+        <strong>Signature:</strong> {decodedData.signature}
       </p>
     </main>
   );

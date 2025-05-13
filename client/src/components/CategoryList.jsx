@@ -79,7 +79,6 @@ const CategoryList = ({ taglink }) => {
 
   return (
     <div className=" py-4">
-      <h2>Categories</h2>
       <div className="slider-container">
         <div
           className="slider"

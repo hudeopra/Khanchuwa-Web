@@ -49,6 +49,15 @@ export default function ProfileNav({ active, subActive }) {
             </li>
             <li>
               <Link
+                to={"/user-favourites"}
+                className={active === "favaaaa" ? "active" : ""}
+              >
+                <FaUser />
+                <span>Fav</span>
+              </Link>
+            </li>
+            <li>
+              <Link
                 to={"/profile-edit"}
                 className={active === "Settings" ? "active" : ""}
               >
