@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa"; // Import FontAwesome icons
 
 import OAuth from "../components/OAuth";
 
@@ -12,6 +13,7 @@ export default function SignUp() {
 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -19,6 +21,10 @@ export default function SignUp() {
       ...userData,
       [e.target.id]: e.target.value,
     });
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
   };
 
   const handleSubmit = async (e) => {
@@ -107,12 +113,25 @@ export default function SignUp() {
             </div>
             <div className="kh-signup__input-wrapper">
               <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                onChange={handleChange}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  onChange={handleChange}
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-3"
+                >
+                  {showPassword ? (
+                    <FaRegEyeSlash className="w-6 h-6" />
+                  ) : (
+                    <FaRegEye className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
             </div>
             <button disabled={loading}>
               {loading ? "Loading..." : "Sign Up"}

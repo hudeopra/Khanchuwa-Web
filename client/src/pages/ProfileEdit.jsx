@@ -20,6 +20,33 @@ import {
   uploadImageToFirebase,
   deleteImageFromFirebase,
 } from "../utilities/firebaseImageUtils";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa"; // Import FontAwesome icons
+
+// Updated PasswordFeedback component to show only unmet conditions
+const PasswordFeedback = ({ password }) => {
+  const conditions = [
+    { regex: /[a-z]/, message: "At least one lowercase letter" },
+    { regex: /[A-Z]/, message: "At least one uppercase letter" },
+    { regex: /\d/, message: "At least one digit" },
+    {
+      regex: /[!@#$%^&*]/,
+      message: "At least one special character (!@#$%^&*)",
+    },
+    { regex: /.{8,}/, message: "At least 8 characters long" },
+  ];
+
+  const unmetConditions = conditions.filter(
+    (condition) => !condition.regex.test(password)
+  );
+
+  return (
+    <ul className="text-sm text-red-600">
+      {unmetConditions.map((condition, index) => (
+        <li key={index}>{condition.message}</li>
+      ))}
+    </ul>
+  );
+};
 
 export default function ProfileEdit() {
   const fileRef = useRef(null);
@@ -35,6 +62,15 @@ export default function ProfileEdit() {
   const dispatch = useDispatch();
   const { showAlert } = useAlert(); // Access the showAlert function
   const [flavourTags, setFlavourTags] = useState([]); // State to store flavour tags
+  const [showPassword, setShowPassword] = useState({
+    currentPassword: false,
+    newPassword: false,
+    reEnterNewPassword: false,
+  });
+
+  const togglePasswordVisibility = (field) => {
+    setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -401,6 +437,7 @@ export default function ProfileEdit() {
                           value={userData.username || ""}
                           id="username"
                           className="border p-3 rounded-lg"
+                          pattern="^[a-zA-Z0-9_-]{3,20}$" // Regex for username validation
                           onChange={handelChange}
                         />
                       </div>
@@ -411,6 +448,7 @@ export default function ProfileEdit() {
                           value={userData.fullname || ""} // Ensure correct field is used
                           id="fullname" // Corrected id to match userData field
                           className="border p-3 rounded-lg"
+                          pattern="^[a-zA-Z\s'-]{2,50}$" // Regex for full name validation
                           onChange={(e) =>
                             setUserData({
                               ...userData,
@@ -426,6 +464,7 @@ export default function ProfileEdit() {
                           value={userData.email || ""}
                           id="email"
                           className="border p-3 rounded-lg"
+                          pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" // Regex for email validation
                           onChange={handelChange}
                         />
                       </div>
@@ -440,6 +479,7 @@ export default function ProfileEdit() {
                           }
                           id="dateOfBirth"
                           className="border p-3 rounded-lg"
+                          pattern="^(19|20)\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$" // Regex for date of birth validation
                           onChange={handelChange}
                         />
                         {dobError && <p className="text-red-700">{dobError}</p>}
@@ -463,6 +503,7 @@ export default function ProfileEdit() {
                                 id="gender"
                                 name="gender"
                                 value={opt.toLowerCase()}
+                                pattern="^(male|female|other)$" // Regex for gender validation
                                 checked={userData.gender === opt.toLowerCase()}
                                 onChange={handelChange}
                               />
@@ -479,6 +520,7 @@ export default function ProfileEdit() {
                           id="bio"
                           maxLength={150}
                           className="border p-3 rounded-lg"
+                          pattern="^.{0,150}$" // Regex for bio validation
                           onChange={handelChange}
                         />
                         <p>{(userData.bio || "").length}/150</p>{" "}
@@ -506,6 +548,7 @@ export default function ProfileEdit() {
                           value={userData.preferences?.language || ""}
                           id="preferences.language"
                           className="border p-3 rounded-lg"
+                          pattern="^[a-zA-Z\s-]{2,50}$" // Regex for language validation
                           onChange={(e) =>
                             setUserData({
                               ...userData,
@@ -539,6 +582,7 @@ export default function ProfileEdit() {
                             >
                               <input
                                 type="checkbox"
+                                pattern="^(Vegetarian|Vegan|Gluten-Free|Dairy-Free|Nut-Free)$" // Regex for dietary restrictions validation
                                 checked={
                                   userData.preferences?.dietaryRestrictions?.includes(
                                     opt
@@ -576,6 +620,7 @@ export default function ProfileEdit() {
                             >
                               <input
                                 type="checkbox"
+                                pattern="^(Peanuts|Shellfish|Dairy|Gluten|Soy)$" // Regex for allergies validation
                                 checked={
                                   userData.preferences?.allergies?.includes(
                                     opt
@@ -604,6 +649,7 @@ export default function ProfileEdit() {
                             >
                               <input
                                 type="checkbox"
+                                pattern="^(Creamy|Spicy|Crispy|Savory|Buttery|Tangy|Nutty|Umami|ABCDFalvor|Sweet)$" // Regex for flavour tags validation
                                 checked={
                                   userData.preferences?.flavourTag?.includes(
                                     tag
@@ -635,6 +681,7 @@ export default function ProfileEdit() {
                           value={userData.socialMedia?.tiktok || ""}
                           id="socialMedia.tiktok"
                           className="border p-2 rounded"
+                          pattern="^https?:\\/\\/(www\\.)?tiktok\\.com\\/@[a-zA-Z0-9._-]+$" // Regex for TikTok URL validation
                           onChange={(e) =>
                             setUserData({
                               ...userData,
@@ -654,6 +701,7 @@ export default function ProfileEdit() {
                           value={userData.socialMedia?.instagram || ""} // Corrected key from 'insta' to 'instagram'
                           id="socialMedia.instagram"
                           className="border p-2 rounded"
+                          pattern="^https?:\\/\\/(www\\.)?instagram\\.com\\/[a-zA-Z0-9._-]+$" // Regex for Instagram URL validation
                           onChange={(e) =>
                             setUserData({
                               ...userData,
@@ -673,6 +721,7 @@ export default function ProfileEdit() {
                           value={userData.socialMedia?.youtube || ""}
                           id="socialMedia.youtube"
                           className="border p-2 rounded"
+                          pattern="^https?:\\/\\/(www\\.)?youtube\\.com\\/(@[a-zA-Z0-9_-]+|channel\\/[a-zA-Z0-9_-]+)$" // Regex for YouTube URL validation
                           onChange={(e) =>
                             setUserData({
                               ...userData,
@@ -695,30 +744,104 @@ export default function ProfileEdit() {
                     <div className="kh-input-wrapper">
                       <div className="kh-input-item">
                         <input
-                          type="password"
+                          type={
+                            showPassword.currentPassword ? "text" : "password"
+                          }
                           placeholder="Enter Current Password"
                           id="currentPassword"
                           className="border p-3 rounded-lg"
                           onChange={handelChange}
                         />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            togglePasswordVisibility("currentPassword")
+                          }
+                          className="absolute right-3 top-3"
+                        >
+                          {showPassword.currentPassword ? (
+                            <FaRegEyeSlash className="w-6 h-6" />
+                          ) : (
+                            <FaRegEye className="w-6 h-6" />
+                          )}
+                        </button>
                       </div>
                       <div className="kh-input-item">
                         <input
-                          type="password"
+                          type={showPassword.newPassword ? "text" : "password"}
                           placeholder="Enter New Password"
                           id="newPassword"
                           className="border p-3 rounded-lg"
-                          onChange={handelChange}
+                          onChange={(e) => {
+                            const trimmedValue = e.target.value.trim();
+                            handelChange({
+                              ...e,
+                              target: { ...e.target, value: trimmedValue },
+                            });
+                            setUserData({
+                              ...userData,
+                              newPassword: trimmedValue,
+                            });
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            togglePasswordVisibility("newPassword")
+                          }
+                          className="absolute right-3 top-3"
+                        >
+                          {showPassword.newPassword ? (
+                            <FaRegEyeSlash className="w-6 h-6" />
+                          ) : (
+                            <FaRegEye className="w-6 h-6" />
+                          )}
+                        </button>
+                        <PasswordFeedback
+                          password={userData.newPassword || ""}
                         />
                       </div>
                       <div className="kh-input-item">
                         <input
-                          type="password"
+                          type={
+                            showPassword.reEnterNewPassword
+                              ? "text"
+                              : "password"
+                          }
                           placeholder="Re-enter New Password"
                           id="reEnterNewPassword"
                           className="border p-3 rounded-lg"
-                          onChange={handelChange}
+                          onChange={(e) => {
+                            const trimmedValue = e.target.value.trim();
+                            handelChange({
+                              ...e,
+                              target: { ...e.target, value: trimmedValue },
+                            });
+                            setUserData({
+                              ...userData,
+                              reEnterNewPassword: trimmedValue,
+                            });
+                          }}
                         />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            togglePasswordVisibility("reEnterNewPassword")
+                          }
+                          className="absolute right-3 top-3"
+                        >
+                          {showPassword.reEnterNewPassword ? (
+                            <FaRegEyeSlash className="w-6 h-6" />
+                          ) : (
+                            <FaRegEye className="w-6 h-6" />
+                          )}
+                        </button>
+                        {userData.newPassword !==
+                          userData.reEnterNewPassword && (
+                          <p className="text-sm text-red-600">
+                            Passwords do not match
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="">

@@ -92,11 +92,11 @@ const CategoryList = ({ taglink }) => {
             <div key={index} className="kh-category__item">
               <div className="kh-category__item--img">
                 <Link to={`/cookshop/${taglink}/${item._id}`}>
+                  <p>{item.recipeRefs.length} Recipes</p>
                   <img src={item.favImg} alt={item.name} />
+                  <h3>{item.name}</h3>
                 </Link>
               </div>
-              <h3>{item.name}</h3>
-              <p>{item.recipeRefs.length} Recipes</p>
             </div>
           ))}
         </div>

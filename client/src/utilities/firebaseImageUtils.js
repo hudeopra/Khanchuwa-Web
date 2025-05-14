@@ -21,7 +21,10 @@ export const uploadImageToFirebase = (file) => {
         reject(error);
       },
       () => {
-        getDownloadURL(uploadTask.snapshot.ref).then(resolve).catch(reject);
+        getDownloadURL(uploadTask.snapshot.ref).then((url) => {
+          console.log("Uploaded image URL:", url); // Log the URL after upload
+          resolve(url);
+        }).catch(reject);
       }
     );
   });

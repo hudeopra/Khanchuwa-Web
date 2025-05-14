@@ -19,10 +19,13 @@ const Failure = () => {
     if (decodedData) {
       const updateOrderStatus = async () => {
         try {
-          await axios.put("http://localhost:3000/orders/update-by-transaction", {
-            transaction_uuid: decodedData.transaction_uuid,
-            status: "FAILED",
-          });
+          await axios.put(
+            "http://localhost:3000/orders/update-by-transaction",
+            {
+              transaction_uuid: decodedData.transaction_uuid,
+              status: "FAILED",
+            }
+          );
         } catch (error) {
           console.error("Error updating order status to FAILED:", error);
         }

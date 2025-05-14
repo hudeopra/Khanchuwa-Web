@@ -342,10 +342,11 @@ export default function CreateRecipe() {
                             <input
                               type="text"
                               placeholder="Name"
-                              className="  "
+                              className=""
                               id="recipeName"
                               maxLength="62"
                               minLength="10"
+                              pattern="^[A-Za-z\s\-\'\u00C0-\u017F]{10,62}$" // Added regex pattern
                               onChange={handleChange}
                               value={formData.recipeName}
                               required
@@ -359,7 +360,8 @@ export default function CreateRecipe() {
                               type="text"
                               id="videoUrl"
                               placeholder="Video URL"
-                              className="  "
+                              className=""
+                              pattern="^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$" // Regex pattern for validating video URLs
                               onChange={handleChange}
                               value={formData.videoUrl}
                             />
@@ -371,7 +373,9 @@ export default function CreateRecipe() {
                         <textarea
                           id="description"
                           placeholder="Description"
-                          className="  "
+                          className=""
+                          maxLength="1000" // Limit to 1000 characters
+                          pattern="^[\s\S]{0,1000}$" // Regex pattern for validating long descriptions
                           onChange={handleChange}
                           value={formData.description}
                         />
@@ -385,7 +389,9 @@ export default function CreateRecipe() {
                         <textarea
                           id="shortDescription"
                           placeholder="Short description"
-                          className="  "
+                          className=""
+                          maxLength="500" // Limit to 500 characters
+                          pattern="^[\s\S]{0,500}$" // Regex pattern for validating short descriptions
                           onChange={handleChange}
                           value={formData.shortDescription}
                         />
@@ -685,6 +691,7 @@ export default function CreateRecipe() {
                         placeholder="Prep Time"
                         className="  "
                         id="prepTime"
+                        pattern="^[1-9][0-9]{0,2}$" // Regex pattern for validating prep time
                         onChange={handleChange}
                         value={formData.prepTime}
                       />
@@ -696,6 +703,7 @@ export default function CreateRecipe() {
                         placeholder="Cook Time"
                         className="  "
                         id="cookTime"
+                        pattern="^[1-9][0-9]{0,2}$" // Regex pattern for validating cook time
                         onChange={handleChange}
                         value={formData.cookTime}
                       />
@@ -815,30 +823,36 @@ export default function CreateRecipe() {
                     {formData.nutritionalInfo.map((item, idx) => (
                       <div
                         key={idx}
-                        className="kh-recipe-form__nutritional__item kh-input-item"
+                        className="kh-recipe-form__nutritional__item"
                       >
-                        <label className="" htmlFor={`nutritional-info-${idx}`}>
+                        <label htmlFor={`nutritional-info-${idx}`}>
                           {item.name}
                         </label>
                         <input
                           id={`nutritional-info-${idx}`}
                           name={`nutritional-info-${idx}`}
                           type="text"
-                          value={item.value}
+                          placeholder={`Enter ${item.name}`}
+                          pattern="^(\d{1,3}(\.\d{1,2})?|1000)$" // Strict regex for numbers and decimals from 0 to 1000
                           onChange={(e) => {
-                            const newInfo = formData.nutritionalInfo.map(
-                              (info, i) =>
-                                i === idx
-                                  ? { ...info, value: e.target.value }
-                                  : info
-                            );
-                            setFormData({
-                              ...formData,
-                              nutritionalInfo: newInfo,
-                            });
+                            const regex = /^(\d{1,3}(\.\d{1,2})?|1000)$/;
+                            if (
+                              regex.test(e.target.value) ||
+                              e.target.value === ""
+                            ) {
+                              const newInfo = formData.nutritionalInfo.map(
+                                (info, i) =>
+                                  i === idx
+                                    ? { ...info, value: e.target.value }
+                                    : info
+                              );
+                              setFormData({
+                                ...formData,
+                                nutritionalInfo: newInfo,
+                              });
+                            }
                           }}
-                          placeholder="Enter amount"
-                          className="  "
+                          value={item.value}
                         />
                       </div>
                     ))}

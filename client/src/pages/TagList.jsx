@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { addToCart } from "../redux/user/userCart";
 import { useAlert } from "../components/AlertContext"; // Import the alert context
 
 const TagList = ({ tagType }) => {
@@ -44,21 +43,7 @@ const TagList = ({ tagType }) => {
   };
 
   const handleAddToCart = (tag) => {
-    const quantity = quantities[tag._id] || 1;
-    const unitPrice = tag.disPrice || tag.mrkPrice || 0; // Ensure unit price is calculated correctly
-    dispatch(
-      addToCart({
-        _id: tag._id, // Use '_id' to match the Redux state structure
-        productName: tag.name,
-        quantity,
-        price: unitPrice * quantity, // Calculate total price
-        unitPrice, // Store unit price for future calculations
-        favImg: tag.favImg, // Include favImg
-        disPrice: tag.disPrice || null, // Add disPrice if available
-        mrkPrice: tag.mrkPrice || null, // Add mrkPrice if available
-      })
-    );
-    showAlert("success", `${tag.name} added to cart!`); // Show success alert
+    // Removed Add to Cart functionality
   };
 
   if (loading) return <div>Loading...</div>;
@@ -74,10 +59,7 @@ const TagList = ({ tagType }) => {
           <h2>{title}</h2>
           <ul className="d-flex flex-wrap gap-3">
             {filteredTags.map((tag) => (
-              <li
-                key={tag._id}
-                // className={`tag-card ${tag.inStock ? "Yes" : "No"}`}
-              >
+              <li key={tag._id}>
                 <Link to={`/cookshop/${tag.tagType}/${tag._id}`}>
                   <h3>{tag.name}</h3>
                   {tag.favImg && (
@@ -102,25 +84,6 @@ const TagList = ({ tagType }) => {
                     </>
                   )}
                 </Link>
-                {type === "ingredientTag" && (
-                  <div>
-                    <input
-                      type="number"
-                      value={quantities[tag._id] || 1}
-                      min="1"
-                      onChange={(e) =>
-                        handleQuantityChange(tag._id, e.target.value)
-                      }
-                      className="w-16 p-2 border text-center"
-                    />
-                    <button
-                      onClick={() => handleAddToCart(tag)}
-                      className="mt-2 p-2 bg-green-600 text-white rounded-lg hover:opacity-90"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                )}
               </li>
             ))}
           </ul>

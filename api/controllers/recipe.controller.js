@@ -55,6 +55,7 @@ export const createRecipe = async (req, res, next) => {
       dietaryRestrictions,
       allergies,
       userRef,
+      imageUrls // Add imageUrls here
     } = req.body;
 
     // Populate tagName for each tag type
@@ -87,6 +88,7 @@ export const createRecipe = async (req, res, next) => {
       dietaryRestrictions: dietaryRestrictions || [], // Handle new field
       allergies: allergies || [], // Handle new field
       userRef,
+      imageUrls // Include imageUrls in the recipe creation
     });
 
     // Update recipe references in tags
@@ -104,7 +106,14 @@ export const createRecipe = async (req, res, next) => {
 // Update a recipe with new data from the client (used by EditRecipe page)
 export const updateRecipe = async (req, res, next) => {
   try {
-    const { dietaryRestrictions, allergies, ...rest } = req.body;
+    const {
+      dietaryRestrictions,
+      allergies,
+      cuisineTag, // Ensure cuisineTag is destructured
+      flavourTag,
+      ingredientTag,
+      ...rest
+    } = req.body;
 
     // Populate tagName for each tag type
     const populatedCuisineTag = await populateTags(cuisineTag || []);

@@ -9,10 +9,12 @@ import {
 import OAuth from "../components/OAuth.jsx";
 import BootstrapAlert from "../components/BootstrapAlert.jsx";
 import { useAlert } from "../components/AlertContext"; // Import the alert context
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa"; // Import FontAwesome icons
 
 export default function SignIn() {
   const { showAlert } = useAlert(); // Access the showAlert function
   const [userData, setUserData] = useState({});
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
   // name of the userslice is user
   const { loading, error } = useSelector((state) => state.user);
 
@@ -28,12 +30,17 @@ export default function SignIn() {
       [e.target.id]: e.target.value,
     });
   };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault(); // prevents the default form submission
 
     // Regex patterns
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email format
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // Min 8 chars, 1 letter, 1 number
+    const passwordRegex = /^/; // Min 8 chars, 1 letter, 1 number   /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/
 
     // Validation
     if (!emailRegex.test(userData.email)) {
@@ -127,13 +134,26 @@ export default function SignIn() {
             </div>
             <div className="kh-signin__input-wrapper">
               <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password" // Corrected name
-                placeholder="Password"
-                onChange={handleChange}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password" // Corrected name
+                  placeholder="Password"
+                  onChange={handleChange}
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-3"
+                >
+                  {showPassword ? (
+                    <FaRegEyeSlash className="w-6 h-6" />
+                  ) : (
+                    <FaRegEye className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
             </div>
             <div className="kh-sigin__half">
               <button disabled={loading}>
