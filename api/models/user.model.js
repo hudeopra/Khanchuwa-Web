@@ -40,15 +40,28 @@ const userSchema = new mongoose.Schema({
     required: false,
     default: [], // Ensure it defaults to an empty array
   }],
+  userStatus: {
+    type: String,
+    required: true,
+    default: "ACTIVE",
+  },
+  phoneNumber: {
+    type: String,
+    required: false,
+  },
+  address: {
+    type: String,
+    required: false,
+  },
   preferences: {
     dietaryRestrictions: [{ type: String, required: false }],
     allergies: [{ type: String, required: false }],
-    language: { type: String, required: false },
-    flavourTag: [{ type: String, required: false }], // Added flavourTag as an array of strings
+    cuisineTags: [{ type: String, required: false }], // Added cuisineTags
+    flavourTag: [{ type: String, required: false }],
   },
 }, {
   timestamps: true,
-});
+}); // Closing the schema definition properly
 
 const User = mongoose.model("User", userSchema);
 

@@ -11,9 +11,12 @@ import {
   getTagByTypeAndId, // NEW IMPORT
   getInStockIngredients // NEW IMPORT
 } from '../controllers/tag.controller.js';
-// import { verifyToken } from '../utils/verifyUser.js'; // Temporarily disabled
+import { updateTagStock } from '../controllers/order.controller.js'; // Import the new function
 
 const router = express.Router();
+
+// New route to update tag stock after order placement
+router.patch('/updateStock', updateTagStock);
 
 // New route to fetch in-stock ingredient tags
 router.get('/ingredients/inStock', getInStockIngredients);

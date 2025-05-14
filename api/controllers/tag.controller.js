@@ -115,6 +115,11 @@ export const updateTag = async (req, res, next) => {
       );
     }
 
+    // Add rating field handling in updateTag
+    if (updateData.rating !== undefined) {
+      updateData.rating = Number(updateData.rating);
+    }
+
     const updatedTag = await RecipeTag.findByIdAndUpdate(id, updateData, { new: true });
     if (!updatedTag) return res.status(404).json({ message: 'Tag not found' });
     res.status(200).json(updatedTag);

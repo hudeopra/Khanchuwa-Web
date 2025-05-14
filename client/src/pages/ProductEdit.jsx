@@ -159,6 +159,22 @@ export default function ProductEdit() {
                     required
                   />
                 </div>
+                <div>
+                  <label htmlFor="rating">Rating</label>
+                  <select
+                    id="rating"
+                    value={formData.rating || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, rating: e.target.value })
+                    }
+                  >
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </AccordionItem>
               {formData.tagType === "ingredientTag" && (
                 <AccordionItem title="Ingredient Details">

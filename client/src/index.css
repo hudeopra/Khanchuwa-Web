@@ -1334,8 +1334,8 @@ ul.kh-profile__menu--sub-menu-block.active {
   gap: 10px;
   position: relative;
 }
-.kh-header__cart--item--img,
-.kh-header__cart--item--img img {
+.kh-header__cart--item-img,
+.kh-header__cart--item-img img {
   width: 80px;
   height: 80px;
 }

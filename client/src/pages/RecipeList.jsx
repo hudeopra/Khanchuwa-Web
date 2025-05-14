@@ -1,11 +1,19 @@
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import {
   Link,
   useSearchParams,
   useNavigate,
   useLocation,
 } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { signInSuccess } from "../redux/user/userSlice";
+import RecipeTagFilters from "../components/RecipeTagFilters";
+
 export default function RecipeList() {
+  const dispatch = useDispatch();
+  const currentUser = useSelector((state) => state.user.currentUser);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm") || "";
   const navigate = useNavigate();
@@ -16,9 +24,13 @@ export default function RecipeList() {
   const [ingredientTags, setIngredientTags] = useState([]);
   const [flavourTags, setFlavourTags] = useState([]);
 
-  const [selectedCuisine, setSelectedCuisine] = useState([]);
+  const [selectedCuisine, setSelectedCuisine] = useState(
+    currentUser?.preferences?.cuisineTags || []
+  );
   const [selectedIngredient, setSelectedIngredient] = useState([]);
-  const [selectedFlavour, setSelectedFlavour] = useState([]);
+  const [selectedFlavour, setSelectedFlavour] = useState(
+    currentUser?.preferences?.flavourTag || []
+  );
 
   // New state variables for toggle
   const [showCuisineFilter, setShowCuisineFilter] = useState(false);
@@ -30,25 +42,69 @@ export default function RecipeList() {
   const [flavourLogic, setFlavourLogic] = useState("OR"); // AND or OR
 
   useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const res = await fetch("/api/user/current", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch user data");
+        const data = await res.json();
+        dispatch(signInSuccess({ user: data }));
+      } catch (error) {
+        console.error("Error fetching current user data:", error);
+      }
+    };
+
+    fetchCurrentUser();
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (currentUser?.preferences?.flavourTag) {
+      setSelectedFlavour(currentUser.preferences.flavourTag);
+    }
+    if (currentUser?.preferences?.cuisineTags) {
+      setSelectedCuisine(currentUser.preferences.cuisineTags);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
     const params = {};
+
     if (selectedCuisine.length) {
       params.cuisineTag = selectedCuisine.join(",");
       params.cuisineLogic = cuisineLogic; // Add logic to query params
+    } else {
+      delete params.cuisineTag;
+      delete params.cuisineLogic;
     }
+
     if (selectedIngredient.length) {
       params.ingredientTag = selectedIngredient.join(",");
       params.ingredientLogic = ingredientLogic; // Add logic to query params
+    } else {
+      delete params.ingredientTag;
+      delete params.ingredientLogic;
     }
+
     if (selectedFlavour.length) {
       params.flavorTag = selectedFlavour.join(",");
       params.flavourLogic = flavourLogic; // Add logic to query params
+    } else {
+      delete params.flavorTag;
+      delete params.flavourLogic;
     }
-    if (searchTerm) params.searchTerm = searchTerm;
 
-    // Update searchParams only if there are filters or search term
-    if (Object.keys(params).length > 0) {
-      setSearchParams(params);
+    if (searchTerm) {
+      params.searchTerm = searchTerm;
+    } else {
+      delete params.searchTerm;
     }
+
+    // Update searchParams to reflect the current state
+    setSearchParams(params);
   }, [
     selectedCuisine,
     selectedIngredient,
@@ -68,7 +124,7 @@ export default function RecipeList() {
         const res = await fetch(url);
         const data = await res.json();
         console.log("Fetched recipes:", data);
-        const fetchedRecipes = Array.isArray(data.recipes) ? data.recipes : [];
+        const fetchedRecipes = Array.isArray(data) ? data : data.recipes || [];
         setRecipes(fetchedRecipes); // Ensure recipes are set correctly
         setLoading(false);
       } catch (error) {
@@ -77,10 +133,16 @@ export default function RecipeList() {
       }
     };
 
-    // Ensure default behavior when no filters or search term
     if (!searchParams.toString() && !Object.keys(searchParams).length) {
+      console.log("No filters applied. Fetching all recipes.");
       fetchRecipes(); // Fetch all recipes directly
     } else {
+      console.log("Filter logic applied with:", {
+        searchTerm,
+        selectedCuisine,
+        selectedIngredient,
+        selectedFlavour,
+      });
       fetchRecipes(); // Fetch recipes based on filters or search term
     }
   }, [searchParams]);
@@ -140,220 +202,36 @@ export default function RecipeList() {
             </h1>
             <div className="kh-recipe-list__filter-wrapper">
               <h2>Filter by Tags</h2>
-              <div className="kh-recipe-list__filter-wrapper--tags">
-                {/* Toggle Cuisine Filter */}
-                <h3
-                  onClick={() => setShowCuisineFilter(!showCuisineFilter)}
-                  style={{ cursor: "pointer" }}
-                >
-                  Cuisine Tags {cuisineTags.length}
-                </h3>
-                <div
-                  className={`kh-recipe-list__filter ${
-                    showCuisineFilter ? "filter-popup" : ""
-                  }`}
-                >
-                  <button
-                    className="close-button"
-                    onClick={() => setShowCuisineFilter(false)}
-                  >
-                    x
-                  </button>
-                  <button
-                    onClick={() =>
-                      setCuisineLogic((prev) => (prev === "AND" ? "OR" : "AND"))
-                    }
-                  >
-                    Toggle Logic: {cuisineLogic}
-                  </button>
-                  <div className="kh-recipe-list__filter--wrapper">
-                    {cuisineTags.map((tag) => (
-                      <div
-                        key={tag.name || tag._id}
-                        className="kh-recipe-form__checkbox--item"
-                      >
-                        <input
-                          type="checkbox"
-                          value={tag.name || tag._id}
-                          checked={selectedCuisine.includes(
-                            tag.name || tag._id
-                          )}
-                          onChange={(e) => {
-                            e.target.checked
-                              ? setSelectedCuisine((prev) => {
-                                  const updated = [...prev, e.target.value];
-                                  console.log(
-                                    "Selected Cuisine Tags:",
-                                    updated
-                                  );
-                                  return updated;
-                                })
-                              : setSelectedCuisine((prev) => {
-                                  const updated = prev.filter(
-                                    (t) => t !== e.target.value
-                                  );
-                                  console.log(
-                                    "Selected Cuisine Tags:",
-                                    updated
-                                  );
-                                  return updated;
-                                });
-                          }}
-                        />
-                        <label>{tag.name}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <span
-                  className={`kh-recipe-list__filter-wrapper--overlay ${
-                    showCuisineFilter ? "filter-popup" : ""
-                  }`}
-                ></span>
-              </div>
-              <div className="kh-recipe-list__filter-wrapper--tags">
-                {/* Toggle Ingredient Filter */}
-                <h3
-                  onClick={() => setShowIngredientFilter(!showIngredientFilter)}
-                  style={{ cursor: "pointer" }}
-                >
-                  Ingredient Tags {ingredientTags.length}
-                </h3>
-
-                <div
-                  className={`kh-recipe-list__filter ${
-                    showIngredientFilter ? "filter-popup" : ""
-                  }`}
-                >
-                  <button
-                    className="close-button"
-                    onClick={() => setShowIngredientFilter(false)}
-                  >
-                    x
-                  </button>
-                  <button
-                    onClick={() =>
-                      setFlavourLogic((prev) => (prev === "AND" ? "OR" : "AND"))
-                    }
-                  >
-                    Toggle Logic: {flavourLogic}
-                  </button>
-                  <div className="kh-recipe-list__filter--wrapper">
-                    {ingredientTags.map((tag) => (
-                      <div
-                        key={tag.name || tag._id}
-                        className="kh-recipe-form__checkbox--item"
-                      >
-                        <input
-                          type="checkbox"
-                          value={tag.name || tag._id}
-                          checked={selectedIngredient.includes(
-                            tag.name || tag._id
-                          )}
-                          onChange={(e) => {
-                            e.target.checked
-                              ? setSelectedIngredient((prev) => {
-                                  const updated = [...prev, e.target.value];
-                                  console.log(
-                                    "Selected Ingredient Tags:",
-                                    updated
-                                  );
-                                  return updated;
-                                })
-                              : setSelectedIngredient((prev) => {
-                                  const updated = prev.filter(
-                                    (t) => t !== e.target.value
-                                  );
-                                  console.log(
-                                    "Selected Ingredient Tags:",
-                                    updated
-                                  );
-                                  return updated;
-                                });
-                          }}
-                        />
-                        <label>{tag.name}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <span
-                  className={`kh-recipe-list__filter-wrapper--overlay ${
-                    showIngredientFilter ? "filter-popup" : ""
-                  }`}
-                ></span>
-              </div>
-              <div className="kh-recipe-list__filter-wrapper--tags">
-                {/* Toggle Flavour Filter */}
-                <h3
-                  onClick={() => setShowFlavourFilter(!showFlavourFilter)}
-                  style={{ cursor: "pointer" }}
-                >
-                  Flavour Tags {flavourTags.length}
-                </h3>
-                <div
-                  className={`kh-recipe-list__filter ${
-                    showFlavourFilter ? "filter-popup" : ""
-                  }`}
-                >
-                  <button
-                    className="close-button"
-                    onClick={() => setShowFlavourFilter(false)}
-                  >
-                    x
-                  </button>
-                  <button
-                    onClick={() =>
-                      setFlavourLogic((prev) => (prev === "AND" ? "OR" : "AND"))
-                    }
-                  >
-                    Toggle Logic: {flavourLogic}
-                  </button>
-                  <div className="kh-recipe-list__filter--wrapper">
-                    {flavourTags.map((tag) => (
-                      <div
-                        key={tag.name || tag._id}
-                        className="kh-recipe-form__checkbox--item"
-                      >
-                        <input
-                          type="checkbox"
-                          value={tag.name || tag._id}
-                          checked={selectedFlavour.includes(
-                            tag.name || tag._id
-                          )}
-                          onChange={(e) => {
-                            e.target.checked
-                              ? setSelectedFlavour((prev) => {
-                                  const updated = [...prev, e.target.value];
-                                  console.log(
-                                    "Selected Flavour Tags:",
-                                    updated
-                                  );
-                                  return updated;
-                                })
-                              : setSelectedFlavour((prev) => {
-                                  const updated = prev.filter(
-                                    (t) => t !== e.target.value
-                                  );
-                                  console.log(
-                                    "Selected Flavour Tags:",
-                                    updated
-                                  );
-                                  return updated;
-                                });
-                          }}
-                        />
-                        <label>{tag.name}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <span
-                  className={`kh-recipe-list__filter-wrapper--overlay ${
-                    showFlavourFilter ? "filter-popup" : ""
-                  }`}
-                ></span>
-              </div>
+              <RecipeTagFilters
+                tags={cuisineTags}
+                selectedTags={selectedCuisine}
+                setSelectedTags={setSelectedCuisine}
+                logic={cuisineLogic}
+                setLogic={setCuisineLogic}
+                showFilter={showCuisineFilter}
+                setShowFilter={setShowCuisineFilter}
+                filterTitle="Cuisine Tags"
+              />
+              <RecipeTagFilters
+                tags={ingredientTags}
+                selectedTags={selectedIngredient}
+                setSelectedTags={setSelectedIngredient}
+                logic={ingredientLogic}
+                setLogic={setIngredientLogic}
+                showFilter={showIngredientFilter}
+                setShowFilter={setShowIngredientFilter}
+                filterTitle="Ingredient Tags"
+              />
+              <RecipeTagFilters
+                tags={flavourTags}
+                selectedTags={selectedFlavour}
+                setSelectedTags={setSelectedFlavour}
+                logic={flavourLogic}
+                setLogic={setFlavourLogic}
+                showFilter={showFlavourFilter}
+                setShowFilter={setShowFlavourFilter}
+                filterTitle="Flavour Tags"
+              />
             </div>
           </div>
           {filteredRecipes.length > 0 ? (

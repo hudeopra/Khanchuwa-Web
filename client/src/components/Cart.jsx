@@ -10,6 +10,7 @@ export default function Cart({
   handleQuantityChange,
   handleRemoveFromCart,
   userCart,
+  currentUser, // Add currentUser prop
 }) {
   const { showAlert } = useAlert(); // Access the showAlert function
   const navigate = useNavigate(); // Initialize navigate hook
@@ -42,6 +43,12 @@ export default function Cart({
   };
 
   const handleCheckout = () => {
+    if (!currentUser) {
+      showAlert("warning", "Please sign in to proceed to checkout.");
+      navigate("/signin");
+      return;
+    }
+
     document.querySelector(".kh-header__overlay").classList.remove("active");
     document
       .querySelector(".kh-header__cart--content")

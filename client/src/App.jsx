@@ -41,7 +41,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy"; // Import PrivacyPolicy
 import TermsAndConditions from "./pages/TermsAndConditions"; // Import TermsAndConditions
 // import AdminCookshop from "./pages/AdminCookshop"; // Import AdminCookshop component
 import PaymentSuccess from "./pages/PaymentSuccess";
-import Checkout from "./pages/checkout"; // Import Checkout component
+import Checkout from "./pages/Checkout"; // Import Checkout component
 
 import Failure from "./components/Failure";
 // import Success from "./components/Success";

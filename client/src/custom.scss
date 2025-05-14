@@ -510,7 +510,9 @@ main {
 }
 
 // homepage Banner ends
-
+.kh-signout {
+  cursor: pointer;
+}
 // homepage ends
 // header start
 .kh-header {
@@ -667,20 +669,47 @@ main {
     }
   }
   &__user {
-    &--label {
+    display: flex;
+    gap: 10px;
+    position: relative;
+    &--profile {
+      &:hover ~ {
+        .kh-header__user--tab {
+          visibility: visible;
+          opacity: 1;
+          top: 45px;
+        }
+      }
+    }
+    &--tab {
       background-color: $primary-color;
+      color: $white;
       padding: 5px;
       border-radius: 2px;
       font-size: 14px;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 1s ease;
-      transition-delay: 1s;
       position: absolute;
-      bottom: -40px;
+      top: 50px;
       left: 50%;
       transform: translateX(-50%);
-
+      width: max-content;
+      padding: 6px 10px;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.5s;
+      &:hover {
+        visibility: visible;
+        opacity: 1;
+      }
+      div {
+        &:not(:last-of-type) {
+          margin-bottom: 5px;
+        }
+        a {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+        }
+      }
       &:before {
         content: "";
         height: 6px;
@@ -693,39 +722,17 @@ main {
       }
     }
     &--profile {
-      position: absolute;
-      left: 0;
-      top: 0;
-      transition: all 1s ease;
-      a {
-        position: relative;
-      }
-    }
-    &--tab {
-      position: relative;
-      display: flex;
       img {
         height: 36px;
         width: 36px;
         object-fit: cover;
         border-radius: 50%;
       }
-      &:hover {
-        .kh-header__user--profile {
-          left: calc(-100% - 30px);
-        }
-        .kh-header__user--label {
-          opacity: 1;
-          visibility: visible;
-        }
-        .kh-header__user--signout {
-          z-index: 1;
-        }
+      a {
+        position: relative;
       }
     }
     &--signout {
-      position: relative;
-      z-index: -1;
       .kh-header__user--label {
         bottom: -36px;
         transition-delay: 0.8s;
@@ -1034,3 +1041,32 @@ main {
 //     top: 220px;
 //     left: 480px;
 //   }
+
+// cookshop starts
+.kh-cookshop {
+  &__list {
+    &--items {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    &--item {
+      width: 140px;
+      transition: all 0.5s;
+      border: 6px solid transparent;
+      p {
+        text-align: center;
+        padding: 4px 10px;
+        background-color: $white;
+        color: $bg-gray;
+        margin-bottom: 0;
+        text-transform: capitalize;
+        font-weight: 600;
+      }
+      &.active {
+        border-color: $primary-color;
+      }
+    }
+  }
+}
+// cookshop ends

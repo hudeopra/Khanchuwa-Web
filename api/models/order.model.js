@@ -15,7 +15,7 @@ const orderSchema = new mongoose.Schema(
       status: {
         type: String,
         required: true,
-        enum: ["PENDING", "COMPLETE", "FAILED", "REFUNDED"],
+        enum: ["PENDING", "COMPLETE", "FAILED", "REFUNDED", "CASH"],
         default: "PENDING",
       },
       transaction_code: {

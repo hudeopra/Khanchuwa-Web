@@ -74,6 +74,10 @@ const recipeTagSchema = new mongoose.Schema(
         return (this.tagType === 'ingredientTag' || this.tagType === 'equipmentTag') ? [] : undefined;
       },
     },
+    rating: {
+      type: Number,
+      default: 1,
+    },
   },
   { timestamps: true }
 );

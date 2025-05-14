@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux"; //importing from usersSlice
 import {
@@ -16,13 +16,19 @@ export default function SignIn() {
   const [userData, setUserData] = useState({});
   const [showPassword, setShowPassword] = useState(false); // State for password visibility
   // name of the userslice is user
-  const { loading, error } = useSelector((state) => state.user);
+  const { loading, error, currentUser } = useSelector((state) => state.user);
 
   // initialize useNavigate
   const navigate = useNavigate();
 
   // initialize userDispatch
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (currentUser) {
+      navigate("/");
+    }
+  }, [currentUser]);
 
   const handleChange = (e) => {
     setUserData({
@@ -170,13 +176,6 @@ export default function SignIn() {
           </div>
           {error && (
             <BootstrapAlert type="error" message={error} duration={5000} />
-          )}
-          {!error && !loading && (
-            <BootstrapAlert
-              type="success"
-              message="Signed in successfully!"
-              duration={5000}
-            />
           )}
         </div>
       </div>

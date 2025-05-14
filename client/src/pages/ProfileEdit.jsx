@@ -62,6 +62,7 @@ export default function ProfileEdit() {
   const dispatch = useDispatch();
   const { showAlert } = useAlert(); // Access the showAlert function
   const [flavourTags, setFlavourTags] = useState([]); // State to store flavour tags
+  const [cuisineTags, setCuisineTags] = useState([]); // State to store cuisine tags
   const [showPassword, setShowPassword] = useState({
     currentPassword: false,
     newPassword: false,
@@ -92,6 +93,8 @@ export default function ProfileEdit() {
           dateOfBirth: data.dateOfBirth || "",
           gender: data.gender || "",
           bio: data.bio || "",
+          address: data.address || "",
+          phoneNumber: data.phoneNumber || "",
           socialMedia:
             data.socialMedia?.reduce((acc, item) => {
               acc[item.platform.toLowerCase()] = item.url;
@@ -130,6 +133,19 @@ export default function ProfileEdit() {
     };
     fetchFlavourTags();
   }, []);
+
+  useEffect(() => {
+    const fetchCuisineTags = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/tag/cuisineTag");
+        const data = await res.json();
+        setCuisineTags(data.map((tag) => tag.name)); // Extract tag names
+      } catch (err) {
+        console.error("Error fetching cuisine tags:", err);
+      }
+    };
+    fetchCuisineTags();
+  }, []); // Fetch cuisine tags on component mount
 
   const handelFileUpload = (file) => {
     setUploading(true);
@@ -531,6 +547,26 @@ export default function ProfileEdit() {
                           </p>
                         )}
                       </div>
+                      <div className="kh-input-item">
+                        <input
+                          type="text"
+                          placeholder="Address"
+                          value={userData.address || ""}
+                          id="address"
+                          className="border p-3 rounded-lg"
+                          onChange={handelChange}
+                        />
+                      </div>
+                      <div className="kh-input-item">
+                        <input
+                          type="text"
+                          placeholder="Phone Number"
+                          value={userData.phoneNumber || ""}
+                          id="phoneNumber"
+                          className="border p-3 rounded-lg"
+                          onChange={handelChange}
+                        />
+                      </div>
                     </div>
                   </div>
                   <div
@@ -540,26 +576,6 @@ export default function ProfileEdit() {
                     aria-labelledby="preferences-tab"
                   >
                     <div className="kh-input-wrapper">
-                      <div className="kh-input-item">
-                        <label>Preferences:</label>
-                        <input
-                          type="text"
-                          placeholder="Language"
-                          value={userData.preferences?.language || ""}
-                          id="preferences.language"
-                          className="border p-3 rounded-lg"
-                          pattern="^[a-zA-Z\s-]{2,50}$" // Regex for language validation
-                          onChange={(e) =>
-                            setUserData({
-                              ...userData,
-                              preferences: {
-                                ...userData.preferences,
-                                language: e.target.value,
-                              },
-                            })
-                          }
-                        />
-                      </div>
                       <div className="kh-recipe-form__form--item  kh-recipe-form__checkbox">
                         <label>Dietary Restrictions:</label>
                         <div className="kh-input-checkbox-wrapper">
@@ -657,6 +673,34 @@ export default function ProfileEdit() {
                                 }
                                 onChange={() =>
                                   toggleOption("preferences.flavourTag", tag)
+                                }
+                              />
+                              <label>{tag}</label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="kh-recipe-form__form--item  kh-recipe-form__checkbox">
+                        <label>Cuisine Tags:</label>
+                        <div className="kh-input-checkbox-wrapper">
+                          {cuisineTags.map((tag) => (
+                            <div
+                              className={`kh-recipe-form__checkbox--item ${
+                                userData.preferences?.cuisineTags?.includes(tag)
+                                  ? "checked"
+                                  : ""
+                              }`}
+                              key={tag}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={
+                                  userData.preferences?.cuisineTags?.includes(
+                                    tag
+                                  ) || false
+                                }
+                                onChange={() =>
+                                  toggleOption("preferences.cuisineTags", tag)
                                 }
                               />
                               <label>{tag}</label>

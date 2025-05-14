@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { generateUniqueId } from "esewajs";
 import { useSelector, useDispatch } from "react-redux";
@@ -12,11 +12,41 @@ const Checkout = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [shippingCost, setShippingCost] = useState(0); // State to track selected shipping cost
   const [editingField, setEditingField] = useState(null); // Track which field is being edited
-  const [updatedValue, setUpdatedValue] = useState(""); // Track the updated value
+  const [updatedPhoneNumber, setUpdatedPhoneNumber] = useState(""); // Track the updated phone number
+  const [updatedAddress, setUpdatedAddress] = useState(""); // Track the updated address
+  const [userData, setUserData] = useState({}); // State to store user data
+  const [paymentMethod, setPaymentMethod] = useState(""); // Track selected payment method
+  const [formErrors, setFormErrors] = useState({}); // State to track individual field errors
+  const [showAlert, setShowAlert] = useState(false); // State to show success alert
   const cartItems = useSelector((state) => state.userCart?.items || []); // Dynamically fetch cart items
   const currentUser = useSelector((state) => state.user?.currentUser); // Updated to match the structure in Header.jsx
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/user/current", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch user data");
+        const data = await res.json();
+
+        setUserData({
+          fullname: data.fullname || "",
+          email: data.email || "",
+          phoneNumber: data.phoneNumber || "",
+        });
+      } catch (error) {
+        console.error(error.message);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handlePayment = async (e) => {
     e.preventDefault();
@@ -96,13 +126,45 @@ const Checkout = () => {
 
   const handleEditClick = (field) => {
     setEditingField(field);
-    setUpdatedValue(currentUser?.[field] || "");
+    if (field === "phoneNumber") {
+      setUpdatedPhoneNumber(userData?.phoneNumber || "");
+    } else if (field === "address") {
+      setUpdatedAddress(userData?.address || "");
+    }
   };
 
-  const handleUpdate = () => {
-    // Dispatch an action to update the user data in Redux (not implemented here)
-    console.log(`Updated ${editingField}:`, updatedValue);
+  const handlePhoneNumberUpdate = () => {
+    // Dispatch an action to update the phone number in Redux (not implemented here)
+    console.log(`Updated phoneNumber:`, updatedPhoneNumber);
     setEditingField(null);
+  };
+
+  const handleAddressUpdate = () => {
+    // Dispatch an action to update the address in Redux (not implemented here)
+    console.log(`Updated address:`, updatedAddress);
+    setEditingField(null);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const errors = {};
+    if (!userData.fullname) errors.fullname = "Full Name is required.";
+    if (!userData.email) errors.email = "Email is required.";
+    if (!userData.phoneNumber) errors.phoneNumber = "Phone Number is required.";
+    if (!updatedAddress) errors.address = "Shipping Address is required.";
+    if (!shippingCost) errors.shipping = "Shipping Information is required.";
+    if (!paymentMethod) errors.payment = "Payment Method is required.";
+
+    setFormErrors(errors);
+
+    if (Object.keys(errors).length > 0) return;
+
+    if (paymentMethod === "cash") {
+      alert("Order placed successfully with Cash on Delivery.");
+    } else if (paymentMethod === "esewa") {
+      handlePayment(e); // Call the existing eSewa payment logic
+    }
   };
 
   return (
@@ -208,7 +270,7 @@ const Checkout = () => {
               <section className="mt-checkout-form mt-section__padding-sm--tb">
                 <div className="mt-checkout__header"></div>
                 <div className="mt-checkout__form">
-                  <form action="">
+                  <form onSubmit={handleSubmit}>
                     <div className="mt-checkout__form--section">
                       <div className="mt-checkout__form--head">
                         <h2>Contact Information</h2>
@@ -216,76 +278,51 @@ const Checkout = () => {
                       <div className="mt-checkout__overview">
                         <div className="mt-checkout__overview--item">
                           <h3>Full Name</h3>
-                          {editingField === "fullname" ? (
-                            <>
-                              <input
-                                type="text"
-                                value={updatedValue}
-                                onChange={(e) =>
-                                  setUpdatedValue(e.target.value)
-                                }
-                              />
-                              <button type="button" onClick={handleUpdate}>
-                                OK
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <p>{currentUser?.fullname || "N/A"}</p>
-                              <button
-                                type="button"
-                                onClick={() => handleEditClick("fullname")}
-                              >
-                                Change
-                              </button>
-                            </>
+                          <p>{userData.fullname || "N/A"}</p>
+                          {formErrors.fullname && (
+                            <p className="error-text">{formErrors.fullname}</p>
                           )}
                         </div>
                         <div className="mt-checkout__overview--item">
                           <h3>Email</h3>
-                          {editingField === "username" ? (
-                            <>
-                              <input
-                                type="text"
-                                value={updatedValue}
-                                onChange={(e) =>
-                                  setUpdatedValue(e.target.value)
-                                }
-                              />
-                              <button type="button" onClick={handleUpdate}>
-                                OK
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <p>{currentUser?.username || "N/A"}</p>
-                              <button
-                                type="button"
-                                onClick={() => handleEditClick("username")}
-                              >
-                                Change
-                              </button>
-                            </>
+                          <p>{userData.email || "N/A"}</p>
+                          {formErrors.email && (
+                            <p className="error-text">{formErrors.email}</p>
                           )}
                         </div>
                         <div className="mt-checkout__overview--item">
                           <h3>Phone Number</h3>
-                          {editingField === "phoneNumber" ? (
+                          {editingField === "phoneNumber" ||
+                          !userData.phoneNumber ? (
                             <>
                               <input
                                 type="text"
-                                value={updatedValue}
-                                onChange={(e) =>
-                                  setUpdatedValue(e.target.value)
-                                }
+                                value={updatedPhoneNumber}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  if (/^\d{0,10}$/.test(value)) {
+                                    setUpdatedPhoneNumber(value);
+                                  }
+                                }}
                               />
-                              <button type="button" onClick={handleUpdate}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (updatedPhoneNumber.length === 10) {
+                                    setUserData((prev) => ({
+                                      ...prev,
+                                      phoneNumber: updatedPhoneNumber,
+                                    }));
+                                    setEditingField(null);
+                                  }
+                                }}
+                              >
                                 OK
                               </button>
                             </>
                           ) : (
                             <>
-                              <p>{currentUser?.phoneNumber || "N/A"}</p>
+                              <p>{userData.phoneNumber}</p>
                               <button
                                 type="button"
                                 onClick={() => handleEditClick("phoneNumber")}
@@ -294,25 +331,37 @@ const Checkout = () => {
                               </button>
                             </>
                           )}
+                          {formErrors.phoneNumber && (
+                            <p className="error-text">
+                              {formErrors.phoneNumber}
+                            </p>
+                          )}
                         </div>
                         <div className="mt-checkout__overview--item">
                           <h3>Shipping Address</h3>
-                          {editingField === "address" ? (
+                          {editingField === "address" || !updatedAddress ? (
                             <>
                               <input
                                 type="text"
-                                value={updatedValue}
+                                value={updatedAddress}
                                 onChange={(e) =>
-                                  setUpdatedValue(e.target.value)
+                                  setUpdatedAddress(e.target.value)
                                 }
                               />
-                              <button type="button" onClick={handleUpdate}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (updatedAddress.trim()) {
+                                    setEditingField(null);
+                                  }
+                                }}
+                              >
                                 OK
                               </button>
                             </>
                           ) : (
                             <>
-                              <p>{currentUser?.address || "N/A"}</p>
+                              <p>{updatedAddress}</p>
                               <button
                                 type="button"
                                 onClick={() => handleEditClick("address")}
@@ -320,6 +369,9 @@ const Checkout = () => {
                                 Change
                               </button>
                             </>
+                          )}
+                          {formErrors.address && (
+                            <p className="error-text">{formErrors.address}</p>
                           )}
                         </div>
                       </div>
@@ -363,58 +415,167 @@ const Checkout = () => {
                           <p>$50.00</p>
                         </div>
                       </div>
+                      {formErrors.shipping && (
+                        <p className="error-text">{formErrors.shipping}</p>
+                      )}
                     </div>
                     <div className="mt-checkout__form--section">
                       <div className="mt-checkout__form--head">
-                        <h2>Payment Methode</h2>
+                        <h2>Payment Method</h2>
                       </div>
                       <div className="mt-checkout__payment-option">
                         <div className="mt-input-wrapper">
-                          <input type="radio" name="payment-option" />
+                          <input
+                            type="radio"
+                            name="payment-option"
+                            value="cash"
+                            onChange={(e) => setPaymentMethod(e.target.value)}
+                          />
                           <span>Cash on Delivery</span>
-                          <div className="mt-checkout__payment-info">
-                            <p>
-                              We look forward meeting to complete your
-                              transaction.
-                            </p>
-                          </div>
                         </div>
                         <div className="mt-input-wrapper">
-                          <input type="radio" name="payment-option" />
-                          <span>Esewa</span>
-                          <div className="mt-checkout__payment-info">
-                            <div className="form-group">
-                              <label htmlFor="Amount">Amount:</label>
-                              <input
-                                type="number"
-                                value={totalAmount} // Set value to total amount
-                                readOnly // Make input read-only
-                              />
-                            </div>
-
-                            {errorMessage && (
-                              <div className="error-message">
-                                {errorMessage}
-                              </div>
-                            )}
-
-                            <button
-                              type="button"
-                              className="submit-button"
-                              onClick={handlePayment}
-                            >
-                              Pay with eSewa
-                            </button>
-                          </div>
+                          <input
+                            type="radio"
+                            name="payment-option"
+                            value="esewa"
+                            onChange={(e) => setPaymentMethod(e.target.value)}
+                          />
+                          <span>eSewa</span>
                         </div>
                       </div>
+                      {formErrors.payment && (
+                        <p className="error-text">{formErrors.payment}</p>
+                      )}
                     </div>
                     <div className="mt-checkout-buttons">
-                      <input
-                        className="mt-btn mt-btn__invert"
-                        type="submit"
-                        value="Continue with Payment"
-                      />
+                      {formErrors.common && (
+                        <p className="error-text">{formErrors.common}</p>
+                      )}
+                      {paymentMethod === "cash" && (
+                        <input
+                          className="mt-btn mt-btn__invert"
+                          type="submit"
+                          value={`Continue with Payment (Total: $${totalAmount})`}
+                          onClick={async (e) => {
+                            e.preventDefault();
+                            const errors = {};
+                            if (!userData.fullname)
+                              errors.fullname = "Full Name is required.";
+                            if (!userData.email)
+                              errors.email = "Email is required.";
+                            if (!userData.phoneNumber)
+                              errors.phoneNumber = "Phone Number is required.";
+                            if (!updatedAddress)
+                              errors.address = "Shipping Address is required.";
+                            if (!shippingCost)
+                              errors.shipping =
+                                "Shipping Information is required.";
+                            if (!paymentMethod)
+                              errors.payment = "Payment Method is required.";
+
+                            if (Object.keys(errors).length > 0) {
+                              errors.common =
+                                "All fields are required. Please fill out all fields.";
+                              setFormErrors(errors);
+                              return;
+                            }
+
+                            try {
+                              const orderResponse = await axios.post(
+                                "http://localhost:3000/orders/create",
+                                {
+                                  transaction: {
+                                    product_id: generateUniqueId(),
+                                    amount: Number(totalAmount),
+                                    status: "CASH",
+                                  },
+                                  user: currentUser._id,
+                                  cart: cartItems.map((item) => ({
+                                    id: item.id,
+                                    quantity: item.quantity,
+                                  })),
+                                },
+                                {
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                }
+                              );
+
+                              // Update tag quantities in the database
+                              await axios.patch(
+                                "http://localhost:3000/api/tag/updateStock",
+                                {
+                                  cart: cartItems.map((item) => ({
+                                    id: item.id,
+                                    quantity: item.quantity,
+                                  })),
+                                },
+                                {
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                }
+                              );
+
+                              // Redirect to homepage with success alert
+                              setShowAlert(true);
+                              setTimeout(() => {
+                                window.location.href = "/";
+                              }, 3000);
+                            } catch (error) {
+                              console.error(
+                                "Error creating order or updating stock:",
+                                error
+                              );
+                              setErrorMessage(
+                                "Failed to create order or update stock. Please try again."
+                              );
+                            }
+                          }}
+                        />
+                      )}
+                      {paymentMethod === "esewa" && (
+                        <button
+                          type="button"
+                          className="submit-button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const errors = {};
+                            if (!userData.fullname)
+                              errors.fullname = "Full Name is required.";
+                            if (!userData.email)
+                              errors.email = "Email is required.";
+                            if (!userData.phoneNumber)
+                              errors.phoneNumber = "Phone Number is required.";
+                            if (!updatedAddress)
+                              errors.address = "Shipping Address is required.";
+                            if (!shippingCost)
+                              errors.shipping =
+                                "Shipping Information is required.";
+                            if (!paymentMethod)
+                              errors.payment = "Payment Method is required.";
+
+                            if (Object.keys(errors).length > 0) {
+                              errors.common =
+                                "All fields are required. Please fill out all fields.";
+                              setFormErrors(errors);
+                              return;
+                            }
+
+                            handlePayment(e);
+                          }}
+                          disabled={
+                            !userData.fullname ||
+                            !userData.email ||
+                            !userData.phoneNumber ||
+                            !updatedAddress ||
+                            !shippingCost
+                          }
+                        >
+                          Pay with eSewa (Total: ${totalAmount})
+                        </button>
+                      )}
                     </div>
                   </form>
                 </div>

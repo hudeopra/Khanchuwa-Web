@@ -7,6 +7,7 @@ import {
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useAlert } from "./AlertContext"; // Import the alert context
+import { FaSignOutAlt } from "react-icons/fa"; // Import FontAwesome icon for sign out
 
 export const SignOut = ({ handleLinkClick, type = "list", txt = true }) => {
   const dispatch = useDispatch();
@@ -33,10 +34,10 @@ export const SignOut = ({ handleLinkClick, type = "list", txt = true }) => {
   };
 
   const content = (
-    <span className="d-flex" onClick={handleSignOut}>
-      <img src="../src/assets/img/search/logout.png" alt="Khanchuwa Logo" />
+    <a className="kh-signout" herf="javascript:void(0)" onClick={handleSignOut}>
+      <FaSignOutAlt /> {/* Use FontAwesome icon */}
       {txt !== false && <span>Sign Out</span>} {/* Conditionally render text */}
-    </span>
+    </a>
   );
 
   if (type === "list") {

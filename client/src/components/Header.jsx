@@ -10,6 +10,7 @@ import {
 import Cart from "./Cart"; // Import the new Cart component
 import MainMenu from "./MainMenu"; // Add import for MainMenu
 import { useAlert } from "./AlertContext"; // Import the alert context
+import { FaCog, FaHeart } from "react-icons/fa"; // Import FontAwesome icons for settings and favorites
 
 export const fetchRandomRecipeId = async () => {
   try {
@@ -198,20 +199,30 @@ export default function Header({ pagename }) {
           <div className="kh-header__user">
             {currentUser ? (
               <div className="kh-header__user--profile-wrapper">
+                <div className="kh-header__user--profile">
+                  <Link to="/profile" onClick={handleLinkClick}>
+                    <img
+                      className="kh-header__user--profile-img"
+                      src={currentUser?.user?.avatar || currentUser?.avatar}
+                      alt="User Avatar"
+                    />
+                  </Link>
+                </div>
                 <div className="kh-header__user--tab">
-                  <div className="kh-header__user--profile">
-                    <Link to="/profile" onClick={handleLinkClick}>
-                      <img
-                        className="kh-header__user--profile-img"
-                        src={currentUser?.user?.avatar || currentUser?.avatar}
-                        alt="User Avatar"
-                      />
-                      <span className="kh-header__user--label">Profile</span>
+                  <div className="kh-header__user--signout">
+                    <SignOut />
+                  </div>
+                  <div className="kh-header__user--settings">
+                    <Link to="/profile-edit" onClick={handleLinkClick}>
+                      <FaCog />
+                      <span className="kh-header__user--label">Settings</span>
                     </Link>
                   </div>
-                  <div className="kh-header__user--signout">
-                    <SignOut txt={false} />
-                    <span className="kh-header__user--label">SignOut</span>
+                  <div className="kh-header__user--favorites">
+                    <Link to="/user-favourites" onClick={handleLinkClick}>
+                      <FaHeart />
+                      <span className="kh-header__user--label">Favorites</span>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -235,6 +246,7 @@ export default function Header({ pagename }) {
                 handleQuantityChange={handleQuantityChange}
                 handleRemoveFromCart={handleRemoveFromCart}
                 userCart={userCart}
+                currentUser={currentUser}
               />
             </div>
           </div>

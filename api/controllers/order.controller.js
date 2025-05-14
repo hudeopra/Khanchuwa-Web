@@ -1,4 +1,5 @@
 import { Order } from "../models/order.model.js";
+import RecipeTag from '../models/recipeTag.model.js';
 
 // Controller to create a new order
 export const createOrder = async (req, res) => {
@@ -95,5 +96,40 @@ export const getOrderById = async (req, res) => {
     res.status(200).json({ message: "Order fetched successfully", order });
   } catch (error) {
     res.status(500).json({ message: "Error fetching order", error: error.message });
+  }
+};
+
+// Function to update tag stock after an order is placed
+export const updateTagStock = async (req, res, next) => {
+  try {
+    const { cart } = req.body; // Expecting cart array in the request body
+
+    if (!cart || !Array.isArray(cart)) {
+      return res.status(400).json({ message: 'Invalid cart data' });
+    }
+
+    // Iterate over each item in the cart and update the inStock and quantity values
+    for (const item of cart) {
+      const { id, quantity } = item;
+
+      if (!id || !quantity) {
+        return res.status(400).json({ message: 'Invalid item data in cart' });
+      }
+
+      const tag = await RecipeTag.findById(id);
+
+      if (!tag) {
+        return res.status(404).json({ message: `Tag with ID ${id} not found` });
+      }
+
+      // Deduct the quantity from the inStock and quantity fields
+      tag.inStock = Math.max(0, tag.inStock - quantity);
+      tag.quantity = Math.max(0, tag.quantity - quantity);
+      await tag.save();
+    }
+
+    res.status(200).json({ message: 'Stock updated successfully' });
+  } catch (error) {
+    next(error);
   }
 };

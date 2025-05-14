@@ -32,12 +32,15 @@ export const updateUserInfo = async (req, res, next) => {
           bio: req.body.bio, // Include bio
           socialMedia: req.body.socialMedia,
           role: req.body.role,
+          address: req.body.address, // Updated field
+          phoneNumber: req.body.phoneNumber, // New field
+          userStatus: req.body.userStatus, // New field
           preferences: {
             notifications: req.body.preferences.notifications,
             dietaryRestrictions: req.body.preferences.dietaryRestrictions,
             allergies: req.body.preferences.allergies,
-            language: req.body.preferences.language,
-            flavourTag: req.body.preferences.flavourTag, // Added flavourTag handling
+            cuisineTags: req.body.preferences.cuisineTags, // New field
+            flavourTag: req.body.preferences.flavourTag, // Existing field
           }, // Include preferences
         },
       },

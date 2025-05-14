@@ -490,6 +490,10 @@ textarea {
   color: #fff;
 }
 
+.kh-signout {
+  cursor: pointer;
+}
+
 .kh-header {
   background-color: transparent;
   position: absolute;
@@ -634,21 +638,46 @@ textarea {
   background-color: rgba(48, 48, 48, 0.644);
   z-index: -2;
 }
-.kh-header__user--label {
+.kh-header__user {
+  display: flex;
+  gap: 10px;
+  position: relative;
+}
+.kh-header__user--profile:hover ~ .kh-header__user--tab {
+  visibility: visible;
+  opacity: 1;
+  top: 45px;
+}
+.kh-header__user--tab {
   background-color: #e66120;
+  color: #fff;
   padding: 5px;
   border-radius: 2px;
   font-size: 14px;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 1s ease;
-  transition-delay: 1s;
   position: absolute;
-  bottom: -40px;
+  top: 50px;
   left: 50%;
   transform: translateX(-50%);
+  width: -moz-max-content;
+  width: max-content;
+  padding: 6px 10px;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.5s;
 }
-.kh-header__user--label:before {
+.kh-header__user--tab:hover {
+  visibility: visible;
+  opacity: 1;
+}
+.kh-header__user--tab div:not(:last-of-type) {
+  margin-bottom: 5px;
+}
+.kh-header__user--tab div a {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.kh-header__user--tab:before {
   content: "";
   height: 6px;
   width: 6px;
@@ -658,39 +687,15 @@ textarea {
   left: 50%;
   transform: translateX(-50%) rotate(45deg);
 }
-.kh-header__user--profile {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transition: all 1s ease;
-}
-.kh-header__user--profile a {
-  position: relative;
-}
-.kh-header__user--tab {
-  position: relative;
-  display: flex;
-}
-.kh-header__user--tab img {
+.kh-header__user--profile img {
   height: 36px;
   width: 36px;
   -o-object-fit: cover;
      object-fit: cover;
   border-radius: 50%;
 }
-.kh-header__user--tab:hover .kh-header__user--profile {
-  left: calc(-100% - 30px);
-}
-.kh-header__user--tab:hover .kh-header__user--label {
-  opacity: 1;
-  visibility: visible;
-}
-.kh-header__user--tab:hover .kh-header__user--signout {
-  z-index: 1;
-}
-.kh-header__user--signout {
+.kh-header__user--profile a {
   position: relative;
-  z-index: -1;
 }
 .kh-header__user--signout .kh-header__user--label {
   bottom: -36px;
@@ -950,4 +955,27 @@ textarea {
 }
 .kh-video.active .kh-video__item {
   z-index: 99;
+}
+
+.kh-cookshop__list--items {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.kh-cookshop__list--item {
+  width: 140px;
+  transition: all 0.5s;
+  border: 6px solid transparent;
+}
+.kh-cookshop__list--item p {
+  text-align: center;
+  padding: 4px 10px;
+  background-color: #fff;
+  color: #303030;
+  margin-bottom: 0;
+  text-transform: capitalize;
+  font-weight: 600;
+}
+.kh-cookshop__list--item.active {
+  border-color: #e66120;
 }/*# sourceMappingURL=custom.css.map */
