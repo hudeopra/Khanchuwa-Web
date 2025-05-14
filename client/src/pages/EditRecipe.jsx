@@ -11,6 +11,10 @@ import { app } from "../firebase";
 import TagSelector from "../components/TagSelector.jsx";
 import AccordionItem from "../components/AccordionItem.jsx";
 import TextEditor from "../components/TextEditor.jsx"; // NEW IMPORT
+import {
+  uploadImageToFirebase,
+  deleteImageFromFirebase,
+} from "../utilities/firebaseImageUtils";
 
 export default function EditRecipe() {
   const { id } = useParams();
@@ -187,18 +191,35 @@ export default function EditRecipe() {
   const handleBannerSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
-      storeImage(file)
-        .then((url) => setFormData({ ...formData, bannerImgUrl: url }))
-        .catch((err) => console.error("Banner upload error:", err));
+      setUploading(true);
+      setTimeout(() => setUploading(false), 2000); // Disable input for 2 seconds after upload
+      uploadImageToFirebase(file)
+        .then((url) => setFormData((prev) => ({ ...prev, bannerImgUrl: url })))
+        .catch((err) => console.error("Banner upload error:", err))
+        .finally(() => setUploading(false));
     }
   };
 
   const handleFavSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
-      storeImage(file)
-        .then((url) => setFormData({ ...formData, favImgUrl: url }))
-        .catch((err) => console.error("Fav upload error:", err));
+      setUploading(true);
+      setTimeout(() => setUploading(false), 2000); // Disable input for 2 seconds after upload
+      uploadImageToFirebase(file)
+        .then((url) => setFormData((prev) => ({ ...prev, favImgUrl: url })))
+        .catch((err) => console.error("Fav upload error:", err))
+        .finally(() => setUploading(false));
+    }
+  };
+
+  const handleImageRemove = (field) => {
+    const imageUrl = formData[field];
+    if (imageUrl) {
+      deleteImageFromFirebase(imageUrl)
+        .then(() => setFormData((prev) => ({ ...prev, [field]: "" })))
+        .catch((err) =>
+          console.error("Error deleting image from Firebase:", err)
+        );
     }
   };
 
@@ -903,12 +924,7 @@ export default function EditRecipe() {
                         />
                         <button
                           type="button"
-                          onClick={() =>
-                            setFormData({
-                              ...formData,
-                              bannerImgUrl: "",
-                            })
-                          }
+                          onClick={() => handleImageRemove("bannerImgUrl")}
                           className="kh-btn kh-btn__x"
                         >
                           x
@@ -933,12 +949,7 @@ export default function EditRecipe() {
                         />
                         <button
                           type="button"
-                          onClick={() =>
-                            setFormData({
-                              ...formData,
-                              favImgUrl: "",
-                            })
-                          }
+                          onClick={() => handleImageRemove("favImgUrl")}
                           className="kh-btn kh-btn__x"
                         >
                           x

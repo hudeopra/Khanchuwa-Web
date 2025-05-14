@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import ConfirmDelete from "../components/ConfirmDelete";
 
 const backupBannerUrl =
   "https://www.gstatic.com/mobilesdk/240923_mobilesdk/CloudFirestore-Discovery.png";
@@ -14,8 +15,6 @@ export default function BlogDetail() {
   const [commentText, setCommentText] = useState("");
   const [commentError, setCommentError] = useState(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
-  const [deleteError, setDeleteError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null); // State for current user
   const navigate = useNavigate();
   const userData = useSelector((state) => state.user);
@@ -57,12 +56,19 @@ export default function BlogDetail() {
         }
         if (res.ok) {
           console.log("Fetched blog data:", data);
-          setBlog(data);
+          setBlog(data.blog); // Ensure we are setting the correct property from the response
+        } else if (res.status === 404) {
+          navigate("/blogs"); // Redirect to /blogs if not found
         } else {
           setError(data.message || "Unexpected error");
         }
       } catch (err) {
-        setError(err.message);
+        console.error("Error fetching blog:", err.message);
+        if (err.message.includes("404")) {
+          navigate("/blogs"); // Redirect to /blogs if not found
+        } else {
+          setError(err.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -96,35 +102,13 @@ export default function BlogDetail() {
     }
   };
 
-  const handleDeleteBlog = async (e) => {
-    e.preventDefault();
-    if (deleteConfirmInput !== "DELETE") {
-      setDeleteError('Please type "DELETE" to confirm.');
-      return;
-    }
-    try {
-      const res = await fetch(`/api/blog/delete/${id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setDeleteError(data.message || "Deletion failed");
-      } else {
-        navigate("/blogs");
-      }
-    } catch (err) {
-      setDeleteError(err.message);
-    }
-  };
-
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <main className="container py-5">
-      {/* Blog Header */}
-      <header>
+    <main className="kh-blog-detail">
+      <div className="container">
+        {/* Blog Header */}
         <h1>{blog.blogtitle || "N/A"}</h1>
         <img
           src={blog.bannerImgUrl || backupBannerUrl}
@@ -136,114 +120,97 @@ export default function BlogDetail() {
           className="rounded-lg"
         />
         <p>By: {blog.author || "N/A"}</p>
-      </header>
 
-      {/* Blog Content */}
-      <section className="my-4">
-        <div>{blog.content || "No content available."}</div>
-      </section>
+        {/* Blog Content */}
+        <section className="my-4">
+          <div>{blog.content || "No content available."}</div>
+        </section>
 
-      {/* Comments Section */}
-      <section className="my-4">
-        <h2>Comments</h2>
-        {blog.reviews && blog.reviews.length > 0 ? (
-          blog.reviews.map((rev, idx) => (
-            <div key={idx} className="border p-2 my-2">
-              <p>
-                <strong>Rating:</strong> {rev.rating}
-              </p>
-              <p>{rev.comment}</p>
-            </div>
-          ))
-        ) : (
-          <p>No comments yet.</p>
-        )}
-      </section>
+        {/* Blog Details */}
+        <section className="my-4">
+          <h2>Blog Details</h2>
+          <pre className="bg-gray-100 p-4 rounded-lg overflow-auto">
+            {JSON.stringify(blog, null, 2)}
+          </pre>
+        </section>
 
-      {/* Add Comment */}
-      {userData.currentUser && (
-        <form onSubmit={handleCommentSubmit} className="border p-4 my-4">
-          <h3>Add a Comment</h3>
-          <label htmlFor="commentRating">Rating:</label>
-          <input
-            type="number"
-            id="commentRating"
-            value={commentRating}
-            onChange={(e) => setCommentRating(e.target.value)}
-            required
-            className="border p-2 my-2 block"
-          />
-          <label htmlFor="commentText">Comment:</label>
-          <textarea
-            id="commentText"
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-            required
-            className="border p-2 my-2 block"
-          />
-          {commentError && (
-            <p className="text-red-700 text-sm">{commentError}</p>
+        {/* Comments Section */}
+        <section className="my-4">
+          <h2>Comments</h2>
+          {blog.reviews && blog.reviews.length > 0 ? (
+            blog.reviews.map((rev, idx) => (
+              <div key={idx} className="border p-2 my-2">
+                <p>
+                  <strong>Rating:</strong> {rev.rating}
+                </p>
+                <p>{rev.comment}</p>
+              </div>
+            ))
+          ) : (
+            <p>No comments yet.</p>
           )}
-          <button
-            type="submit"
-            className="p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
-          >
-            Submit Comment
-          </button>
-        </form>
-      )}
+        </section>
 
-      {/* Edit and Delete Options for the Author */}
-      {currentUser?._id === blog.userRef && (
-        <div className="my-4">
-          <button
-            onClick={() => navigate(`/blog/edit/${id}`)}
-            className="p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
-          >
-            Edit Blog
-          </button>
-          <button
-            onClick={() => setShowDeleteConfirmation(true)}
-            className="ml-4 p-3 bg-red-600 text-white rounded-lg hover:opacity-90"
-          >
-            Delete Blog
-          </button>
-        </div>
-      )}
-
-      {showDeleteConfirmation && (
-        <form onSubmit={handleDeleteBlog} className="border p-4 my-4">
-          <h3>Confirm Deletion</h3>
-          <p>Type "DELETE" to permanently remove this blog.</p>
-          <input
-            type="text"
-            value={deleteConfirmInput}
-            onChange={(e) => setDeleteConfirmInput(e.target.value)}
-            required
-            className="border p-2 my-2 block"
-          />
-          {deleteError && <p className="text-red-700 text-sm">{deleteError}</p>}
-          <div className="flex gap-4">
+        {/* Add Comment */}
+        {userData.currentUser && (
+          <form onSubmit={handleCommentSubmit} className="border p-4 my-4">
+            <h3>Add a Comment</h3>
+            <label htmlFor="commentRating">Rating:</label>
+            <input
+              type="number"
+              id="commentRating"
+              value={commentRating}
+              onChange={(e) => setCommentRating(e.target.value)}
+              required
+              className="border p-2 my-2 block"
+            />
+            <label htmlFor="commentText">Comment:</label>
+            <textarea
+              id="commentText"
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              required
+              className="border p-2 my-2 block"
+            />
+            {commentError && (
+              <p className="text-red-700 text-sm">{commentError}</p>
+            )}
             <button
               type="submit"
-              className="p-3 bg-red-600 text-white rounded-lg hover:opacity-90"
+              className="p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
             >
-              Confirm Delete
+              Submit Comment
+            </button>
+          </form>
+        )}
+
+        {/* Edit and Delete Options for the Author */}
+        {currentUser?._id === blog.userRef && (
+          <div className="my-4">
+            <button
+              onClick={() => navigate(`/blog/edit/${id}`)}
+              className="p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
+            >
+              Edit Blog
             </button>
             <button
-              type="button"
-              onClick={() => {
-                setShowDeleteConfirmation(false);
-                setDeleteError(null);
-                setDeleteConfirmInput("");
-              }}
-              className="p-3 bg-gray-400 text-white rounded-lg hover:opacity-90"
+              onClick={() => setShowDeleteConfirmation(true)}
+              className="ml-4 p-3 bg-red-600 text-white rounded-lg hover:opacity-90"
             >
-              Cancel
+              Delete Blog
             </button>
           </div>
-        </form>
-      )}
+        )}
+
+        {showDeleteConfirmation && (
+          <ConfirmDelete
+            deleteType="blog"
+            deleteId={id}
+            deleteApi="/api/blog/delete"
+            redirectPath="/blogs"
+          />
+        )}
+      </div>
     </main>
   );
 }

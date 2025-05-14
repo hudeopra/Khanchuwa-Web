@@ -1,13 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useRef, useState, useEffect } from "react";
 import {
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytesResumable,
-} from "firebase/storage";
-import { app } from "../firebase";
-import {
   updateUserStart,
   updateUserSuccess,
   updateUserFailure,
@@ -25,14 +18,13 @@ import UserRecipeFive from "../components/UserRecipeFive";
 import UserBlogFive from "../components/UserBlogFIve";
 import ProfileCard from "../components/ProfileCard";
 
-// import { getAuth } from "firebase/auth";
-
 export default function Profile() {
   const fileRef = useRef(null);
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
+  const [uploading, setUploading] = useState(false);
   // userData now tracks additional fields
   const [userData, setUserData] = useState({});
   const [dobError, setDobError] = useState("");
@@ -41,12 +33,6 @@ export default function Profile() {
   const [recentRecipes, setRecentRecipes] = useState([]);
   const [recentBlogs, setRecentBlogs] = useState([]);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (file) {
-      handelFileUpload(file);
-    }
-  }, [file]);
 
   useEffect(() => {
     if (currentUser) {
@@ -134,32 +120,6 @@ export default function Profile() {
         .catch((error) => console.error(error));
     }
   }, [currentUser]);
-
-  const handelFileUpload = (file) => {
-    const storage = getStorage(app);
-    const fileName = new Date().getTime() + "_" + file.name; // storing file name without duplicate names for accuracy
-
-    const storageRef = ref(storage, fileName);
-    const uploadTask = uploadBytesResumable(storageRef, file); //uploading file to storage
-
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setFilePerc(Math.round(progress)); // update filePerc state
-      },
-      (error) => {
-        setFileUploadError(true);
-        console.error(error.message);
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          setUserData({ ...userData, avatar: downloadURL });
-        });
-      }
-    );
-  };
 
   const handelChange = (e) => {
     if (e.target.id === "dateOfBirth") {

@@ -9,6 +9,10 @@ import {
 } from "firebase/storage";
 import { app } from "../firebase";
 import AccordionItem from "../components/AccordionItem.jsx"; // Import AccordionItem
+import {
+  uploadImageToFirebase,
+  deleteImageFromFirebase,
+} from "../utilities/firebaseImageUtils";
 
 export default function ProductEdit() {
   const { id } = useParams();
@@ -47,39 +51,37 @@ export default function ProductEdit() {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        // Check if file size exceeds 2 MB
-        showAlert("error", "Image size must be less than 2 MB."); // Show error alert
+        showAlert("error", "Image size must be less than 2 MB.");
         return;
       }
-      setSelectedImages((prev) => ({ ...prev, [field]: file }));
-      const fileURL = URL.createObjectURL(file); // Create a temporary URL for preview
-      setFormData((prev) => ({ ...prev, [field]: fileURL })); // Update formData for preview
+      setUploading(true);
+      setTimeout(() => setUploading(false), 2000); // Disable input for 2 seconds after upload
+      uploadImageToFirebase(file)
+        .then((url) => {
+          setFormData((prev) => ({ ...prev, [field]: url }));
+          showAlert("success", "Image uploaded successfully!");
+        })
+        .catch((err) => {
+          console.error("Image upload error:", err);
+          showAlert("error", "Image upload failed.");
+        })
+        .finally(() => setUploading(false));
     }
   };
 
   const handleImageRemove = (field) => {
-    setSelectedImages((prev) => ({ ...prev, [field]: null }));
-    setFormData((prev) => ({ ...prev, [field]: "" })); // Clear the preview
-  };
-
-  const uploadImageToFirebase = async (file) => {
-    return new Promise((resolve, reject) => {
-      const storage = getStorage(app);
-      const fileName = new Date().getTime() + file.name;
-      const storageRef = ref(storage, fileName);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      uploadTask.on(
-        "state_changed",
-        null,
-        (error) => {
-          showAlert("error", `Image upload failed: ${error.message}`); // Show error alert
-          reject(error);
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then(resolve);
-        }
-      );
-    });
+    const imageUrl = formData[field];
+    if (imageUrl) {
+      deleteImageFromFirebase(imageUrl)
+        .then(() => {
+          setFormData((prev) => ({ ...prev, [field]: "" }));
+          showAlert("success", "Image removed successfully!");
+        })
+        .catch((err) => {
+          console.error("Error deleting image:", err);
+          showAlert("error", "Failed to delete image.");
+        });
+    }
   };
 
   const handleSubmit = async (e) => {

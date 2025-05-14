@@ -1,11 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useRef, useState, useEffect } from "react";
-import {
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytesResumable,
-} from "firebase/storage";
 import { app } from "../firebase";
 import {
   updateUserStart,
@@ -22,8 +16,10 @@ import { Link } from "react-router-dom";
 import BootstrapAlert from "../components/BootstrapAlert";
 import ProfileNav from "../components/ProfileNav";
 import { useAlert } from "../components/AlertContext"; // Import the alert context
-
-// import { getAuth } from "firebase/auth";
+import {
+  uploadImageToFirebase,
+  deleteImageFromFirebase,
+} from "../utilities/firebaseImageUtils";
 
 export default function ProfileEdit() {
   const fileRef = useRef(null);
@@ -35,6 +31,7 @@ export default function ProfileEdit() {
   const [dobError, setDobError] = useState("");
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [uploading, setUploading] = useState(false); // State to disable input during upload
   const dispatch = useDispatch();
   const { showAlert } = useAlert(); // Access the showAlert function
   const [flavourTags, setFlavourTags] = useState([]); // State to store flavour tags
@@ -99,34 +96,33 @@ export default function ProfileEdit() {
   }, []);
 
   const handelFileUpload = (file) => {
-    const storage = getStorage(app);
-    const fileName = new Date().getTime() + "_" + file.name;
+    setUploading(true);
+    setTimeout(() => setUploading(false), 2000); // Disable input for 2 seconds after upload
+    uploadImageToFirebase(file)
+      .then((url) => {
+        setUserData((prev) => ({ ...prev, avatar: url }));
+        showAlert("success", "Image uploaded successfully!");
+      })
+      .catch((err) => {
+        console.error("Image upload error:", err);
+        showAlert("error", "Image upload failed.");
+      })
+      .finally(() => setUploading(false));
+  };
 
-    const storageRef = ref(storage, fileName);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setFilePerc(Math.round(progress));
-        if (progress === 0) {
-          showAlert("info", "Image upload started...");
-        }
-      },
-      (error) => {
-        setFileUploadError(true);
-        showAlert("error", "Error Image Upload (image must be less than 1 mb)");
-        console.error(error.message);
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          setUserData({ ...userData, avatar: downloadURL });
-          showAlert("success", "Image Uploaded successfully");
+  const handleImageRemove = () => {
+    const imageUrl = userData.avatar;
+    if (imageUrl) {
+      deleteImageFromFirebase(imageUrl)
+        .then(() => {
+          setUserData((prev) => ({ ...prev, avatar: "" }));
+          showAlert("success", "Image removed successfully!");
+        })
+        .catch((err) => {
+          console.error("Error deleting image:", err);
+          showAlert("error", "Failed to delete image.");
         });
-      }
-    );
+    }
   };
 
   const handelChange = (e) => {
@@ -379,6 +375,7 @@ export default function ProfileEdit() {
                           ref={fileRef}
                           hidden
                           accept="image/*"
+                          disabled={uploading} // Disable input during upload
                         />
                         {userData.avatar && (
                           <img
@@ -386,6 +383,15 @@ export default function ProfileEdit() {
                             src={userData.avatar}
                             alt="User Profile Img"
                           />
+                        )}
+                        {userData.avatar && (
+                          <button
+                            type="button"
+                            onClick={handleImageRemove}
+                            className="btn btn-danger"
+                          >
+                            Remove Image
+                          </button>
                         )}
                       </div>
                       <div className="kh-input-item">

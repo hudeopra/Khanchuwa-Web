@@ -176,7 +176,7 @@ export default function Header({ pagename }) {
             <div className="kh-header__head--main-logo">
               <Link to="/" onClick={handleLinkClick}>
                 <img
-                  src="../src/assets/img/logoKhanchuwa.png"
+                  src="http://localhost:5173/src/assets/img/logoKhanchuwa.png"
                   alt="Khanchuwa Logo"
                 />
               </Link>

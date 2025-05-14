@@ -30,6 +30,40 @@ export default function SignIn() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault(); // prevents the default form submission
+
+    // Regex patterns
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email format
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // Min 8 chars, 1 letter, 1 number
+
+    // Validation
+    if (!emailRegex.test(userData.email)) {
+      dispatch(
+        signInFailure(
+          "Invalid email format. Please enter a valid email address."
+        )
+      );
+      showAlert(
+        "error",
+        "Invalid email format. Please enter a valid email address."
+      );
+      return;
+    }
+    if (!passwordRegex.test(userData.password)) {
+      let passwordError =
+        "Password must be at least 8 characters long, include at least one letter and one number.";
+      if (userData.password.length < 8) {
+        passwordError =
+          "Password is too short. It must be at least 8 characters long.";
+      } else if (!/[A-Za-z]/.test(userData.password)) {
+        passwordError = "Password must include at least one letter.";
+      } else if (!/\d/.test(userData.password)) {
+        passwordError = "Password must include at least one number.";
+      }
+      dispatch(signInFailure(passwordError));
+      showAlert("error", passwordError);
+      return;
+    }
+
     try {
       dispatch(signInStart()); // setLoading(true);
       const res = await fetch("/api/auth/signin", {

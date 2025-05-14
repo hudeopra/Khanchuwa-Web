@@ -5,6 +5,7 @@ import { useAlert } from "../components/AlertContext"; // Import AlertContext
 import SliderSyncing from "../components/SliderSyncing";
 import ToggleFavorite from "../components/ToggleFavorite";
 import TagList from "../components/RecipeTags";
+import ConfirmDelete from "../components/ConfirmDelete";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
@@ -32,8 +33,6 @@ export default function RecipeDetail() {
   const [commentText, setCommentText] = useState("");
   const [commentError, setCommentError] = useState(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
-  const [deleteError, setDeleteError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null); // State for current user
   const [isFavorite, setIsFavorite] = useState(false); // State for favorite toggle
 
@@ -105,12 +104,18 @@ export default function RecipeDetail() {
         console.log("API response:", data); // Debugging log
         if (res.ok) {
           setRecipe(data);
+        } else if (res.status === 404) {
+          navigate("/recipes"); // Redirect to /recipes if not found
         } else {
           setError(data.message || "Unexpected error");
         }
       } catch (err) {
         console.error("Error fetching recipe:", err); // Debugging log
-        setError(err.message);
+        if (err.message.includes("404")) {
+          navigate("/recipes"); // Redirect to /recipes if not found
+        } else {
+          setError(err.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -148,29 +153,6 @@ export default function RecipeDetail() {
       }
     } catch (err) {
       setCommentError(err.message);
-    }
-  };
-
-  const handleDeleteRecipe = async (e) => {
-    e.preventDefault();
-    if (deleteConfirmInput !== "DELETE") {
-      setDeleteError('Please type "DELETE" to confirm.');
-      return;
-    }
-    try {
-      const res = await fetch(`/api/recipe/delete/${id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setDeleteError(data.message || "Deletion failed");
-      } else {
-        // Redirect after deletion
-        navigate("/recipes");
-      }
-    } catch (err) {
-      setDeleteError(err.message);
     }
   };
 
@@ -486,37 +468,12 @@ export default function RecipeDetail() {
         </form>
       )}
       {showDeleteConfirmation && (
-        <form onSubmit={handleDeleteRecipe} className="border p-4 py-4">
-          <h3 className="text-xl font-semibold">Confirm Deletion</h3>
-          <p>Type "DELETE" to permanently remove this recipe.</p>
-          <input
-            type="text"
-            value={deleteConfirmInput}
-            onChange={(e) => setDeleteConfirmInput(e.target.value)}
-            className="border p-2 my-2 block"
-            required
-          />
-          {deleteError && <p className="text-red-700 text-sm">{deleteError}</p>}
-          <div className="flex gap-4">
-            <button
-              type="submit"
-              className="p-3 bg-red-600 text-white rounded-lg hover:opacity-90"
-            >
-              Confirm Delete
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowDeleteConfirmation(false);
-                setDeleteError(null);
-                setDeleteConfirmInput("");
-              }}
-              className="p-3 bg-gray-400 text-white rounded-lg hover:opacity-90"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+        <ConfirmDelete
+          deleteType="recipe"
+          deleteId={id}
+          deleteApi="/api/recipe/delete"
+          redirectPath="/recipes"
+        />
       )}
     </main>
   );

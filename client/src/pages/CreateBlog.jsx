@@ -2,12 +2,9 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytesResumable,
-} from "firebase/storage";
-import { app } from "../firebase";
+  uploadImageToFirebase,
+  deleteImageFromFirebase,
+} from "../utilities/firebaseImageUtils";
 import TagSelector from "../components/TagSelector.jsx";
 import AccordionItem from "../components/AccordionItem.jsx";
 
@@ -33,30 +30,12 @@ const CreateBlog = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const storeImage = async (file) => {
-    return new Promise((resolve, reject) => {
-      const storage = getStorage(app);
-      const fileName = new Date().getTime() + file.name;
-      const storageRef = ref(storage, fileName);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      uploadTask.on(
-        "state_changed",
-        () => {},
-        (error) => reject(error),
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            resolve(downloadURL);
-          });
-        }
-      );
-    });
-  };
-
   const handleBannerSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
       setUploading(true);
-      storeImage(file)
+      setTimeout(() => setUploading(false), 2000); // Disable input for 2 seconds after upload
+      uploadImageToFirebase(file)
         .then((url) => setFormData((prev) => ({ ...prev, bannerImgUrl: url })))
         .catch((err) => console.error("Banner upload error:", err))
         .finally(() => setUploading(false));
@@ -67,17 +46,32 @@ const CreateBlog = () => {
     const file = e.target.files[0];
     if (file) {
       setUploading(true);
-      storeImage(file)
+      setTimeout(() => setUploading(false), 2000); // Disable input for 2 seconds after upload
+      uploadImageToFirebase(file)
         .then((url) => setFormData((prev) => ({ ...prev, favImgUrl: url })))
         .catch((err) => console.error("Fav upload error:", err))
         .finally(() => setUploading(false));
     }
   };
 
+  const handleImageRemove = (field) => {
+    const imageUrl = formData[field];
+    if (imageUrl) {
+      console.log("Attempting to delete image:", imageUrl); // Debugging log
+      deleteImageFromFirebase(imageUrl)
+        .then(() => {
+          console.log("Image deleted successfully from Firebase:", imageUrl); // Debugging log
+          setFormData((prev) => ({ ...prev, [field]: "" }));
+        })
+        .catch((err) =>
+          console.error("Error deleting image from Firebase:", err)
+        );
+    }
+  };
+
   const updateTagBlogReference = async (tagId, blogId) => {
     try {
       await fetch("/api/tag/addBlogRef", {
-        // updated endpoint
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tagId, blogId }),
@@ -196,9 +190,7 @@ const CreateBlog = () => {
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    setFormData((prev) => ({ ...prev, bannerImgUrl: "" }))
-                  }
+                  onClick={() => handleImageRemove("bannerImgUrl")}
                 >
                   Remove Banner
                 </button>
@@ -221,9 +213,7 @@ const CreateBlog = () => {
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    setFormData((prev) => ({ ...prev, favImgUrl: "" }))
-                  }
+                  onClick={() => handleImageRemove("favImgUrl")}
                 >
                   Remove Favorite
                 </button>

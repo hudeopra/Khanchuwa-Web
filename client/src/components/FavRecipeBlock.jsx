@@ -18,7 +18,7 @@ export const FavRecipeBlock = ({ variant }) => {
       : "kh-recipe-fav__wrapper";
 
   return (
-    <div className="container">
+    <div className="">
       <div className={wrapperClass}>
         <div className="kh-recipe-fav__content">
           <div className="kh-recipe-fav__img">

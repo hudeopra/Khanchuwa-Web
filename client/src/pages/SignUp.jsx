@@ -23,6 +23,36 @@ export default function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Regex patterns
+    const usernameRegex = /^[a-zA-Z0-9_]{3,15}$/; // Alphanumeric, 3-15 chars
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email format
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // Min 8 chars, 1 letter, 1 number
+
+    // Validation
+    if (!usernameRegex.test(userData.username)) {
+      setError("Username must be 3-15 characters and alphanumeric.");
+      return;
+    }
+    if (!emailRegex.test(userData.email)) {
+      setError("Invalid email format. Please enter a valid email address.");
+      return;
+    }
+    if (!passwordRegex.test(userData.password)) {
+      let passwordError =
+        "Password must be at least 8 characters long, include at least one letter and one number.";
+      if (userData.password.length < 8) {
+        passwordError =
+          "Password is too short. It must be at least 8 characters long.";
+      } else if (!/[A-Za-z]/.test(userData.password)) {
+        passwordError = "Password must include at least one letter.";
+      } else if (!/\d/.test(userData.password)) {
+        passwordError = "Password must include at least one number.";
+      }
+      setError(passwordError);
+      return;
+    }
+
     try {
       setLoading(true);
       const res = await fetch("/api/auth/signup", {
@@ -46,18 +76,6 @@ export default function SignUp() {
       setLoading(false);
       setError(error.message);
     }
-    //   if (!res.ok) {
-    //     dispatch(signUpFailure(data.message));
-    //     console.error("SignUp.jsx: Error response", data);
-    //     return;
-    //   }
-
-    //   dispatch(signUpSuccess(data.user));
-    //   navigate("/signin");
-    // } catch (error) {
-    //   dispatch(signUpFailure(error.message));
-    //   console.error("SignUp.jsx: Fetch error", error);
-    // }
   };
 
   return (
