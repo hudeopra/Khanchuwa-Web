@@ -17,7 +17,7 @@ export const verifyToken = (req, res, next) => {
       return next(errorHandler(403, 'api/verifyUser: Forbidden'));
     }
     console.log("Token verified successfully:", user); // Debugging statement
-    req.user = user;
+    req.user = user; // This will now include both `id` and `role`
     next();
   });
 };

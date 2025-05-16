@@ -11,46 +11,41 @@ export const testing = (req, res) => {
 
 // exporting to user.route.js
 export const updateUserInfo = async (req, res, next) => {
-  if (req.user.id !== req.params.id)
-    return next(errorHandler(401, 'api/user.controller: you can only update your own account'));
+  console.log('User Role:', req.user.role); // Debugging: Log user role
+  console.log('User ID:', req.user.id); // Debugging: Log user ID
+  console.log('Request Params ID:', req.params.id); // Debugging: Log request params ID
+  console.log('Request Body:', req.body); // Debugging: Log request body
+
+  // Allow admins to update any user or allow users to update their own account
+  if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
+    console.log('Authorization failed: User is not admin or updating their own account');
+    return next(errorHandler(401, 'You can only update your own account or must be an admin'));
+  }
 
   try {
-    if (req.body.password)
+    if (req.body.password) {
       req.body.password = await bcrypt.hash(req.body.password, 12);
+    }
 
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       {
-        $set: {
-          username: req.body.username,
-          email: req.body.email,
-          password: req.body.password,
-          avatar: req.body.avatar, // Use avatar instead of profilePicture
-          fullname: req.body.fullname,
-          dateOfBirth: req.body.dateOfBirth,
-          gender: req.body.gender,
-          bio: req.body.bio, // Include bio
-          socialMedia: req.body.socialMedia,
-          role: req.body.role,
-          address: req.body.address, // Updated field
-          phoneNumber: req.body.phoneNumber, // New field
-          userStatus: req.body.userStatus, // New field
-          preferences: {
-            notifications: req.body.preferences.notifications,
-            dietaryRestrictions: req.body.preferences.dietaryRestrictions,
-            allergies: req.body.preferences.allergies,
-            cuisineTags: req.body.preferences.cuisineTags, // New field
-            flavourTag: req.body.preferences.flavourTag, // Existing field
-          }, // Include preferences
-        },
+        $set: req.body,
       },
       { new: true }
     );
 
-    const { password, ...rest } = updatedUser._doc; // remove password from the response
-    res.status(200).json(rest);
+    if (!updatedUser) {
+      console.log('User not found for update');
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const { password, ...rest } = updatedUser._doc; // Exclude password from the response
+    console.log('User updated successfully:', rest);
+    res.status(200).json({ success: true, data: rest });
   } catch (error) {
-    next(errorHandler(500, 'api/user.controller: Internal Server Error'));
+    console.error('Error updating user:', error);
+    next(errorHandler(500, 'Internal Server Error'));
   }
 };
 

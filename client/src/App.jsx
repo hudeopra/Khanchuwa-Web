@@ -49,6 +49,7 @@ import Orderlist from "./pages/Orderlist"; // Import Orderlist component
 import OrderDetail from "./pages/OrderDetail"; // Import OrderDetail component
 import UserFavourites from "./pages/UserFavourites"; // Import UserFavourites component
 import Cookshop from "./pages/Cookshop"; // Import Cookshop component
+import AllUsers from "./components/AllUsers"; // Import AllUsers component
 
 function CookshopPageWrapper() {
   const { tagType } = useParams(); // Get tagType from the URL
@@ -416,6 +417,15 @@ export default function App() {
               <>
                 <Header pagename="Payment Success" />
                 <PaymentSuccess />
+              </>
+            }
+          />
+          <Route
+            path="/adminallusers"
+            element={
+              <>
+                <Header pagename="Admin All Users" />
+                <AllUsers />
               </>
             }
           />

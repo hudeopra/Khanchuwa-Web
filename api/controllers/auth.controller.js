@@ -47,7 +47,7 @@ export const signIn = async (req, res, next) => {
       console.log('auth.controller: All users:', allUsers);
     }
 
-    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: validUser._id, role: validUser.role }, process.env.JWT_SECRET); // Include role in the token payload
 
     console.log('auth.controller: Generated token', token);
     const { password: pass, ...user } = validUser._doc;

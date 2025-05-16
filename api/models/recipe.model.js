@@ -77,6 +77,9 @@ const recipeSchema = new mongoose.Schema(
     // New fields for dietary restrictions, allergies, and taste preferences
     dietaryRestrictions: { type: [String], default: [] }, // New field for dietary restrictions
     allergies: { type: [String], default: [] }, // New field for allergies
+
+    // Status of the recipe
+    status: { type: String, enum: ['DRAFT', 'PENDING', 'PUBLISHED', 'REJECTED'], default: 'PENDING' }, // Status of the recipe
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields

@@ -55,7 +55,8 @@ export const createRecipe = async (req, res, next) => {
       dietaryRestrictions,
       allergies,
       userRef,
-      imageUrls // Add imageUrls here
+      imageUrls, // Add imageUrls here
+      status = 'DRAFT', // Default status to 'DRAFT'
     } = req.body;
 
     // Populate tagName for each tag type
@@ -88,7 +89,8 @@ export const createRecipe = async (req, res, next) => {
       dietaryRestrictions: dietaryRestrictions || [], // Handle new field
       allergies: allergies || [], // Handle new field
       userRef,
-      imageUrls // Include imageUrls in the recipe creation
+      imageUrls, // Include imageUrls in the recipe creation
+      status, // Include status in the recipe creation
     });
 
     // Update recipe references in tags
