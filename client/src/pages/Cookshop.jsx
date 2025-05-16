@@ -138,6 +138,14 @@ const Cookshop = () => {
                   >
                     Add to Cart
                   </button>
+                  <button
+                    onClick={() =>
+                      (window.location.href = `/cookshop/${activeItem.tagType}/${activeItem._id}`)
+                    }
+                    className="mt-2 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             )}

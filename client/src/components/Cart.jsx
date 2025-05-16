@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom"; // Add useNavigate import
 import { useAlert } from "./AlertContext"; // Import the alert context
+import { FaShoppingCart } from "react-icons/fa";
 
 export default function Cart({
   cartItems,
@@ -65,10 +66,8 @@ export default function Cart({
           }`}
           onClick={toggleCart}
         >
-          <img
-            src="../src/assets/img/search/chefLogo.png"
-            alt="Khanchuwa Logo"
-          />
+          <FaShoppingCart />
+
           <span className="count">{cartItems.length}</span>
         </span>
       </div>

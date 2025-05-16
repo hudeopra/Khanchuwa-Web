@@ -171,3 +171,4 @@ export const validatePassword = async (req, res, next) => {
     next(errorHandler(500, "api/user.controller: Internal Server Error"));
   }
 };
+

@@ -672,6 +672,7 @@ main {
     display: flex;
     gap: 10px;
     position: relative;
+    align-items: center;
     &--profile {
       &:hover ~ {
         .kh-header__user--tab {

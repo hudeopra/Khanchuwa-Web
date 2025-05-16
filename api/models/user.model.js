@@ -59,6 +59,11 @@ const userSchema = new mongoose.Schema({
     cuisineTags: [{ type: String, required: false }], // Added cuisineTags
     flavourTag: [{ type: String, required: false }],
   },
+  recipelimit: {
+    type: Number,
+    required: true,
+    default: 10,
+  },
 }, {
   timestamps: true,
 }); // Closing the schema definition properly

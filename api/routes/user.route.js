@@ -12,4 +12,5 @@ router.get('/recipes', verifyToken, getUserRecipes);
 router.get('/current', verifyToken, getCurrentUser);
 router.post("/validate-password", validatePassword);
 
+
 export default router;

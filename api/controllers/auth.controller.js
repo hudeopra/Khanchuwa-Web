@@ -31,7 +31,6 @@ export const signUp = async (req, res, next) => {
 export const signIn = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    // console.log('auth.controller: Signin request', { email, password }); // Log request data
 
     const validUser = await User.findOne({ email });
     console.log('auth.controller: User found', email);
@@ -41,14 +40,21 @@ export const signIn = async (req, res, next) => {
     if (!validPassword) return next(errorHandler(400, 'auth.controller: Invalid credentials'));
     console.log('auth.controller: Password is correct', validPassword);
 
+    let allUsers = [];
+    if (validUser.role === 'admin') {
+      console.log('auth.controller: Admin user detected');
+      allUsers = await User.find({}, { _id: 1, username: 1, avatar: 1, role: 1, userStatus: 1, recipelimit: 1 });
+      console.log('auth.controller: All users:', allUsers);
+    }
+
     const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
 
     console.log('auth.controller: Generated token', token);
-    const { password: pass, ...user } = validUser._doc; // _id is already included in user
+    const { password: pass, ...user } = validUser._doc;
     res
       .cookie('access_token', token, { httpOnly: true })
       .status(200)
-      .json({ user }); // No changes needed here
+      .json({ user, allUsers });
   } catch (error) {
     console.error('auth.controller: Signin error', error);
     res.status(500).json({ success: false, message: error.message });

@@ -642,6 +642,7 @@ textarea {
   display: flex;
   gap: 10px;
   position: relative;
+  align-items: center;
 }
 .kh-header__user--profile:hover ~ .kh-header__user--tab {
   visibility: visible;

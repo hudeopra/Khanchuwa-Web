@@ -1,7 +1,8 @@
 import { createSlice, current } from '@reduxjs/toolkit';
 
 const initialState = {
-  currentUser: null,
+  currentUser: undefined, // Set to undefined instead of null
+  allUsers: undefined, // Set to undefined instead of null
   error: null,
   loading: false,
 };
@@ -14,8 +15,17 @@ const userSlice = createSlice({
       state.loading = true;
     },
     signInSuccess: (state, action) => {
-      const { _id, username, fullname, avatar, userFavRecipe, gender, preferences } = action.payload.user; // Include _id and remove username
-      state.currentUser = { _id, username, fullname, avatar, userFavRecipe, gender, preferences }; // Add _id to currentUser
+      const { user, allUsers } = action.payload; // Extract user and allUsers from payload
+      const { _id, username, fullname, avatar, userFavRecipe, gender, preferences, role } = user; // Destructure user fields
+      state.currentUser = { _id, username, fullname, avatar, userFavRecipe, gender, preferences, role }; // Set currentUser
+
+      if (role === 'admin' && allUsers) {
+        state.allUsers = allUsers; // Set allUsers only for admin
+        sessionStorage.setItem('allUsers', JSON.stringify(allUsers)); // Store allUsers in session storage
+      } else {
+        state.allUsers = undefined; // Ensure allUsers is undefined if not admin
+      }
+
       state.loading = false;
       state.error = null;
     },
@@ -41,6 +51,7 @@ const userSlice = createSlice({
     },
     deleteUserSuccess: (state) => {
       state.currentUser = null;
+      state.allUsers = null; // Clear allUsers on delete
       state.loading = false;
       state.error = null;
     },
@@ -52,7 +63,9 @@ const userSlice = createSlice({
       state.loading = true;
     },
     signOutUserSuccess: (state) => {
-      state.currentUser = null;
+      state.currentUser = undefined; // Set to undefined on sign out
+      state.allUsers = undefined; // Set to undefined on sign out
+      sessionStorage.removeItem('allUsers'); // Remove allUsers from session storage
       state.loading = false;
       state.error = null;
     },
