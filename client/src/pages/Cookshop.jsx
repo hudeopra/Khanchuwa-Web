@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/user/userCart";
 import { useAlert } from "../components/AlertContext";
 
@@ -12,6 +12,7 @@ const Cookshop = () => {
 
   const dispatch = useDispatch();
   const { showAlert } = useAlert();
+  const userData = useSelector((state) => state.user);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -58,6 +59,12 @@ const Cookshop = () => {
   };
 
   const handleAddToCart = () => {
+    // First check if user is logged in
+    if (!userData.currentUser) {
+      showAlert("error", "Please sign in to use cart");
+      return;
+    }
+
     if (activeItem) {
       const quantity = quantities[activeItem._id] || 1;
       const unitPrice = activeItem.disPrice || activeItem.mrkPrice || 0;

@@ -6,8 +6,9 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { app } from "../firebase";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useAlert } from "../components/AlertContext";
 import TagSelector from "../components/TagSelector.jsx";
 import AccordionItem from "../components/AccordionItem.jsx";
 import TextEditor from "../components/TextEditor.jsx"; // NEW IMPORT
@@ -19,6 +20,10 @@ import {
 export default function CreateRecipe() {
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { showAlert } = useAlert();
+  const [redirected, setRedirected] = useState(false);
+  const [localCurrentUser, setLocalCurrentUser] = useState(null); // Added local state for current user
   const [formData, setFormData] = useState({
     imageUrls: [],
     recipeName: "",
@@ -313,6 +318,43 @@ export default function CreateRecipe() {
         : { ...prev, [field]: [...current, option] };
     });
   };
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      // If we've already shown the alert and redirected, don't do it again
+      if (redirected) return;
+
+      try {
+        const res = await fetch("/api/user/current", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch current user");
+        const data = await res.json();
+        console.log("Current user data:", data); // Debugging log
+
+        // Check if user has creator or admin role
+        if (data.role !== "creator" && data.role !== "admin") {
+          showAlert("danger", "You must be a creator to access this page");
+          setRedirected(true); // Mark as redirected
+          navigate("/"); // Redirect to homepage
+          return; // Exit early
+        }
+
+        setLocalCurrentUser(data); // Set local current user
+        dispatch({
+          type: "user/updateUserSuccess",
+          payload: data, // Update Redux with the new user data
+        });
+      } catch (error) {
+        console.error("Error fetching current user:", error.message);
+      }
+    };
+
+    fetchCurrentUser(); // Fetch current user on reload
+  }, [dispatch, navigate, showAlert, redirected]);
 
   return (
     <main className="kh-recipe-form">

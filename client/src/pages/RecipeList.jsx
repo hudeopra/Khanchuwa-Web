@@ -43,23 +43,39 @@ export default function RecipeList() {
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
+      // Skip the API call if we already have user data in Redux
+      if (currentUser && Object.keys(currentUser).length > 0) {
+        console.log("Using existing user data from Redux");
+        return;
+      }
+
       try {
-        const res = await fetch("/api/user/current", {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+          console.log("No access token found, user may not be logged in");
+          return;
+        }
+
+        const res = await fetch("http://localhost:3000/api/user/current", {
           method: "GET",
+          credentials: "include", // Include cookies in the request
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            Authorization: `Bearer ${token}`,
           },
         });
-        if (!res.ok) throw new Error("Failed to fetch user data");
+        if (!res.ok) {
+          console.log(`User fetch failed with status: ${res.status}`);
+          return; // Exit early without throwing error
+        }
         const data = await res.json();
         dispatch(signInSuccess({ user: data }));
       } catch (error) {
-        console.error("Error fetching current user data:", error);
+        console.log("Error fetching user data:", error.message);
       }
     };
 
     fetchCurrentUser();
-  }, [dispatch]);
+  }, [dispatch, currentUser]);
 
   useEffect(() => {
     if (currentUser?.preferences?.flavourTag) {

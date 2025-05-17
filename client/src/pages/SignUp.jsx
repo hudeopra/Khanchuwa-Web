@@ -16,12 +16,6 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (currentUser) {
-      navigate("/");
-    }
-  }, [currentUser]);
-
   const handleChange = (e) => {
     setUserData({
       ...userData,

@@ -208,6 +208,19 @@ export default function Header({ pagename }) {
                     />
                   </Link>
                 </div>
+
+                <div className="kh-header__user--cart">
+                  <Cart
+                    cartItems={cartItems}
+                    isCartActive={isCartActive}
+                    toggleCart={toggleCart}
+                    handleClearCart={handleClearCart}
+                    handleQuantityChange={handleQuantityChange}
+                    handleRemoveFromCart={handleRemoveFromCart}
+                    userCart={userCart}
+                    currentUser={currentUser}
+                  />
+                </div>
                 <div className="kh-header__user--tab">
                   <div className="kh-header__user--signout">
                     <SignOut />
@@ -236,19 +249,6 @@ export default function Header({ pagename }) {
                 </Link>
               </>
             )}
-
-            <div className="kh-header__user--cart">
-              <Cart
-                cartItems={cartItems}
-                isCartActive={isCartActive}
-                toggleCart={toggleCart}
-                handleClearCart={handleClearCart}
-                handleQuantityChange={handleQuantityChange}
-                handleRemoveFromCart={handleRemoveFromCart}
-                userCart={userCart}
-                currentUser={currentUser}
-              />
-            </div>
           </div>
         </div>
       </div>

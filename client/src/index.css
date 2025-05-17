@@ -963,7 +963,7 @@ ul.kh-profile__menu--sub-menu-block.active {
   padding: 15px 10px 15px 15px;
   justify-content: space-between;
 }
-. .kh-profile__menu--menu-block a:hover,
+.kh-profile__menu--menu-block a:hover,
 .kh-profile__menu--menu-block a.active {
   background-color: var(--hover-color);
 }

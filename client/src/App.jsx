@@ -39,12 +39,10 @@ import ProductEdit from "./pages/ProductEdit"; // Import ProductEdit component
 import NotFound from "./pages/404"; // Import NotFound component
 import PrivacyPolicy from "./pages/PrivacyPolicy"; // Import PrivacyPolicy
 import TermsAndConditions from "./pages/TermsAndConditions"; // Import TermsAndConditions
-// import AdminCookshop from "./pages/AdminCookshop"; // Import AdminCookshop component
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Checkout from "./pages/Checkout"; // Import Checkout component
 
 import Failure from "./components/Failure";
-// import Success from "./components/Success";
 import Orderlist from "./pages/Orderlist"; // Import Orderlist component
 import OrderDetail from "./pages/OrderDetail"; // Import OrderDetail component
 import UserFavourites from "./pages/UserFavourites"; // Import UserFavourites component
@@ -114,6 +112,8 @@ export default function App() {
     <AlertProvider>
       <Router>
         <Routes>
+          {/* PUBLIC ROUTES - Accessible to everyone */}
+          {/* Home, About, Auth */}
           <Route
             path="/"
             element={
@@ -124,7 +124,7 @@ export default function App() {
             }
           />
           <Route
-            path="/About"
+            path="/about"
             element={
               <>
                 <Header pagename="About" />
@@ -133,7 +133,7 @@ export default function App() {
             }
           />
           <Route
-            path="/SignIn"
+            path="/signin"
             element={
               <>
                 <Header pagename="Sign In" />
@@ -142,7 +142,7 @@ export default function App() {
             }
           />
           <Route
-            path="/SignUp"
+            path="/signup"
             element={
               <>
                 <Header pagename="Sign Up" />
@@ -150,9 +150,148 @@ export default function App() {
               </>
             }
           />
+
+          {/* PUBLIC - Recipes and Blogs */}
+          <Route
+            path="/recipes"
+            element={
+              <>
+                <Header pagename="Recipes" />
+                <RecipeList />
+              </>
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <>
+                <Header pagename="Search Results" />
+                <RecipeList />
+              </>
+            }
+          />
+          <Route
+            path="/recipes/:id"
+            element={
+              <>
+                <Header pagename="Recipe Details" />
+                <RecipeDetail />
+              </>
+            }
+          />
+          <Route
+            path="/blogs"
+            element={
+              <>
+                <Header pagename="Blogs" />
+                <BlogList />
+              </>
+            }
+          />
+          <Route
+            path="/blogs/:id"
+            element={
+              <>
+                <Header pagename="Blog Details" />
+                <BlogDetail />
+              </>
+            }
+          />
+
+          {/* PUBLIC - Shop and Tags */}
+          <Route
+            path="/ingredient"
+            element={
+              <>
+                <Header pagename="Ingredient" />
+                <TagList tagType="ingredientTag" />
+              </>
+            }
+          />
+          <Route
+            path="/cookshop"
+            element={
+              <>
+                <Header pagename="Cookshop" />
+                <Cookshop />
+              </>
+            }
+          />
+          <Route
+            path="/cuisine"
+            element={
+              <>
+                <Header pagename="Cuisine" />
+                <TagList tagType="cuisineTag" />
+              </>
+            }
+          />
+          <Route
+            path="/flavour"
+            element={
+              <>
+                <Header pagename="Flavour" />
+                <TagList tagType="flavourTag" />
+              </>
+            }
+          />
+          <Route
+            path="/cookshop/:tagType/:id"
+            element={<CookshopPageWrapper />}
+          />
+
+          {/* PUBLIC - Payment and Legal */}
+          <Route
+            path="/payment-failure"
+            element={
+              <>
+                <Header pagename="Payment Failed" />
+                <Failure />
+              </>
+            }
+          />
+          <Route
+            path="/checkout"
+            element={
+              <>
+                <Header pagename="Checkout" />
+                <Checkout />
+              </>
+            }
+          />
+          <Route
+            path="/privacy-policy"
+            element={
+              <>
+                <Header pagename="Privacy Policy" />
+                <PrivacyPolicy />
+              </>
+            }
+          />
+          <Route
+            path="/terms-and-conditions"
+            element={
+              <>
+                <Header pagename="Terms and Conditions" />
+                <TermsAndConditions />
+              </>
+            }
+          />
+          <Route
+            path="/payment-success"
+            element={
+              <>
+                <Header pagename="Payment Success" />
+                <PaymentSuccess />
+              </>
+            }
+          />
+
+          {/* USER AUTHENTICATED ROUTES - Requires login */}
           <Route element={<PrivateRoute />}>
+            {/* User Profile */}
             <Route
-              path="/Profile"
+              path="/profile"
               element={
                 <>
                   <Header pagename="Profile" />
@@ -169,6 +308,8 @@ export default function App() {
                 </>
               }
             />
+
+            {/* User Content Creation */}
             <Route
               path="/create-recipe"
               element={
@@ -223,15 +364,8 @@ export default function App() {
                 </>
               }
             />
-            <Route
-              path="/product/edit/:id"
-              element={
-                <>
-                  <Header pagename="Edit Product" />
-                  <ProductEdit />
-                </>
-              }
-            />
+
+            {/* User Shopping */}
             <Route
               path="/user-favourites"
               element={
@@ -241,191 +375,53 @@ export default function App() {
                 </>
               }
             />
+            <Route
+              path="/orderlist"
+              element={
+                <>
+                  <Header pagename="Order List" />
+                  <Orderlist />
+                </>
+              }
+            />
+            <Route
+              path="/orderdetail/:id"
+              element={
+                <>
+                  <Header pagename="Order Detail" />
+                  <OrderDetail />
+                </>
+              }
+            />
+
+            {/* ADMIN ROUTES */}
+            <Route
+              path="/admin/product/edit/:id"
+              element={
+                <>
+                  <Header pagename="Edit Product" />
+                  <ProductEdit />
+                </>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <>
+                  <Header pagename="Admin All Users" />
+                  <AllUsers />
+                </>
+              }
+            />
           </Route>
-          <Route
-            path="/recipes"
-            element={
-              <>
-                <Header pagename="Recipes" />
-                <RecipeList />
-              </>
-            }
-          />
-          <Route
-            path="/search"
-            element={
-              <>
-                <Header pagename="Search Results" />
-                <RecipeList />
-              </>
-            }
-          />
-          <Route
-            path="/recipes/:id"
-            element={
-              <>
-                <Header pagename="Recipe Details" />
-                <RecipeDetail />
-              </>
-            }
-          />
-          <Route
-            path="/blogs"
-            element={
-              <>
-                <Header pagename="Blogs" />
-                <BlogList />
-              </>
-            }
-          />
-          <Route
-            path="/blogs/:id"
-            element={
-              <>
-                <Header pagename="Blog Details" />
-                <BlogDetail />
-              </>
-            }
-          />
-          {/* <Route
-            path="/admincookshop"
-            element={
-              <>
-                <Header pagename="Admin Cookshop" />
-                <AdminCookshop />
-              </>
-            }
-          /> */}
-          <Route
-            path="/ingredient"
-            element={
-              <>
-                <Header pagename="Ingredient" />
-                <TagList tagType="ingredientTag" />
-              </>
-            }
-          />
-          <Route
-            path="/cookshop"
-            element={
-              <>
-                <Header pagename="Cookshop" />
-                <Cookshop />
-              </>
-            }
-          />
-          <Route
-            path="/cuisine"
-            element={
-              <>
-                <Header pagename="Cuisine" />
-                <TagList tagType="cuisineTag" /> {/* Corrected prop name */}
-              </>
-            }
-          />
-          <Route
-            path="/flavour"
-            element={
-              <>
-                <Header pagename="flavour" />
-                <TagList tagType="flavourTag" /> {/* Corrected prop name */}
-              </>
-            }
-          />
-          <Route
-            path="/cookshop/:tagType/:id"
-            element={<CookshopPageWrapper />}
-          />
 
-          {/* payment */}
-
-          {/* <Route
-            path="/paymentsuccess"
-            element={
-              <>
-                <Header pagename="payment form" />
-                <Success />
-              </>
-            }
-          /> */}
-          <Route
-            path="/payment-failure"
-            element={
-              <>
-                <Header pagename="payment form" />
-                <Failure />
-              </>
-            }
-          />
-          <Route
-            path="/checkout"
-            element={
-              <>
-                <Header pagename="Checkout" />
-                <Checkout />
-              </>
-            }
-          />
-          <Route
-            path="/orderlist"
-            element={
-              <>
-                <Header pagename="Order List" />
-                <Orderlist />
-              </>
-            }
-          />
-          <Route
-            path="/orderdetail/:id"
-            element={
-              <>
-                <Header pagename="Order Detail" />
-                <OrderDetail />
-              </>
-            }
-          />
+          {/* 404 Route */}
           <Route
             path="*"
             element={
               <>
                 <Header pagename="404 Not Found" />
                 <NotFound />
-              </>
-            }
-          />
-          <Route
-            path="/privacy-policy"
-            element={
-              <>
-                <Header pagename="Privacy Policy" />
-                <PrivacyPolicy />
-              </>
-            }
-          />
-          <Route
-            path="/terms-and-conditions"
-            element={
-              <>
-                <Header pagename="Terms and Conditions" />
-                <TermsAndConditions />
-              </>
-            }
-          />
-          <Route
-            path="/payment-success"
-            element={
-              <>
-                <Header pagename="Payment Success" />
-                <PaymentSuccess />
-              </>
-            }
-          />
-          <Route
-            path="/adminallusers"
-            element={
-              <>
-                <Header pagename="Admin All Users" />
-                <AllUsers />
               </>
             }
           />

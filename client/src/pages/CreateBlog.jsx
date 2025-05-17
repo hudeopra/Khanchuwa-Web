@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useAlert } from "../components/AlertContext";
 import {
   uploadImageToFirebase,
   deleteImageFromFirebase,
@@ -11,6 +12,10 @@ import AccordionItem from "../components/AccordionItem.jsx";
 const CreateBlog = () => {
   const navigate = useNavigate();
   const { currentUser } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const { showAlert } = useAlert();
+  const [redirected, setRedirected] = useState(false);
+  const [localCurrentUser, setLocalCurrentUser] = useState(null); // Added proper state for current user
   const [formData, setFormData] = useState({
     blogtitle: "",
     shortDescription: "",
@@ -25,6 +30,46 @@ const CreateBlog = () => {
   });
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      // If we've already shown the alert and redirected, don't do it again
+      if (redirected) return;
+
+      try {
+        const res = await fetch("/api/user/current", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch current user");
+        const data = await res.json();
+        console.log("Current user data:", data); // Debugging log
+
+        // Check if user has creator or admin role
+        if (data.role !== "creator" && data.role !== "admin") {
+          showAlert(
+            "danger",
+            "You must be a creator or admin to access this page"
+          );
+          setRedirected(true); // Mark as redirected
+          navigate("/"); // Redirect to homepage
+          return; // Exit early
+        }
+
+        setLocalCurrentUser(data); // Set local current user state
+        dispatch({
+          type: "user/updateUserSuccess",
+          payload: data, // Update Redux with the new user data
+        });
+      } catch (error) {
+        console.error("Error fetching current user:", error.message);
+      }
+    };
+
+    fetchCurrentUser(); // Fetch current user on reload
+  }, [dispatch, navigate, showAlert, redirected]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

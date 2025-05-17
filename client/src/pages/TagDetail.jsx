@@ -145,6 +145,12 @@ const TagDetail = () => {
   }, []);
 
   const handleAddToCart = () => {
+    // First check if user is logged in
+    if (!currentUser) {
+      showAlert("error", "Please sign in to use cart");
+      return;
+    }
+
     if (tag) {
       const unitPrice = tag.disPrice || tag.mrkPrice || 0; // Calculate unit price
       const cartItem = {
@@ -193,7 +199,7 @@ const TagDetail = () => {
                         href={`/product/edit/${tag._id}`}
                         className="mt-2 ml-4 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
                       >
-                        Edit Product
+                        ta
                       </a>
                     </div>
                   )}
