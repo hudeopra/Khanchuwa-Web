@@ -14,6 +14,7 @@
     "axios": "^1.8.4",
     "esewajs": "^2.0.0",
     "firebase": "^11.1.0",
+    "jodit-react": "^5.2.19",
     "jquery": "^3.7.1",
     "jquery-nice-select": "^1.1.0",
     "react": "^18.3.1",
