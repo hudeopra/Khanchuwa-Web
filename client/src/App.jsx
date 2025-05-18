@@ -4,50 +4,50 @@ import {
   Routes,
   useParams,
 } from "react-router-dom"; // Import useParams
-import PrivateRoute from "./components/PrivateRoute";
-import { AlertProvider, useAlert } from "./components/AlertContext"; // Import useAlert
+import PrivateRoute from "./components/PrivateRoute.jsx";
+import { AlertProvider, useAlert } from "./components/AlertContext.jsx"; // Import useAlert
 
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import Home from "./pages/Home";
-import About from "./pages/About";
-import Profile from "./pages/Profile";
-import ProfileEdit from "./pages/ProfileEdit";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
+import Header from "./components/Header.jsx";
+import Footer from "./components/Footer.jsx";
+import Home from "./pages/Home.jsx";
+import About from "./pages/About.jsx";
+import Profile from "./pages/Profile.jsx";
+import ProfileEdit from "./pages/ProfileEdit.jsx";
+import SignIn from "./pages/SignIn.jsx";
+import SignUp from "./pages/SignUp.jsx";
 
 // Recipes
-import CreateRecipe from "./pages/CreateRecipe";
-import RecipeList from "./pages/RecipeList"; // Import RecipeList component
-import RecipeDetail from "./pages/RecipeDetail"; // Import RecipeDetail component
-import UserRecipie from "./pages/UserRecipie"; // Import UserRecipie component
-import EditRecipe from "./pages/EditRecipe"; // Updated import name
+import CreateRecipe from "./pages/CreateRecipe.jsx";
+import RecipeList from "./pages/RecipeList.jsx"; // Import RecipeList component
+import RecipeDetail from "./pages/RecipeDetail.jsx"; // Import RecipeDetail component
+import UserRecipie from "./pages/UserRecipie.jsx"; // Import UserRecipie component
+import EditRecipe from "./pages/EditRecipe.jsx"; // Updated import name
 
 // Blogs
-import CreateBlog from "./pages/CreateBlog";
-import BlogList from "./pages/BlogList"; // Import BlogList component
-import BlogDetail from "./pages/BlogDetail"; // Import BlogDetail component
-import UserBlog from "./pages/UserBlog"; // Import UserBlog component
-import EditBlog from "./pages/EditBlog"; // Updated import name
+import CreateBlog from "./pages/CreateBlog.jsx";
+import BlogList from "./pages/BlogList.jsx"; // Import BlogList component
+import BlogDetail from "./pages/BlogDetail.jsx"; // Import BlogDetail component
+import UserBlog from "./pages/UserBlog.jsx"; // Import UserBlog component
+import EditBlog from "./pages/EditBlog.jsx"; // Updated import name
 
 // shop
-import TagDetail from "./pages/TagDetail"; // Import TagDetail component
-import TagList from "./pages/TagList"; // Import TagList component
-import ProductEdit from "./pages/ProductEdit"; // Import ProductEdit component
+import TagDetail from "./pages/TagDetail.jsx"; // Import TagDetail component
+import TagList from "./pages/TagList.jsx"; // Import TagList component
+import ProductEdit from "./pages/ProductEdit.jsx"; // Import ProductEdit component
 
 // 404
-import NotFound from "./pages/404"; // Import NotFound component
-import PrivacyPolicy from "./pages/PrivacyPolicy"; // Import PrivacyPolicy
-import TermsAndConditions from "./pages/TermsAndConditions"; // Import TermsAndConditions
-import PaymentSuccess from "./pages/PaymentSuccess";
-import Checkout from "./pages/Checkout"; // Import Checkout component
+import NotFound from "./pages/404.jsx"; // Import NotFound component
+import PrivacyPolicy from "./pages/PrivacyPolicy.jsx"; // Import PrivacyPolicy
+import TermsAndConditions from "./pages/TermsAndConditions.jsx"; // Import TermsAndConditions
+import PaymentSuccess from "./pages/PaymentSuccess.jsx";
+import Checkout from "./pages/Checkout.jsx"; // Import Checkout component
 
-import Failure from "./components/Failure";
-import Orderlist from "./pages/Orderlist"; // Import Orderlist component
-import OrderDetail from "./pages/OrderDetail"; // Import OrderDetail component
-import UserFavourites from "./pages/UserFavourites"; // Import UserFavourites component
-import Cookshop from "./pages/Cookshop"; // Import Cookshop component
-import AllUsers from "./components/AllUsers"; // Import AllUsers component
+import Failure from "./components/Failure.jsx";
+import Orderlist from "./pages/Orderlist.jsx"; // Import Orderlist component
+import OrderDetail from "./pages/OrderDetail.jsx"; // Import OrderDetail component
+import UserFavourites from "./pages/UserFavourites.jsx"; // Import UserFavourites component
+import Cookshop from "./pages/Cookshop.jsx"; // Import Cookshop component
+import AllUsers from "./components/AllUsers.jsx"; // Import AllUsers component
 
 function CookshopPageWrapper() {
   const { tagType } = useParams(); // Get tagType from the URL
@@ -106,6 +106,8 @@ function AlertRenderer() {
     </div>
   );
 }
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
 export default function App() {
   return (
