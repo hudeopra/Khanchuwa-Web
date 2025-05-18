@@ -37,8 +37,15 @@ const userSlice = createSlice({
       state.loading = true;
     },
     updateUserSuccess: (state, action) => {
-      const { _id, username, fullname, userFavRecipe, gender, avatar, preferences } = action.payload; // Include _id and remove username
-      state.currentUser = { _id, username, fullname, avatar, userFavRecipe, gender, preferences }; // Add _id to currentUser
+      // Keep existing user data and merge with updated fields
+      const updatedUser = action.payload;
+
+      // Maintain the current state and only update fields that are present in the response
+      state.currentUser = {
+        ...state.currentUser,
+        ...updatedUser,
+      };
+
       state.loading = false;
       state.error = null;
     },

@@ -138,7 +138,7 @@ export default function ProfileNav({ active, subActive }) {
                     <span>New Blog</span>
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link
                     to={"/user-blog/favorites"}
                     className={active === "Favorite Blogs" ? "active" : ""}
@@ -146,7 +146,7 @@ export default function ProfileNav({ active, subActive }) {
                     <FaHeart />
                     <span>Favorite Blogs</span>
                   </Link>
-                </li>
+                </li> */}
               </ul>
             </li>
             <li>

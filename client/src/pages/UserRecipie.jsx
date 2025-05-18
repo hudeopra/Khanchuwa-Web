@@ -39,7 +39,7 @@ export default function UserRecipie() {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <main className="kh-profile">
+    <main className="kh-profile ">
       <div className="container">
         <div className="row">
           <div className="col-3">
@@ -52,50 +52,52 @@ export default function UserRecipie() {
             {recipes.length === 0 ? (
               <p>No recipes found.</p>
             ) : (
-              <div className="kh-recipe-post">
-                {recipes.map((recipe) => (
-                  <div key={recipe._id} className="recipe-block">
-                    <div className="recipe-block-wrapper">
-                      <h3>{recipe.recipeName}</h3>
-                      <img
-                        src={
-                          Array.isArray(recipe.imageUrls) &&
-                          recipe.imageUrls.length > 0
-                            ? recipe.imageUrls[0]
-                            : ""
-                        }
-                        alt={recipe.recipeName}
-                        className="recipe-fav-image"
-                      />
-                      <h3>{recipe.shortDescription}</h3>
-                      <h3>{recipe.diet}</h3>
-                      <h3>{recipe.updatedAt}</h3>
-                      <p>Meal Type:</p>
-                      <ul>
-                        {recipe.mealType.map((meal, index) => (
-                          <li key={index}>{meal}</li>
-                        ))}
-                      </ul>
-                      <h3>Ingredients:</h3>
-                      <ul>
-                        {recipe.ingredients.map((ingredient) => (
-                          <li key={ingredient._id}>{ingredient.name}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="flex gap-2 mt-4">
+              <div className="row">
+                {recipes.map((item, index) => (
+                  <div
+                    key={item._id || index}
+                    className="col-6 col-mg-3 col-lg-4"
+                  >
+                    <div className="kh-recipe-block__item">
                       <Link
-                        to={`/recipes/${recipe._id}`}
-                        className="btn btn-view text-blue-500"
+                        to={`/recipes/${item._id}`}
+                        className="kh-recipe__item--horizontal"
                       >
-                        View Recipe
+                        <div className="kh-recipe-block__item--img">
+                          <img
+                            src={
+                              Array.isArray(item.imageUrls) &&
+                              item.imageUrls.length > 0
+                                ? item.imageUrls[0]
+                                : ""
+                            }
+                            alt={item.recipeName}
+                          />
+                        </div>
+                        <div className="kh-recipe-block__content">
+                          <h3>{item.recipeName}</h3>
+                          <p>
+                            {item.shortDescription &&
+                            item.shortDescription.length > 150
+                              ? `${item.shortDescription.slice(0, 60)}...`
+                              : item.shortDescription}
+                          </p>
+                        </div>
+                        <div className="kh-recipe-block__info">
+                          <span>{item.cookTime} </span>
+                          <span>{item.servings} </span>
+                          <span>{item.difficulty} </span>
+                          <span>{item.recipeFav} </span>
+                        </div>
                       </Link>
-                      <Link
-                        to={`/recipes/edit/${recipe._id}`}
-                        className="btn btn-edit"
-                      >
-                        Edit
-                      </Link>
+                      <div className="mt-2">
+                        <Link
+                          to={`/recipes/edit/${item._id}`}
+                          className="btn btn-edit"
+                        >
+                          Edit
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 ))}

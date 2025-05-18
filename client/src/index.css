@@ -254,6 +254,7 @@ main {
 }
 
 .kh-category__item--img {
+  display: block;
   border-radius: 12px;
   overflow: hidden;
   height: 140px;

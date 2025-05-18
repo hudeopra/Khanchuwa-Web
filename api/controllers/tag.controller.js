@@ -9,7 +9,7 @@ export const getTagsByType = async (req, res, next) => {
 
 
     const tags = await RecipeTag.find(filter);
-    console.log(`Fetched tags of type ${type}:`, tags);
+    // console.log(`Fetched tags of type ${type}:`, tags);
     res.status(200).json(tags);
   } catch (error) {
     next(error);

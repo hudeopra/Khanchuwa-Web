@@ -63,7 +63,7 @@ export const AlertProvider = ({ children }) => {
     <AlertContext.Provider value={{ showAlert, dismissAlert }}>
       {children}
       <div
-        style={{ position: "fixed", top: "100px", right: "30px", zIndex: 1050 }}
+        style={{ position: "fixed", top: "25px", right: "150px", zIndex: 1050 }}
       >
         {alerts.map((alert) => (
           <div

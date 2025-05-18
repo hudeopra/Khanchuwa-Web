@@ -3,7 +3,7 @@ import { errorHandler } from './error.js';
 
 export const verifyToken = (req, res, next) => {
   const token = req.cookies.access_token;
-  console.log("verifyUser.js: token", token); // Debugging statement
+  // console.log("verifyUser.js: token", token); // Debugging statement
   if (!token) {
     console.log("No token provided"); // Debugging statement
     return next(errorHandler(401, 'api/verifyUser: Unauthorized'));

@@ -30,208 +30,83 @@ export default function UserRecipeFive({ recentRecipes, currentUser }) {
   };
 
   return (
-    <div className="kh-profile__items">
+    <div className="kh-profile__posts row">
+      <h3>My Recipes</h3>
       <Link to={`/user-recipe`} className="btn btn-edit">
         View All recipes
       </Link>
       {recentRecipes.length > 0 ? (
         recentRecipes.map((recipe) => (
-          <div key={recipe._id} className="kh-profile__item-wrapper">
-            <div className="kh-profile__item">
-              <div className="kh-profile__item--img">
-                <img
-                  src={
-                    Array.isArray(recipe.imageUrls) &&
-                    recipe.imageUrls.length > 0
-                      ? recipe.imageUrls[0]
-                      : ""
-                  }
-                  alt={recipe.recipeName}
-                  className="recipe-fav-image"
-                />
+          <div className="col-6">
+            <div key={recipe._id} className="kh-profile__post">
+              <Link to={`/recipes/${recipe._id}`} className="">
+                <div className="kh-profile__post-img">
+                  <img
+                    src={
+                      Array.isArray(recipe.imageUrls) &&
+                      recipe.imageUrls.length > 0
+                        ? recipe.imageUrls[0]
+                        : ""
+                    }
+                    alt={recipe.recipeName}
+                    className="recipe-fav-image"
+                  />
+                </div>
                 <div className="kh-profile__item--content">
                   <div className="kh-profile__item--details">
-                    <h3>{recipe.recipeName}</h3>
-
-                    <div className="kh-profile__item--tags">
-                      <div className="kh-profile__item--tag">
-                        <ul>
-                          {recipe.mealType.map((meal, index) => (
-                            <li
-                              className={`kh-bubble kh-bubble__mealtype ${
-                                typeof meal === "string"
-                                  ? meal.replace(/\s+/g, "-").toLowerCase()
-                                  : meal.name
-                                  ? meal.name.replace(/\s+/g, "-").toLowerCase()
-                                  : "unknown"
-                              }`}
-                              key={index}
-                            >
-                              {typeof meal === "string"
-                                ? meal
-                                : meal.name || "Unknown"}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="kh-profile__item--tag">
-                        <ul>
-                          {recipe.mealCourse.map((course, index) => (
-                            <li
-                              className={`kh-bubble kh-bubble__mealcourse ${course
-                                .replace(/\s+/g, "-")
-                                .toLowerCase()}`}
-                              key={index}
-                            >
-                              {course}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="kh-profile__item--tag">
-                        <ul>
-                          {recipe.cuisineTag.map((cuisine, index) => (
-                            <li
-                              className={`kh-bubble kh-bubble__cuisine ${cuisine.tagName
-                                .replace(/\s+/g, "-")
-                                .toLowerCase()}`}
-                              key={index}
-                            >
-                              {cuisine.tagName}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="kh-profile__item--tag">
-                        <ul>
-                          {recipe.flavourTag.map((flavour, index) => (
-                            <li
-                              className={`kh-bubble kh-bubble__flavour ${flavour.tagName
-                                .replace(/\s+/g, "-")
-                                .toLowerCase()}`}
-                              key={index}
-                            >
-                              {flavour.tagName}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="kh-profile__item--tag">
-                        <ul>
-                          {recipe.ingredients.map((ingredient) => (
-                            <li
-                              className={`kh-bubble kh-bubble__mealtype ${
-                                ingredient.name
-                                  ? ingredient.name
-                                      .replace(/\s+/g, "-")
-                                      .toLowerCase()
-                                  : "unknown"
-                              }`}
-                              key={ingredient._id}
-                            >
-                              {ingredient.name || "Unknown"}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="kh-profile__item--btns">
-                    <Link
-                      to={`/recipe/edit/${recipe._id}`}
-                      className="kh-btn kh-btn__x"
-                    >
-                      e
-                    </Link>
-                    <button
-                      onClick={() => {
-                        setShowDeleteConfirmation(true);
-                        setRecipeToDelete(recipe._id);
-                      }}
-                      className="kh-btn kh-btn__x"
-                    >
-                      x
-                    </button>
+                    <h4>
+                      {recipe.recipeName} <span>({recipe.recipeFav})</span>
+                    </h4>
                   </div>
                 </div>
-              </div>
-              {/* Delete confirmation modal */}
-              {showDeleteConfirmation && recipeToDelete === recipe._id && (
-                <div className="delete-confirmation-modal">
-                  <h3>Confirm Deletion</h3>
-                  <p>Type "DELETE" to permanently remove this recipe.</p>
-                  <input
-                    type="text"
-                    value={deleteConfirmInput}
-                    onChange={(e) => setDeleteConfirmInput(e.target.value)}
-                    className="delete-confirmation-input"
-                  />
-                  {deleteError && (
-                    <p className="delete-error-message">{deleteError}</p>
-                  )}
-                  <div className="delete-confirmation-actions">
-                    <button
-                      onClick={() => handleDeleteRecipe(recipe._id)}
-                      className="btn btn-confirm"
-                    >
-                      Confirm
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowDeleteConfirmation(false);
-                        setDeleteError(null);
-                        setDeleteConfirmInput("");
-                        setRecipeToDelete(null);
-                      }}
-                      className="btn btn-cancel"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-              <span className="kh-profile__item--uptime">
-                {(() => {
-                  const updatedAt = new Date(recipe.updatedAt);
-                  const now = new Date();
-                  const diffInSeconds = Math.floor((now - updatedAt) / 1000);
+                <span className="kh-profile__post--uptime">
+                  {(() => {
+                    const updatedAt = new Date(recipe.updatedAt);
+                    const now = new Date();
+                    const diffInSeconds = Math.floor((now - updatedAt) / 1000);
 
-                  if (diffInSeconds < 60)
-                    return `${diffInSeconds} second${
-                      diffInSeconds !== 1 ? "s" : ""
+                    if (diffInSeconds < 60)
+                      return `${diffInSeconds} second${
+                        diffInSeconds !== 1 ? "s" : ""
+                      } ago`;
+                    const diffInMinutes = Math.floor(diffInSeconds / 60);
+                    if (diffInMinutes < 60)
+                      return `${diffInMinutes} minute${
+                        diffInMinutes !== 1 ? "s" : ""
+                      } ago`;
+                    const diffInHours = Math.floor(diffInMinutes / 60);
+                    if (diffInHours < 24)
+                      return `${diffInHours} hour${
+                        diffInHours !== 1 ? "s" : ""
+                      } ago`;
+                    const diffInDays = Math.floor(diffInHours / 24);
+                    if (diffInDays < 7)
+                      return `${diffInDays} day${
+                        diffInDays !== 1 ? "s" : ""
+                      } ago`;
+                    const diffInWeeks = Math.floor(diffInDays / 7);
+                    if (diffInWeeks < 4)
+                      return `${diffInWeeks} week${
+                        diffInWeeks !== 1 ? "s" : ""
+                      } ago`;
+                    const diffInMonths = Math.floor(diffInDays / 30);
+                    if (diffInMonths < 12)
+                      return `${diffInMonths} month${
+                        diffInMonths !== 1 ? "s" : ""
+                      } ago`;
+                    const diffInYears = Math.floor(diffInMonths / 12);
+                    return `${diffInYears} year${
+                      diffInYears !== 1 ? "s" : ""
                     } ago`;
-                  const diffInMinutes = Math.floor(diffInSeconds / 60);
-                  if (diffInMinutes < 60)
-                    return `${diffInMinutes} minute${
-                      diffInMinutes !== 1 ? "s" : ""
-                    } ago`;
-                  const diffInHours = Math.floor(diffInMinutes / 60);
-                  if (diffInHours < 24)
-                    return `${diffInHours} hour${
-                      diffInHours !== 1 ? "s" : ""
-                    } ago`;
-                  const diffInDays = Math.floor(diffInHours / 24);
-                  if (diffInDays < 7)
-                    return `${diffInDays} day${
-                      diffInDays !== 1 ? "s" : ""
-                    } ago`;
-                  const diffInWeeks = Math.floor(diffInDays / 7);
-                  if (diffInWeeks < 4)
-                    return `${diffInWeeks} week${
-                      diffInWeeks !== 1 ? "s" : ""
-                    } ago`;
-                  const diffInMonths = Math.floor(diffInDays / 30);
-                  if (diffInMonths < 12)
-                    return `${diffInMonths} month${
-                      diffInMonths !== 1 ? "s" : ""
-                    } ago`;
-                  const diffInYears = Math.floor(diffInMonths / 12);
-                  return `${diffInYears} year${
-                    diffInYears !== 1 ? "s" : ""
-                  } ago`;
-                })()}
-              </span>
+                  })()}
+                </span>
+              </Link>
+              <Link
+                to={`/recipes/edit/${recipe._id}`}
+                className="kh-btn kh-btn--edit"
+              >
+                Edit
+              </Link>
             </div>
           </div>
         ))

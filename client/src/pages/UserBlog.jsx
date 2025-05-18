@@ -39,7 +39,7 @@ export default function UserBlog() {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <main className="">
+    <main className="kh-profile">
       <div className="container">
         <div className="row">
           <div className="col-3">
@@ -52,16 +52,13 @@ export default function UserBlog() {
             {blogs.length === 0 ? (
               <p>No blogs found.</p>
             ) : (
-              <div className="kh-blog-post">
+              <div className="row">
                 {blogs.map((blog) => (
-                  <div
-                    key={blog._id}
-                    className="blog-block border p-4 rounded-lg"
-                  >
+                  <div key={blog._id} className="col-6 col-mg-3 col-lg-4">
                     <div className="blog-block-wrapper">
-                      <h3 className="font-semibold text-lg">
+                      <h4 className="font-semibold text-lg">
                         {blog.blogtitle}
-                      </h3>
+                      </h4>
                       <p className="text-sm text-gray-600">
                         <strong>Author:</strong> {blog.author}
                       </p>

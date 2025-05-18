@@ -253,7 +253,6 @@ export default function ProfileEdit() {
     try {
       dispatch(updateUserStart());
       const userId = currentUser.user ? currentUser.user._id : currentUser._id;
-
       const socialMediaArray = Object.entries(userData.socialMedia).map(
         ([platform, url]) => ({ platform, url })
       ); // Convert socialMedia object back to an array
@@ -796,7 +795,7 @@ export default function ProfileEdit() {
                           className="border p-3 rounded-lg"
                           onChange={handelChange}
                         />
-                        <button
+                        {/* <button
                           type="button"
                           onClick={() =>
                             togglePasswordVisibility("currentPassword")
@@ -808,7 +807,7 @@ export default function ProfileEdit() {
                           ) : (
                             <FaRegEye className="w-6 h-6" />
                           )}
-                        </button>
+                        </button> */}
                       </div>
                       <div className="kh-input-item">
                         <input

@@ -27,114 +27,170 @@ export default function ProfileCard() {
 
   if (!user) return <p>Loading...</p>;
 
-  return (
-    <div className="kh-profile__tab--card-wrapper">
-      {/* <div className="kh-profile__tab--setting">
-        <Link to={"/profile-edit"}>
-          <span>
-            <img
-              src="../src/assets/img/search/signout.png"
-              alt="Khanchuwa Logo"
-            />
-          </span>
-        </Link>
-      </div> */}
-      <div className="kh-profile__tab--wrapper kh-profile__tab--id-card">
-        <div className="kh-profile__tab--item">
-          <img src={user.avatar} alt="Avatar" className="profile-avatar" />
-        </div>
-        <div className="kh-profile__tab--user-info">
-          {user.fullname && <h2>{user.fullname}</h2>}
-          <span>@{user.username}</span>
+  // Helper function to check if array is empty or undefined
+  const isEmpty = (array) => {
+    return !array || array.length === 0;
+  };
 
-          {user.bio && (
-            <div className="kh-profile__tab--item">
-              <p> {user.bio}</p>
-            </div>
-          )}
-          <div className="kh-profile__tab--wrapper kh-profile__tab--user-details">
-            {/*{user.email && (
+  // Helper function to format array data for display
+  const formatArrayData = (array) => {
+    if (isEmpty(array)) return "None";
+    return array.join(", ");
+  };
+
+  // Get role background color based on user role
+  const getRoleBackgroundColor = (role) => {
+    switch (role) {
+      case "admin":
+        return "#999";
+      case "creator":
+        return "#666";
+      case "user":
+      default:
+        return "#333";
+    }
+  };
+
+  // Check if the preferences section should be displayed
+  const hasPreferences =
+    user.preferences &&
+    (!isEmpty(user.preferences.dietaryRestrictions) ||
+      !isEmpty(user.preferences.allergies) ||
+      !isEmpty(user.preferences.cuisineTags) ||
+      !isEmpty(user.preferences.flavourTag));
+
+  return (
+    <div className="kh-profile-card ">
+      <div className="kh-profile-card__head">
+        <div className="kh-profile-card__head--content">
+          <div className="kh-profile-card__head--content--item">
+            {user.email && <p>{user.email}</p>}
+          </div>
+          <div className="kh-profile-card__head--content--item">
+            {user.address && <p>{user.address}</p>}
+          </div>
+
+          <div className="kh-profile-card__head--content--item">
+            {user.phoneNumber && (
               <div className="kh-profile__tab--item">
+                <p>{user.phoneNumber}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="kh-profile-card__user">
+        <div className="kh-profile-card__user--img">
+          {user.avatar && (
+            <img src={user.avatar} alt="Avatar" className="profile-avatar" />
+          )}
+        </div>
+        <div className="kh-profile-card__user--info">
+          <div className="kh-profile-card__user--data">
+            {user.role && (
+              <div className="kh-profile-card__tab--item">
                 <p>
-                  <strong>Email:</strong> {user.email}
+                  <strong></strong>
+                  <span
+                    className="user-role-badge"
+                    style={{
+                      backgroundColor: getRoleBackgroundColor(user.role),
+                      padding: "3px 10px",
+                      borderRadius: "4px",
+                      color: "#fff",
+                      display: "inline-block",
+                      marginLeft: "5px",
+                    }}
+                  >
+                    {user.role}
+                  </span>
                 </p>
               </div>
             )}
-             {user.dateOfBirth && (
-              <div className="kh-profile__tab--item">
-                <p>
-                  <strong>Date Of Birth:</strong>{" "}
-                  {new Date(user.dateOfBirth).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "2-digit",
-                  })}
-                </p>
+          </div>
+          {user.fullname && <h2>{user.fullname}</h2>}
+          <span>@{user.username}</span>
+          <div className="kh-profile-card__user--bio">
+            {user.bio && (
+              <div className="kh-profile-card__tab--item">
+                <p>{user.bio}</p>
               </div>
-            )} */}
-            <div className="kh-profile__tab--item">
-              {user.gender && (
-                <p>
-                  <strong>Gender:</strong> {user.gender}
-                </p>
-              )}
-            </div>
-            {/* <div className="kh-profile__tab--item">
-              {user.updatedAt && (
-                <p>
-                  <strong>Last Updated:</strong>{" "}
-                  <span className="">
-                    {(() => {
-                      const updatedAt = new Date(user.updatedAt);
-                      const now = new Date();
-                      const diffInSeconds = Math.floor(
-                        (now - updatedAt) / 1000
-                      );
-
-                      if (diffInSeconds < 60)
-                        return `${diffInSeconds} second${
-                          diffInSeconds !== 1 ? "s" : ""
-                        } ago`;
-                      const diffInMinutes = Math.floor(diffInSeconds / 60);
-                      if (diffInMinutes < 60)
-                        return `${diffInMinutes} minute${
-                          diffInMinutes !== 1 ? "s" : ""
-                        } ago`;
-                      const diffInHours = Math.floor(diffInMinutes / 60);
-                      if (diffInHours < 24)
-                        return `${diffInHours} hour${
-                          diffInHours !== 1 ? "s" : ""
-                        } ago`;
-                      const diffInDays = Math.floor(diffInHours / 24);
-                      if (diffInDays < 7)
-                        return `${diffInDays} day${
-                          diffInDays !== 1 ? "s" : ""
-                        } ago`;
-                      const diffInWeeks = Math.floor(diffInDays / 7);
-                      if (diffInWeeks < 4)
-                        return `${diffInWeeks} week${
-                          diffInWeeks !== 1 ? "s" : ""
-                        } ago`;
-                      const diffInMonths = Math.floor(diffInDays / 30);
-                      if (diffInMonths < 12)
-                        return `${diffInMonths} month${
-                          diffInMonths !== 1 ? "s" : ""
-                        } ago`;
-                      const diffInYears = Math.floor(diffInMonths / 12);
-                      return `${diffInYears} year${
-                        diffInYears !== 1 ? "s" : ""
-                      } ago`;
-                    })()}
-                  </span>
-                </p>
-              )}
-            </div> */}
+            )}
           </div>
         </div>
-        <div className="kh-profile__tab--item">
-          {user.role && (
-            <p>
-              <strong>Role:</strong> {user.role}
-            </p>
+      </div>
+      <div className="kh-profile-card__content">
+        <div className="kh-profile-card__content--item kh-profile-card__content--preferences ">
+          {hasPreferences && (
+            <div className="kh-profile-card__tab--item ">
+              <h4>
+                <strong>User Preferences:</strong>
+              </h4>
+              <div className="kh-profile-card__content--preferences-item">
+                {!isEmpty(user.preferences.dietaryRestrictions) && (
+                  <div>
+                    <strong>Dietary Restrictions:</strong>
+                    <ul>
+                      {user.preferences.dietaryRestrictions.map(
+                        (restriction, index) => (
+                          <li key={`restriction-${index}`}>{restriction}</li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                )}
+                {!isEmpty(user.preferences.allergies) && (
+                  <div>
+                    <strong>Allergies:</strong>
+                    <ul>
+                      {user.preferences.allergies.map((allergy, index) => (
+                        <li key={`allergy-${index}`}>{allergy}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {!isEmpty(user.preferences.cuisineTags) && (
+                  <div>
+                    <strong>Cuisines:</strong>
+                    <ul>
+                      {user.preferences.cuisineTags.map((cuisine, index) => (
+                        <li key={`cuisine-${index}`}>{cuisine}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {!isEmpty(user.preferences.flavourTag) && (
+                  <div>
+                    <strong>Flavors:</strong>
+                    <ul>
+                      {user.preferences.flavourTag.map((flavor, index) => (
+                        <li key={`flavor-${index}`}>{flavor}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="kh-profile-card__content--item  kh-profile-card__content--details">
+          <h4>asd</h4>
+          {user.recipelimit !== undefined && user.role !== "user" && (
+            <div className="kh-profile-card__tab--item">
+              <p>
+                <strong>Recipe Limit:</strong> {user.recipelimit}
+              </p>
+            </div>
+          )}
+          {user.userFavRecipe && user.userFavRecipe.length > 0 && (
+            <div className="kh-profile-card__tab--item">
+              <p>
+                <strong>Favorite Recipes:</strong>{" "}
+                <Link to="/user-favourites">
+                  {user.userFavRecipe.length} saved
+                </Link>
+              </p>
+            </div>
           )}
         </div>
       </div>

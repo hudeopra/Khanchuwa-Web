@@ -52,41 +52,43 @@ const UserFavouritesComponent = () => {
   return (
     <main className="container py-5">
       <h1>My Favorite Recipes</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="row">
         {favRecipes.map((item, index) => (
-          <div key={item._id || index} className="kh-recipe-block__item">
-            <ToggleFavorite recipeId={item._id} />
-            <Link
-              to={`/recipes/${item._id}`}
-              className=" kh-recipe__item--horizontal"
-            >
-              <div className="kh-recipe-block__item--img">
-                <img
-                  src={
-                    item.favImgUrl
-                      ? item.favImgUrl
-                      : images[
-                          `recipe${item.recipeName.replace(/ /g, "")}Thumb`
-                        ]
-                  }
-                  alt={item.recipeName}
-                />
-              </div>
-              <div className="kh-recipe-block__content">
-                <h3>{item.recipeName}</h3>
-                <p>
-                  {item.description.length > 150
-                    ? `${item.description.slice(0, 60)}...`
-                    : item.description}
-                </p>
-              </div>
-              <div className="kh-recipe-block__info">
-                <span>{item.cookTime} </span>
-                <span>{item.servings} </span>
-                <span>{item.difficulty} </span>
-                <span>{item.recipeFav} </span>
-              </div>
-            </Link>
+          <div key={item._id || index} className="kcol-6 col-mg-3 col-lg-4">
+            <div className="kh-recipe-block__item ">
+              <ToggleFavorite recipeId={item._id} />
+              <Link
+                to={`/recipes/${item._id}`}
+                className=" kh-recipe__item--horizontal"
+              >
+                <div className="kh-recipe-block__item--img">
+                  <img
+                    src={
+                      item.favImgUrl
+                        ? item.favImgUrl
+                        : images[
+                            `recipe${item.recipeName.replace(/ /g, "")}Thumb`
+                          ]
+                    }
+                    alt={item.recipeName}
+                  />
+                </div>
+                <div className="kh-recipe-block__content">
+                  <h3>{item.recipeName}</h3>
+                  <p>
+                    {item.description.length > 150
+                      ? `${item.description.slice(0, 60)}...`
+                      : item.description}
+                  </p>
+                </div>
+                <div className="kh-recipe-block__info">
+                  <span>{item.cookTime} </span>
+                  <span>{item.servings} </span>
+                  <span>{item.difficulty} </span>
+                  <span>{item.recipeFav} </span>
+                </div>
+              </Link>
+            </div>
           </div>
         ))}
       </div>
