@@ -1,5 +1,5 @@
 import express from 'express'; //MUST USE 
-import { deleteUser, testing, updateUserInfo, toggleFavoriteRecipe, getUserRecipes, getCurrentUser, validatePassword } from '../controllers/user.controller.js';
+import { deleteUser, testing, updateUserInfo, toggleFavoriteRecipe, getUserRecipes, getCurrentUser, validatePassword, decrementRecipeLimit } from '../controllers/user.controller.js';
 import { verifyToken } from '../utils/verifyUser.js';
 
 const router = express.Router(); // CREATING ROUTER USING EXPRESS
@@ -10,7 +10,7 @@ router.delete('/delete/:id', verifyToken, deleteUser);
 router.post('/favorite/:recipeId', verifyToken, toggleFavoriteRecipe);
 router.get('/recipes', verifyToken, getUserRecipes);
 router.get('/current', verifyToken, getCurrentUser);
-router.post("/validate-password", validatePassword);
-
+router.post("/validate-password", verifyToken, validatePassword);
+router.post("/decrement-recipe-limit", verifyToken, decrementRecipeLimit);
 
 export default router;

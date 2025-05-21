@@ -11,14 +11,58 @@ const CategoryList = ({ taglink }) => {
   const [containerWidth, setContainerWidth] = useState(0);
   const [canSlideNext, setCanSlideNext] = useState(true);
   const [canSlidePrev, setCanSlidePrev] = useState(false);
+  const [publishedCounts, setPublishedCounts] = useState({});
 
   // Fetch categories from the API
   useEffect(() => {
     fetch(`http://localhost:3000/api/tag/${taglink}`)
       .then((response) => response.json())
-      .then((data) => {
+      .then(async (data) => {
+        console.log(`Fetched ${taglink} categories:`, data);
         setCategories(data);
-        setSortedCategories(sortByPropertyDesc(data, "recipeRefs.length"));
+
+        // Calculate published recipe counts
+        const counts = {};
+
+        // Process each category
+        for (const category of data) {
+          let publishedCount = 0;
+
+          // Check each recipe reference for published status
+          if (category.recipeRefs && category.recipeRefs.length > 0) {
+            for (const recipeId of category.recipeRefs) {
+              try {
+                const recipeResponse = await fetch(
+                  `http://localhost:3000/api/recipe/published/${recipeId}`
+                );
+
+                // If successful (status 200), it's a published recipe
+                if (recipeResponse.ok) {
+                  publishedCount++;
+                }
+              } catch (error) {
+                console.error(
+                  `Error checking recipe status for ${recipeId}:`,
+                  error
+                );
+              }
+            }
+          }
+
+          // Store the count for this category
+          counts[category._id] = publishedCount;
+        }
+
+        setPublishedCounts(counts);
+
+        // Sort categories by published recipe count instead of total recipe count
+        const sortedByPublished = [...data].sort((a, b) => {
+          const countA = counts[a._id] || 0;
+          const countB = counts[b._id] || 0;
+          return countB - countA;
+        });
+
+        setSortedCategories(sortedByPublished);
       })
       .catch((error) => console.error("Error fetching categories:", error));
   }, [taglink]);
@@ -92,7 +136,11 @@ const CategoryList = ({ taglink }) => {
             <div key={index} className="kh-category__item">
               <div className="kh-category__item--img">
                 <Link to={`/cookshop/${taglink}/${item._id}`}>
-                  <p>{item.recipeRefs.length} Recipes</p>
+                  {publishedCounts[item._id] > 0 ? (
+                    <p>{publishedCounts[item._id]} Recipes</p>
+                  ) : (
+                    <p>Coming Soon</p>
+                  )}
                   <img src={item.favImg} alt={item.name} />
                 </Link>
               </div>

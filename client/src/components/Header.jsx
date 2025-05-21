@@ -14,15 +14,15 @@ import { FaCog, FaHeart } from "react-icons/fa"; // Import FontAwesome icons for
 
 export const fetchRandomRecipeId = async () => {
   try {
-    const response = await fetch("/api/recipe/all");
+    const response = await fetch("/api/recipe/published");
     const text = await response.text(); // get raw text
     if (!text) {
-      console.error("No data received from /api/recipe/all");
+      console.error("No data received from /api/recipe/published");
       return null;
     }
     const data = JSON.parse(text); // parse only if text exists
     if (data.length === 0) {
-      console.error("No recipes available in the data");
+      console.error("No published recipes available in the data");
       return null;
     }
     const randomIndex = Math.floor(Math.random() * data.length);

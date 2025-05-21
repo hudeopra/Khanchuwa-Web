@@ -10,11 +10,11 @@ const RecipeCardBig = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch recipes from DB
+  // Fetch recipes from DB - now using published endpoint
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const res = await fetch("/api/recipe/all");
+        const res = await fetch("/api/recipe/published");
         const data = await res.json();
         const dataArr = Array.isArray(data) ? data : [];
         setRecipes(dataArr);
@@ -43,8 +43,6 @@ const RecipeCardBig = () => {
       {/* Render horizontal cards */}
       {horizontalCards.map((item, index) => (
         <div key={item._id || index} className="kh-recipe-block__item">
-          {" "}
-          {/* Ensure unique key */}
           <ToggleFavorite recipeId={item._id} />
           <Link
             to={`/recipes/${item._id}`}
@@ -83,8 +81,6 @@ const RecipeCardBig = () => {
 
       {verticalCards.map((item, index) => (
         <div key={item._id || index} className="kh-recipe-block__item">
-          {" "}
-          {/* Ensure unique key */}
           <ToggleFavorite recipeId={item._id} />
           <Link to={`/recipes/${item._id}`} className="">
             <div className="kh-recipe-block__item--img">
@@ -102,8 +98,7 @@ const RecipeCardBig = () => {
               <p>
                 {item.description.length > 200
                   ? `${item.description.slice(0, 120)}...`
-                  : item.description}{" "}
-                Recipes
+                  : item.description}
               </p>
             </div>
             <div className="kh-recipe-block__info">

@@ -149,6 +149,56 @@ export const createUser = async (req, res, next) => {
   }
 };
 
+// NEW: Decrement user's recipe limit
+export const decrementRecipeLimit = async (req, res, next) => {
+  try {
+    const { userId } = req.body;
+
+    // Verify that the user making the request is the same as the userId or is an admin
+    if (req.user.role !== 'admin' && req.user.id !== userId) {
+      return next(errorHandler(401, 'You can only update your own recipe limit'));
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Check if user is admin (admins have unlimited recipes)
+    if (user.role === 'admin') {
+      return res.status(200).json({
+        success: true,
+        message: "Admin users have unlimited recipe creation",
+        newLimit: "Unlimited"
+      });
+    }
+
+    // Check if user has any recipes left
+    if (user.recipelimit <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "User has reached recipe creation limit",
+        newLimit: 0
+      });
+    }
+
+    // Decrement recipe limit
+    user.recipelimit = Math.max(0, user.recipelimit - 1);
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Recipe limit updated successfully",
+      newLimit: user.recipelimit
+    });
+  } catch (error) {
+    next(errorHandler(500, 'Error updating recipe limit'));
+  }
+};
+
 // NEW: Validate current password
 export const validatePassword = async (req, res, next) => {
   try {

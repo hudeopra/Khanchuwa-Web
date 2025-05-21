@@ -29,6 +29,12 @@
  */
 
 /**
+ * @route GET /published
+ * @description Retrieve all published recipes. Publicly accessible.
+ * @access Public
+ */
+
+/**
  * @route GET /filter
  * @description Retrieve recipes based on specific filter criteria. Publicly accessible.
  *              This endpoint allows users to filter recipes by various parameters such as:
@@ -60,13 +66,14 @@
  * POST   /comment/:id     - http://localhost:5000/api/recipes/comment/:id
  * DELETE /delete/:id      - http://localhost:5000/api/recipes/delete/:id
  * GET    /all             - http://localhost:5000/api/recipes/all
+ * GET    /published       - http://localhost:5000/api/recipes/published
  * GET    /filter          - http://localhost:5000/api/recipes/filter
  * GET    /user/:userId    - http://localhost:5000/api/recipes/user/:userId
  * GET    /:id             - http://localhost:5000/api/recipes/:id
  */
 
 import express from 'express';
-import { createRecipe, getAllRecipes, getRecipeById, updateRecipe, addComment, deleteRecipe, filterRecipes, getRecipesByUser, filterRecipesByAttributes } from '../controllers/recipe.controller.js';
+import { createRecipe, getAllRecipes, getPublishedRecipes, getRecipeById, getPublishedRecipeById, updateRecipe, addComment, deleteRecipe, filterRecipes, getRecipesByUser, filterRecipesByAttributes } from '../controllers/recipe.controller.js';
 import { verifyToken } from '../utils/verifyUser.js';
 
 const router = express.Router();
@@ -77,6 +84,8 @@ router.post('/comment/:id', verifyToken, addComment); // new route for adding co
 router.delete('/delete/:id', verifyToken, deleteRecipe); // new route for deleting recipe
 router.get('/user/:userId', getRecipesByUser); // updated route for getting recipes by user
 router.get('/all', getAllRecipes);
+router.get('/published', getPublishedRecipes); // new route for getting published recipes
+router.get('/published/:id', getPublishedRecipeById); // new route for getting a published recipe by ID
 router.get('/filter', filterRecipes); // new filtering endpoint
 router.get('/filter-by-attributes', filterRecipesByAttributes); // moved above to avoid conflict
 router.get('/:id', getRecipeById); // moved this route below to avoid conflict

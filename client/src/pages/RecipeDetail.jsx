@@ -88,40 +88,30 @@ export default function RecipeDetail() {
     fetchCurrentUser(); // Fetch current user on reload
   }, [dispatch]);
 
+  // Fetch recipe data when component mounts or ID changes
   useEffect(() => {
-    console.log("Fetching recipe with ID:", id);
-    const fetchRecipe = async () => {
+    const fetchRecipeData = async () => {
       try {
-        const res = await fetch(`/api/recipe/${id}`);
-        const contentType = res.headers.get("content-type");
-        let data;
-        if (contentType && contentType.includes("application/json")) {
-          data = await res.json();
-        } else {
-          const text = await res.text();
-          throw new Error(text);
+        setLoading(true);
+        // Update to use the published recipe endpoint
+        const res = await fetch(`/api/recipe/published/${id}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to fetch recipe");
         }
-        console.log("API response:", data); // Debugging log
-        if (res.ok) {
-          setRecipe(data);
-        } else if (res.status === 404) {
-          navigate("/recipes"); // Redirect to /recipes if not found
-        } else {
-          setError(data.message || "Unexpected error");
-        }
-      } catch (err) {
-        console.error("Error fetching recipe:", err); // Debugging log
-        if (err.message.includes("404")) {
-          navigate("/recipes"); // Redirect to /recipes if not found
-        } else {
-          setError(err.message);
-        }
-      } finally {
+
+        setRecipe(data);
         setLoading(false);
+      } catch (error) {
+        setError(error.message || "Error fetching recipe");
+        setLoading(false);
+        console.error("Error fetching recipe:", error);
       }
     };
-    fetchRecipe();
-  }, [id, userData]);
+
+    fetchRecipeData();
+  }, [id]);
 
   useEffect(() => {
     // Check if the current recipe is in the user's favorite list

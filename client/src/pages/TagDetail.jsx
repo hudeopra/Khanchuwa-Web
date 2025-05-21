@@ -46,8 +46,9 @@ const TagDetail = () => {
 
         // Fetch recipes and blogs based on references
         const recipeFetches = data.recipeRefs.map((refId) => {
-          console.log("Fetching recipe with ID:", refId); // Debugging log
-          return fetch(`http://localhost:3000/api/recipe/${refId}`, {
+          console.log("Fetching published recipe with ID:", refId); // Updated debugging log
+          return fetch(`http://localhost:3000/api/recipe/published/${refId}`, {
+            // Use the new published endpoint
             headers: { "Content-Type": "application/json" },
           })
             .then(async (res) => {
@@ -61,7 +62,7 @@ const TagDetail = () => {
               }
               if (!res.ok) {
                 console.error(
-                  `Error fetching recipe ${refId}:`,
+                  `Error fetching published recipe ${refId}:`,
                   res.status,
                   res.statusText
                 );
@@ -70,7 +71,10 @@ const TagDetail = () => {
               return recipeData;
             })
             .catch((err) => {
-              console.error(`Fetch error for recipe ${refId}:`, err.message); // Improved error message
+              console.error(
+                `Fetch error for published recipe ${refId}:`,
+                err.message
+              ); // Updated error message
               return null;
             });
         });
@@ -190,19 +194,22 @@ const TagDetail = () => {
                     width="400"
                   />
                 )}
-                {currentUser?.role === "admin" &&
-                  ["ingredientTag", "cuisineTag", "flavourTag"].includes(
-                    tag.tagType
-                  ) && ( // Show only for admin and specific tag types
-                    <div className="kh-tag-detail__admin-actions">
-                      <a
-                        href={`/product/edit/${tag._id}`}
-                        className="mt-2 ml-4 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
-                      >
-                        ta
-                      </a>
-                    </div>
-                  )}
+                {currentUser?.role === "admin" && (
+                  <div className="kh-tag-detail__admin-actions">
+                    <a
+                      href={`/product/edit/${tag._id}`}
+                      className="mt-2 ml-4 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90 me-2"
+                    >
+                      Edit Tag
+                    </a>
+                    <a
+                      href={`/admin/tag/${tagType}/${tag._id}`}
+                      className="mt-2 ml-4 p-3 bg-purple-600 text-white rounded-lg hover:opacity-90"
+                    >
+                      Admin View
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
             {/* {tag.favImg && (

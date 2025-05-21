@@ -22,6 +22,8 @@ import RecipeList from "./pages/RecipeList.jsx"; // Import RecipeList component
 import RecipeDetail from "./pages/RecipeDetail.jsx"; // Import RecipeDetail component
 import UserRecipie from "./pages/UserRecipie.jsx"; // Import UserRecipie component
 import EditRecipe from "./pages/EditRecipe.jsx"; // Updated import name
+import AdminAllRecipe from "./pages/AdminAllRecipe.jsx"; // Import AdminAllRecipe component
+import AdminTagDetail from "./pages/AdminTagDetail.jsx"; // Import AdminTagDetail component
 
 // Blogs
 import CreateBlog from "./pages/CreateBlog.jsx";
@@ -412,6 +414,24 @@ export default function App() {
                 <>
                   <Header pagename="Admin All Users" />
                   <AllUsers />
+                </>
+              }
+            />
+            <Route
+              path="/admin/recipes"
+              element={
+                <>
+                  <Header pagename="Admin All Recipes" />
+                  <AdminAllRecipe />
+                </>
+              }
+            />
+            <Route
+              path="/admin/tag/:tagType/:id"
+              element={
+                <>
+                  <Header pagename="Admin Tag Details" />
+                  <AdminTagDetail />
                 </>
               }
             />

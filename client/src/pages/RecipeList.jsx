@@ -136,7 +136,10 @@ export default function RecipeList() {
     const fetchRecipes = async () => {
       try {
         const query = searchParams.toString();
-        const url = query ? `/api/recipe/filter?${query}` : `/api/recipe/all`; // Fetch all recipes if no query
+        // Update this to use published endpoint by default
+        const url = query
+          ? `/api/recipe/filter?${query}`
+          : `/api/recipe/published`;
         const res = await fetch(url);
         const data = await res.json();
         console.log("Fetched recipes:", data);
@@ -150,8 +153,8 @@ export default function RecipeList() {
     };
 
     if (!searchParams.toString() && !Object.keys(searchParams).length) {
-      console.log("No filters applied. Fetching all recipes.");
-      fetchRecipes(); // Fetch all recipes directly
+      console.log("No filters applied. Fetching published recipes.");
+      fetchRecipes(); // Fetch published recipes directly
     } else {
       console.log("Filter logic applied with:", {
         searchTerm,

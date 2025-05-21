@@ -157,6 +157,16 @@ export const getAllRecipes = async (req, res, next) => {
   }
 };
 
+// New function: Get all published recipes
+export const getPublishedRecipes = async (req, res, next) => {
+  try {
+    const recipes = await Recipe.find({ status: 'PUBLISHED' });
+    return res.status(200).json(recipes);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getRecipeById = async (req, res, next) => {
   try {
     const recipe = await Recipe.findById(req.params.id)
@@ -165,6 +175,27 @@ export const getRecipeById = async (req, res, next) => {
       .populate("ingredientTag");
     if (!recipe) {
       return res.status(404).json({ message: 'Recipe not found' });
+    }
+
+    return res.status(200).json(recipe);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// New function: Get a published recipe by ID
+export const getPublishedRecipeById = async (req, res, next) => {
+  try {
+    const recipe = await Recipe.findOne({
+      _id: req.params.id,
+      status: 'PUBLISHED'
+    })
+      .populate("cuisineTag")
+      .populate("flavourTag")
+      .populate("ingredientTag");
+
+    if (!recipe) {
+      return res.status(404).json({ message: 'Published recipe not found' });
     }
 
     return res.status(200).json(recipe);
@@ -222,6 +253,7 @@ export const filterRecipes = async (req, res, next) => {
       allergies,
       dietaryRestrictions,
       searchTerm,
+      status,
     } = req.query;
 
     let filter = {};
@@ -255,6 +287,13 @@ export const filterRecipes = async (req, res, next) => {
     }
     if (diet) {
       filter.diet = diet;
+    }
+    // Add status filter
+    if (status) {
+      filter.status = status;
+    } else {
+      // Default to PUBLISHED if status not specified
+      filter.status = 'PUBLISHED';
     }
 
     // Combine searchTerm with other filters

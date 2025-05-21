@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useAlert } from "../components/AlertContext";
 import TagSelector from "../components/TagSelector.jsx";
 import AccordionItem from "../components/AccordionItem.jsx";
-import TextEditor from "../components/TextEditor.jsx"; // NEW IMPORT
+import TextEditor from "../components/TextEditor.jsx";
 import {
   uploadImageToFirebase,
   deleteImageFromFirebase,
@@ -23,7 +23,8 @@ export default function CreateRecipe() {
   const dispatch = useDispatch();
   const { showAlert } = useAlert();
   const [redirected, setRedirected] = useState(false);
-  const [localCurrentUser, setLocalCurrentUser] = useState(null); // Added local state for current user
+  const [localCurrentUser, setLocalCurrentUser] = useState(null);
+  const [recipeLimit, setRecipeLimit] = useState(0); // State to track recipe limit
   const [formData, setFormData] = useState({
     imageUrls: [],
     recipeName: "",
@@ -237,9 +238,10 @@ export default function CreateRecipe() {
       const data = await res.json();
       console.log("Response data:", data);
 
-      setLoading(false);
       if (data.success === false) {
+        setLoading(false);
         setError(data.message);
+        return;
       } else if (data._id) {
         // Update each ingredient tag used:
         await Promise.all(
@@ -247,10 +249,61 @@ export default function CreateRecipe() {
             updateIngredientTagReference(tagId, data._id)
           )
         );
+
+        // Call the endpoint to decrement the recipe limit
+        if (localCurrentUser && localCurrentUser.role !== "admin") {
+          try {
+            const decrementRes = await fetch(
+              "/api/user/decrement-recipe-limit",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem(
+                    "access_token"
+                  )}`,
+                },
+                body: JSON.stringify({ userId }),
+              }
+            );
+
+            const decrementData = await decrementRes.json();
+            if (decrementData.success) {
+              // Update local state with new recipe limit
+              setRecipeLimit(decrementData.newLimit);
+
+              // Show remaining recipes alert
+              if (decrementData.newLimit <= 3 && decrementData.newLimit > 0) {
+                showAlert(
+                  "warning",
+                  `You have ${decrementData.newLimit} recipes left to create.`
+                );
+              } else if (decrementData.newLimit === 0) {
+                showAlert(
+                  "warning",
+                  "You've reached your recipe creation limit."
+                );
+              }
+
+              // Update Redux store with new user data
+              dispatch({
+                type: "user/updateUserSuccess",
+                payload: {
+                  ...localCurrentUser,
+                  recipelimit: decrementData.newLimit,
+                },
+              });
+            }
+          } catch (error) {
+            console.error("Failed to update recipe limit:", error);
+          }
+        }
+
         navigate(`/recipes/${data._id}`);
       } else {
         setError("Recipe creation failed. Please try again.");
       }
+      setLoading(false);
     } catch (error) {
       setError(error.message);
       setLoading(false);
@@ -335,19 +388,28 @@ export default function CreateRecipe() {
         const data = await res.json();
         console.log("Current user data:", data); // Debugging log
 
-        // Check if user has creator or admin role
-        if (data.role !== "creator" && data.role !== "admin") {
-          showAlert("danger", "You must be a creator to access this page");
-          setRedirected(true); // Mark as redirected
-          navigate("/"); // Redirect to homepage
-          return; // Exit early
-        }
-
-        setLocalCurrentUser(data); // Set local current user
+        // Store user data regardless of role
+        setRecipeLimit(data.recipelimit);
+        setLocalCurrentUser(data);
         dispatch({
           type: "user/updateUserSuccess",
-          payload: data, // Update Redux with the new user data
+          payload: data,
         });
+
+        // Check if user has creator or admin role
+        if (data.role !== "creator" && data.role !== "admin") {
+          // Don't redirect, allow them to see the page with "become creator" button
+          return;
+        }
+
+        // Check recipe limit - if it's 0 and user is not an admin, show alert and redirect
+        if (data.recipelimit <= 0 && data.role !== "admin") {
+          showAlert(
+            "warning",
+            "You've reached your recipe creation limit. Please contact an administrator."
+          );
+          return;
+        }
       } catch (error) {
         console.error("Error fetching current user:", error.message);
       }
@@ -365,6 +427,32 @@ export default function CreateRecipe() {
               <h1 className="text-3xl font-semibold text-center my-7">
                 Create a Recipe
               </h1>
+
+              {/* Alert for regular users */}
+              {localCurrentUser && localCurrentUser.role === "user" && (
+                <div className="alert alert-danger">
+                  You need to be a creator to publish recipes.
+                  <button className="btn btn-primary ms-3">
+                    Become a Creator
+                  </button>
+                </div>
+              )}
+
+              {/* Alert for creators with recipe limits */}
+              {localCurrentUser && localCurrentUser.role === "creator" && (
+                <div
+                  className={`alert ${
+                    recipeLimit <= 0
+                      ? "alert-danger"
+                      : recipeLimit <= 3
+                      ? "alert-warning"
+                      : "alert-info"
+                  }`}
+                >
+                  Recipe Creation Limit: <strong>{recipeLimit}</strong> recipes
+                  remaining
+                </div>
+              )}
             </div>
             <div className="col-12 col-md-8">
               <AccordionItem title="Recipe Information">
@@ -681,16 +769,49 @@ export default function CreateRecipe() {
                 <div className="kh-recipe-form__admin--submit">
                   <input type="hidden" id="userRef" value={currentUser._id} />
 
-                  <button
-                    type="submit"
-                    disabled={loading || uploading}
-                    className=" "
-                  >
-                    {loading ? "Creating..." : "Create Recipe"}
-                  </button>
+                  {localCurrentUser && localCurrentUser.role === "user" ? (
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={() => navigate("/upgrade-account")} // Replace with your actual upgrade route
+                    >
+                      Become a Creator to Publish Recipes
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      disabled={
+                        loading ||
+                        uploading ||
+                        (localCurrentUser &&
+                          localCurrentUser.role !== "admin" &&
+                          recipeLimit <= 0)
+                      }
+                      className={`${
+                        loading
+                          ? "loading"
+                          : localCurrentUser &&
+                            localCurrentUser.role !== "admin" &&
+                            recipeLimit <= 0
+                          ? "disabled"
+                          : ""
+                      }`}
+                    >
+                      {loading ? "Creating..." : "Create Recipe"}
+                    </button>
+                  )}
+
+                  {recipeLimit <= 0 &&
+                    localCurrentUser &&
+                    localCurrentUser.role === "creator" && (
+                      <p className="text-red-700 text-sm">
+                        You've reached your recipe creation limit
+                      </p>
+                    )}
                   {error && <p className="text-red-700 text-sm">{error}</p>}
                 </div>
               </div>
+
               <AccordionItem title="Cooking and Prep ">
                 <div className="div-input-wrapper">
                   <div className="kh-recipe-form__wrapper">
