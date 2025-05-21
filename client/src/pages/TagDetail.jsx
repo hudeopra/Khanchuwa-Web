@@ -16,6 +16,35 @@ const TagDetail = () => {
   const navigate = useNavigate(); // Initialize navigate
   const { showAlert } = useAlert(); // Access the showAlert function
   const [currentUser, setCurrentUser] = useState(null); // State for current user
+  const [pendingRecipes, setPendingRecipes] = useState(0); // Track number of pending recipes
+
+  // Helper function to silently check if a recipe is published
+  const checkRecipePublished = async (recipeId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/recipe/published/${recipeId}`,
+        {
+          headers: { "Content-Type": "application/json" },
+          // Adding this option helps prevent the browser from showing failed requests in the console
+          mode: "cors",
+        }
+      );
+
+      if (!response.ok) {
+        return null; // Return null for unpublished recipes instead of throwing
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        return await response.json();
+      } else {
+        return null;
+      }
+    } catch (error) {
+      // Silent handling - don't log to console
+      return null;
+    }
+  };
 
   useEffect(() => {
     const fetchTag = async () => {
@@ -44,41 +73,31 @@ const TagDetail = () => {
         console.log("Fetched Tag Data:", data); // Debugging log
         setTag(data); // Set the tag state with the fetched data
 
-        // Fetch recipes and blogs based on references
-        const recipeFetches = data.recipeRefs.map((refId) => {
-          console.log("Fetching published recipe with ID:", refId); // Updated debugging log
-          return fetch(`http://localhost:3000/api/recipe/published/${refId}`, {
-            // Use the new published endpoint
-            headers: { "Content-Type": "application/json" },
-          })
-            .then(async (res) => {
-              const contentType = res.headers.get("content-type");
-              let recipeData;
-              if (contentType && contentType.includes("application/json")) {
-                recipeData = await res.json();
-              } else {
-                const text = await res.text();
-                throw new Error(text);
-              }
-              if (!res.ok) {
-                console.error(
-                  `Error fetching published recipe ${refId}:`,
-                  res.status,
-                  res.statusText
-                );
-                return null;
-              }
-              return recipeData;
-            })
-            .catch((err) => {
-              console.error(
-                `Fetch error for published recipe ${refId}:`,
-                err.message
-              ); // Updated error message
-              return null;
-            });
+        // Initialize missing recipes counter
+        let missingRecipesCount = 0;
+
+        // Fetch recipes based on references - using our improved silent check
+        const recipePromises = data.recipeRefs.map(checkRecipePublished);
+        const fetchedRecipes = await Promise.all(recipePromises);
+
+        // Count missing recipes and filter out nulls
+        const validRecipes = fetchedRecipes.filter((recipe) => {
+          if (!recipe) {
+            missingRecipesCount++;
+            return false;
+          }
+          return true;
         });
 
+        // Log summary of missing recipes if there are any
+        if (missingRecipesCount > 0) {
+          console.log(`${missingRecipesCount} recipes are coming soon!`);
+          setPendingRecipes(missingRecipesCount);
+        }
+
+        setRecipes(validRecipes);
+
+        // Fetch blogs based on references
         const blogFetches = data.blogRefs.map((refId) => {
           console.log("Fetching blog with ID:", refId); // Debugging log
           return fetch(`http://localhost:3000/api/blog/${refId}`, {
@@ -101,20 +120,8 @@ const TagDetail = () => {
             });
         });
 
-        const [fetchedRecipes, fetchedBlogs] = await Promise.all([
-          Promise.all(recipeFetches),
-          Promise.all(blogFetches),
-        ]);
-
-        setRecipes(fetchedRecipes.filter((recipe) => recipe)); // Filter out null values
-        if (fetchedRecipes.filter((recipe) => !recipe).length > 0) {
-          console.warn("Some recipes could not be fetched.");
-        }
-
+        const fetchedBlogs = await Promise.all(blogFetches);
         setBlogs(fetchedBlogs.filter((blog) => blog)); // Filter out null values
-        if (fetchedBlogs.filter((blog) => !blog).length > 0) {
-          console.warn("Some blogs could not be fetched.");
-        }
       } catch (err) {
         console.error("Error fetching tag details:", err.message); // Improved error message
         setError(
@@ -184,7 +191,7 @@ const TagDetail = () => {
             <div className="kh-tag-detail__wrapper">
               <div className=" d-flex justify-content-between align-items-end mb-2">
                 <h1>{tag.name}</h1>
-                <p class="kh-tag-detail__tag-name">{tag.tagType}</p>
+                <span className="kh-tag-detail__tag-name">{tag.tagType}</span>
               </div>
               <div className="kh-tag-detail__banner">
                 {tag.bannerImg && (
@@ -291,6 +298,12 @@ const TagDetail = () => {
         <div className="row">
           <div className="col-12 py-5">
             <h2>Recipes list</h2>
+            {pendingRecipes > 0 && (
+              <div className="alert alert-info">
+                {pendingRecipes} more recipe
+                {pendingRecipes > 1 ? "s" : ""} coming soon!
+              </div>
+            )}
             <div className="row">
               {recipes.length > 0 ? (
                 recipes.map((recipe) => (
@@ -305,13 +318,11 @@ const TagDetail = () => {
                         <h5 className="card-title">
                           {recipe.recipeName || "N/A"}
                         </h5>
-                        <p className="card-text mb-2">
-                          <p>
-                            {recipe.description.length > 150
-                              ? `${recipe.description.slice(0, 110)}...`
-                              : recipe.description}
-                          </p>{" "}
-                        </p>
+                        <div className="card-text mb-2">
+                          {recipe.description.length > 150
+                            ? `${recipe.description.slice(0, 110)}...`
+                            : recipe.description}
+                        </div>
                         <a
                           href={`/recipes/${recipe._id}`}
                           className="btn btn-primary"

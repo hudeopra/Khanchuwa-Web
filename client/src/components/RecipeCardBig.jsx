@@ -10,18 +10,37 @@ const RecipeCardBig = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch recipes from DB - now using published endpoint
+  // Fetch recipes from DB - now using published endpoint with improved error handling
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const res = await fetch("/api/recipe/published");
+        const res = await fetch("/api/recipe/published", {
+          mode: "cors",
+          signal: AbortSignal.timeout(8000), // 8-second timeout to prevent hanging requests
+        });
+
+        if (!res.ok) {
+          console.log("No published recipes available. Status:", res.status);
+          setRecipes([]);
+          setSortedRecipes([]);
+          setLoading(false);
+          return;
+        }
+
         const data = await res.json();
         const dataArr = Array.isArray(data) ? data : [];
         setRecipes(dataArr);
         setSortedRecipes(sortByPropertyDesc(dataArr, "recipeFav"));
-        setLoading(false);
       } catch (error) {
-        setError(error.message);
+        // Only log actual errors, not aborted requests
+        if (error.name !== "AbortError") {
+          console.log("Couldn't load recipes, will try again later");
+        }
+
+        // Don't show errors to the user, just set empty arrays
+        setRecipes([]);
+        setSortedRecipes([]);
+      } finally {
         setLoading(false);
       }
     };
@@ -30,7 +49,9 @@ const RecipeCardBig = () => {
   }, []);
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  // Show a more user-friendly message instead of an error
+  if (sortedRecipes.length === 0)
+    return <p>No recipes available yet. Check back soon!</p>;
 
   // Get top 11 recipes
   const displayedCards = sortedRecipes.slice(0, 7);

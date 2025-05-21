@@ -197,7 +197,15 @@ export default function Cart({
               </div>
             </>
           ) : (
-            <p>Cart is empty</p>
+            <div className="empty-cart-container text-center py-4">
+              <p>Cart is empty</p>
+              <Link
+                to="/cookshop"
+                className="kh-btn bg-green-500 text-white py-2 px-4 rounded mt-3"
+              >
+                Check out our cookshop
+              </Link>
+            </div>
           )}
           <div className="kh-header__cart--checkout">
             <button

@@ -252,24 +252,40 @@ export default function EditRecipe() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Create a clean copy of formData for submission
+      const cleanFormData = { ...formData };
+
+      // Filter out empty ingredients (ingredients with no name)
+      cleanFormData.ingredients = formData.ingredients.filter(
+        (ing) => ing.name && ing.name.trim() !== ""
+      );
+
+      // Filter out any empty/unknown tag entries (entries without tagId)
+      cleanFormData.cuisineTag = formData.cuisineTag.filter((tag) => tag.tagId);
+      cleanFormData.flavourTag = formData.flavourTag.filter((tag) => tag.tagId);
+      cleanFormData.ingredientTag = formData.ingredientTag.filter(
+        (tag) => tag.tagId
+      );
+
       const res = await fetch(`/api/recipe/update/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(cleanFormData),
       });
+
       const data = await res.json();
       if (data.success === false) {
         setError(data.message);
       } else {
         // Compute removed tags per type
         const removedIngredientTags = previousTags.ingredientTag.filter(
-          (tagId) => !formData.ingredientTag.includes(tagId)
+          (tagId) => !cleanFormData.ingredientTag.includes(tagId)
         );
         const removedCuisineTags = previousTags.cuisineTag.filter(
-          (tagId) => !formData.cuisineTag.includes(tagId)
+          (tagId) => !cleanFormData.cuisineTag.includes(tagId)
         );
         const removedFlavourTags = previousTags.flavourTag.filter(
-          (tagId) => !formData.flavourTag.includes(tagId)
+          (tagId) => !cleanFormData.flavourTag.includes(tagId)
         );
         // Remove tag references for removed tags
         await Promise.all(
@@ -283,13 +299,19 @@ export default function EditRecipe() {
         );
         // For current tags, add recipe reference (optionally you can check new ones only)
         await Promise.all(
-          formData.ingredientTag.map((tagId) => updateTagReference(tagId, id))
+          cleanFormData.ingredientTag.map((tag) =>
+            updateTagReference(tag.tagId, id)
+          )
         );
         await Promise.all(
-          formData.cuisineTag.map((tagId) => updateTagReference(tagId, id))
+          cleanFormData.cuisineTag.map((tag) =>
+            updateTagReference(tag.tagId, id)
+          )
         );
         await Promise.all(
-          formData.flavourTag.map((tagId) => updateTagReference(tagId, id))
+          cleanFormData.flavourTag.map((tag) =>
+            updateTagReference(tag.tagId, id)
+          )
         );
         navigate(`/recipes/${id}`);
       }
@@ -322,6 +344,12 @@ export default function EditRecipe() {
               <h1 className="text-3xl font-semibold text-center my-7">
                 Edit a Recipe
               </h1>
+              {/* New notification banner about PENDING status */}
+              <div className="alert alert-info my-3">
+                <i className="fas fa-info-circle me-2"></i>
+                When you update a recipe, it will be set to "PENDING" status and
+                require admin approval before being published again.
+              </div>
             </div>
             <div className="col-12 col-md-8">
               <AccordionItem title="Recipe Information">
@@ -473,6 +501,7 @@ export default function EditRecipe() {
                             "Steamed",
                             "Simmered",
                             "Fresh",
+                            "Pressure Cooker",
                           ].map((opt) => (
                             <div
                               className={`kh-recipe-form__checkbox--item ${
@@ -644,19 +673,6 @@ export default function EditRecipe() {
                                 index ===
                                 self.findIndex((t) => t.tagId === tag.tagId)
                             ), // Ensure no duplicates
-                            ingredients: [
-                              ...prev.ingredients,
-                              ...selected.map((t) => ({
-                                name: t.tagName,
-                                quantity: "",
-                              })),
-                            ].filter(
-                              (ingredient, index, self) =>
-                                index ===
-                                self.findIndex(
-                                  (i) => i.name === ingredient.name
-                                )
-                            ), // Ensure no duplicate ingredients
                           };
                         })
                       }

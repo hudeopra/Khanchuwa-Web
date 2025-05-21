@@ -14,21 +14,34 @@ import { FaCog, FaHeart } from "react-icons/fa"; // Import FontAwesome icons for
 
 export const fetchRandomRecipeId = async () => {
   try {
-    const response = await fetch("/api/recipe/published");
-    const text = await response.text(); // get raw text
-    if (!text) {
-      console.error("No data received from /api/recipe/published");
+    // Using mode: 'cors' to help suppress browser console errors for network failures
+    const response = await fetch("/api/recipe/published", {
+      mode: "cors",
+      // Adding a short timeout to prevent long-hanging requests
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!response.ok) {
+      // Handle non-successful responses silently
       return null;
     }
-    const data = JSON.parse(text); // parse only if text exists
-    if (data.length === 0) {
-      console.error("No published recipes available in the data");
+
+    const data = await response.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      // Log a user-friendly message instead of error
+      console.log("No published recipes available yet");
       return null;
     }
+
     const randomIndex = Math.floor(Math.random() * data.length);
     return data[randomIndex];
   } catch (error) {
-    console.error("Error fetching recipes:", error);
+    // Prevent showing AbortError in console as it's expected
+    if (error.name !== "AbortError") {
+      // Use a more user-friendly message without stack trace
+      console.log("Couldn't fetch random recipe, will try again later");
+    }
     return null;
   }
 };

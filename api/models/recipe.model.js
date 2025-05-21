@@ -25,23 +25,24 @@ const recipeSchema = new mongoose.Schema(
     ],
 
     // Tags (References to RecipeTag model)
+    // Updated: Using schema that prevents MongoDB from auto-generating _id fields for all tag types
     cuisineTag: [
-      {
-        tagId: { type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' }, // Reference to RecipeTag
-        tagName: { type: String, default: "Unknown" }, // Default to "Unknown" if tagName is missing
-      },
+      new mongoose.Schema({
+        tagId: { type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag', required: true },
+        tagName: { type: String, default: "Unknown" },
+      }, { _id: false }) // This prevents _id generation
     ],
     flavourTag: [
-      {
-        tagId: { type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' },
+      new mongoose.Schema({
+        tagId: { type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag', required: true },
         tagName: { type: String, default: "Unknown" },
-      },
+      }, { _id: false }) // This prevents _id generation
     ],
     ingredientTag: [
-      {
-        tagId: { type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag' },
+      new mongoose.Schema({
+        tagId: { type: mongoose.Schema.Types.ObjectId, ref: 'RecipeTag', required: true },
         tagName: { type: String, default: "Unknown" },
-      },
+      }, { _id: false }) // This prevents _id generation
     ],
 
     // Images and Media

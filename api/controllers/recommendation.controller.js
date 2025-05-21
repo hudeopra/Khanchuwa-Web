@@ -1,26 +1,58 @@
 import User from '../models/user.model.js';
 import Recipe from '../models/recipe.model.js';
+import mongoose from 'mongoose';
 
 export const getRecommendations = async (req, res, next) => {
   const { userId, topN = 5, minSimilarity = 0.1 } = req.query;
 
   try {
+    // Validate userId
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid user ID format'
+      });
+    }
+
     // Fetch all users and recipes
     const users = await User.find().lean();
     const recipes = await Recipe.find().lean();
 
+    if (users.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No users found in the database'
+      });
+    }
+
+    // Check if the requested user exists in the database
+    const targetUser = users.find(user => user._id.toString() === userId.toString());
+    if (!targetUser) {
+      console.log(`Target user not found for ID: ${userId}`);
+      console.log('Available user IDs:', users.map(u => u._id.toString()));
+
+      // Instead of letting it throw an error, return a friendly response
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+        details: 'The requested user ID does not exist in the database',
+        userId: userId
+      });
+    }
+
     // Call the recommendation algorithm
-    const recommendations = userBasedCF(users, recipes, userId, topN, minSimilarity);
+    const recommendations = userBasedCF(users, recipes, userId, parseInt(topN), parseFloat(minSimilarity));
 
     res.status(200).json({ success: true, recommendations });
   } catch (error) {
+    console.error('Recommendation error:', error);
     next(error);
   }
 };
 
 function userBasedCF(users, recipes, targetUserId, topN = 5, minSimilarity = 0.1) {
-  // Validate input
-  const targetUser = users.find(user => user._id.toString() === targetUserId);
+  // The targetUser should exist here since we're checking in the controller
+  const targetUser = users.find(user => user._id.toString() === targetUserId.toString());
   if (!targetUser) {
     throw new Error('Target user not found');
   }
@@ -31,15 +63,17 @@ function userBasedCF(users, recipes, targetUserId, topN = 5, minSimilarity = 0.1
   for (const user of users) {
     dataset[user._id.toString()] = {};
     for (const recipeId of allRecipeIds) {
-      dataset[user._id.toString()][recipeId] = user.userFavRecipe.some(fav => fav.toString() === recipeId) ? 1 : 0;
+      // Safely handle userFavRecipe that might be undefined
+      const userFavRecipes = user.userFavRecipe || [];
+      dataset[user._id.toString()][recipeId] = userFavRecipes.some(fav => fav.toString() === recipeId) ? 1 : 0;
     }
   }
 
   // Calculate similarities
   const similarities = {};
   for (const user of users) {
-    if (user._id.toString() !== targetUserId) {
-      const similarity = calculateSimilarity(dataset[targetUserId], dataset[user._id.toString()]);
+    if (user._id.toString() !== targetUserId.toString()) {
+      const similarity = calculateSimilarity(dataset[targetUserId.toString()], dataset[user._id.toString()]);
       if (similarity >= minSimilarity) {
         similarities[user._id.toString()] = similarity;
       }
@@ -55,7 +89,7 @@ function userBasedCF(users, recipes, targetUserId, topN = 5, minSimilarity = 0.1
   const similaritySum = {};
   for (const [similarUserId, similarity] of sortedSimilarities) {
     for (const recipeId of allRecipeIds) {
-      if (!dataset[targetUserId][recipeId]) { // Recipe not favorited by target user
+      if (!dataset[targetUserId.toString()][recipeId]) { // Recipe not favorited by target user
         recommendations[recipeId] = (recommendations[recipeId] || 0) + similarity * dataset[similarUserId][recipeId];
         similaritySum[recipeId] = (similaritySum[recipeId] || 0) + similarity;
       }
@@ -91,7 +125,9 @@ function userBasedCF(users, recipes, targetUserId, topN = 5, minSimilarity = 0.1
 
       // Optional: Match flavor preferences
       const userFlavourTags = targetPreferences.flavourTag || [];
-      const recipeFlavourTags = (recipe.flavourTag || []).map(tag => tag.tagName);
+      const recipeFlavourTags = (recipe.flavourTag || []).map(tag =>
+        typeof tag === 'string' ? tag : (tag.tagName || '')
+      );
       if (userFlavourTags.length > 0 && !userFlavourTags.some(tag => recipeFlavourTags.includes(tag))) {
         return false; // Recipe doesn't match flavor preferences
       }

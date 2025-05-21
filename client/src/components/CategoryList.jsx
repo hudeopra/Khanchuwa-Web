@@ -12,9 +12,24 @@ const CategoryList = ({ taglink }) => {
   const [canSlideNext, setCanSlideNext] = useState(true);
   const [canSlidePrev, setCanSlidePrev] = useState(false);
   const [publishedCounts, setPublishedCounts] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  // Silently check if a recipe is published without displaying individual errors
+  const checkRecipePublished = async (recipeId) => {
+    try {
+      const recipeResponse = await fetch(
+        `http://localhost:3000/api/recipe/published/${recipeId}`
+      );
+      return recipeResponse.ok;
+    } catch (error) {
+      // Silently return false instead of logging the error
+      return false;
+    }
+  };
 
   // Fetch categories from the API
   useEffect(() => {
+    setLoading(true);
     fetch(`http://localhost:3000/api/tag/${taglink}`)
       .then((response) => response.json())
       .then(async (data) => {
@@ -23,6 +38,7 @@ const CategoryList = ({ taglink }) => {
 
         // Calculate published recipe counts
         const counts = {};
+        const missingRecipes = new Set(); // Use Set to track unique missing recipe IDs
 
         // Process each category
         for (const category of data) {
@@ -30,27 +46,32 @@ const CategoryList = ({ taglink }) => {
 
           // Check each recipe reference for published status
           if (category.recipeRefs && category.recipeRefs.length > 0) {
-            for (const recipeId of category.recipeRefs) {
-              try {
-                const recipeResponse = await fetch(
-                  `http://localhost:3000/api/recipe/published/${recipeId}`
-                );
+            // Use Promise.all to check all recipes in parallel
+            const checkResults = await Promise.all(
+              category.recipeRefs.map(async (recipeId) => {
+                const isPublished = await checkRecipePublished(recipeId);
 
-                // If successful (status 200), it's a published recipe
-                if (recipeResponse.ok) {
-                  publishedCount++;
+                // If not published, add to the set of missing recipes
+                if (!isPublished) {
+                  missingRecipes.add(recipeId);
                 }
-              } catch (error) {
-                console.error(
-                  `Error checking recipe status for ${recipeId}:`,
-                  error
-                );
-              }
-            }
+
+                return isPublished;
+              })
+            );
+
+            // Count published recipes based on results
+            publishedCount = checkResults.filter(Boolean).length;
           }
 
           // Store the count for this category
           counts[category._id] = publishedCount;
+        }
+
+        // Display a single summary message about missing recipes
+        const missingCount = missingRecipes.size;
+        if (missingCount > 0) {
+          console.log(`${missingCount} more recipes are coming soon!`);
         }
 
         setPublishedCounts(counts);
@@ -63,8 +84,12 @@ const CategoryList = ({ taglink }) => {
         });
 
         setSortedCategories(sortedByPublished);
+        setLoading(false);
       })
-      .catch((error) => console.error("Error fetching categories:", error));
+      .catch((error) => {
+        console.error("Error fetching categories:", error);
+        setLoading(false);
+      });
   }, [taglink]);
 
   // Calculate dimensions and update slider container
@@ -123,48 +148,52 @@ const CategoryList = ({ taglink }) => {
 
   return (
     <div className=" py-4">
-      <div className="slider-container">
-        <div
-          className="slider"
-          ref={sliderRef}
-          style={{
-            transform: `translateX(${position}px)`,
-            transition: "transform 0.3s ease-out",
-          }}
-        >
-          {sortedCategories.map((item, index) => (
-            <div key={index} className="kh-category__item">
-              <div className="kh-category__item--img">
-                <Link to={`/cookshop/${taglink}/${item._id}`}>
-                  {publishedCounts[item._id] > 0 ? (
-                    <p>{publishedCounts[item._id]} Recipes</p>
-                  ) : (
-                    <p>Coming Soon</p>
-                  )}
-                  <img src={item.favImg} alt={item.name} />
-                </Link>
+      {loading ? (
+        <div className="text-center">Loading categories...</div>
+      ) : (
+        <div className="slider-container">
+          <div
+            className="slider"
+            ref={sliderRef}
+            style={{
+              transform: `translateX(${position}px)`,
+              transition: "transform 0.3s ease-out",
+            }}
+          >
+            {sortedCategories.map((item, index) => (
+              <div key={index} className="kh-category__item">
+                <div className="kh-category__item--img">
+                  <Link to={`/cookshop/${taglink}/${item._id}`}>
+                    {publishedCounts[item._id] > 0 ? (
+                      <p>{publishedCounts[item._id]} Recipes</p>
+                    ) : (
+                      <p>Coming Soon</p>
+                    )}
+                    <img src={item.favImg} alt={item.name} />
+                  </Link>
+                </div>
+                <h3>{item.name}</h3>
               </div>
-              <h3>{item.name}</h3>
-            </div>
-          ))}
+            ))}
+          </div>
+          <div className="controls">
+            <button
+              onClick={slidePrev}
+              disabled={!canSlidePrev}
+              style={{ opacity: canSlidePrev ? 1 : 0 }}
+            >
+              ← Prev
+            </button>
+            <button
+              onClick={slideNext}
+              disabled={!canSlideNext}
+              style={{ opacity: canSlideNext ? 1 : 0 }}
+            >
+              Next →
+            </button>
+          </div>
         </div>
-        <div className="controls">
-          <button
-            onClick={slidePrev}
-            disabled={!canSlidePrev}
-            style={{ opacity: canSlidePrev ? 1 : 0 }}
-          >
-            ← Prev
-          </button>
-          <button
-            onClick={slideNext}
-            disabled={!canSlideNext}
-            style={{ opacity: canSlideNext ? 1 : 0 }}
-          >
-            Next →
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

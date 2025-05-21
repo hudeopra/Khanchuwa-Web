@@ -56,7 +56,7 @@ export const createRecipe = async (req, res, next) => {
       allergies,
       userRef,
       imageUrls, // Add imageUrls here
-      status = 'DRAFT', // Default status to 'DRAFT'
+      status, // Remove the default value to respect the schema's default
     } = req.body;
 
     // Populate tagName for each tag type
@@ -114,33 +114,61 @@ export const updateRecipe = async (req, res, next) => {
       cuisineTag, // Ensure cuisineTag is destructured
       flavourTag,
       ingredientTag,
+      status,
       ...rest
     } = req.body;
 
-    // Populate tagName for each tag type
-    const populatedCuisineTag = await populateTags(cuisineTag || []);
-    const populatedFlavourTag = await populateTags(flavourTag || []);
-    const populatedIngredientTag = await populateTags(ingredientTag || []);
+    // First, get the existing recipe to preserve data not included in the request
+    const existingRecipe = await Recipe.findById(req.params.id);
+    if (!existingRecipe) return res.status(404).json({ message: 'Recipe not found' });
 
+    // If we're only updating the status (common from admin panel), preserve existing tag data
+    const isStatusOnlyUpdate = Object.keys(req.body).length === 1 && status !== undefined;
+
+    // Determine what tag data to use (new data or preserve existing)
+    let updatedCuisineTag, updatedFlavourTag, updatedIngredientTag;
+
+    if (isStatusOnlyUpdate) {
+      // For status-only updates, preserve existing tag data
+      updatedCuisineTag = existingRecipe.cuisineTag;
+      updatedFlavourTag = existingRecipe.flavourTag;
+      updatedIngredientTag = existingRecipe.ingredientTag;
+    } else {
+      // For normal updates with tag data, process the new tags
+      updatedCuisineTag = cuisineTag ? await populateTags(cuisineTag) : existingRecipe.cuisineTag;
+      updatedFlavourTag = flavourTag ? await populateTags(flavourTag) : existingRecipe.flavourTag;
+      updatedIngredientTag = ingredientTag ? await populateTags(ingredientTag) : existingRecipe.ingredientTag;
+
+      // Update recipe references in tags if new tag data was provided
+      if (cuisineTag) await updateRecipeReferences(updatedCuisineTag, existingRecipe._id);
+      if (flavourTag) await updateRecipeReferences(updatedFlavourTag, existingRecipe._id);
+      if (ingredientTag) await updateRecipeReferences(updatedIngredientTag, existingRecipe._id);
+    }
+
+    // Create update object with preserved or new data
+    const updateData = {
+      ...rest,
+      cuisineTag: updatedCuisineTag,
+      flavourTag: updatedFlavourTag,
+      ingredientTag: updatedIngredientTag,
+      dietaryRestrictions: dietaryRestrictions !== undefined ? dietaryRestrictions : existingRecipe.dietaryRestrictions,
+      allergies: allergies !== undefined ? allergies : existingRecipe.allergies,
+    };
+
+    // Add status to update data if provided (for admin status changes)
+    if (status !== undefined) {
+      updateData.status = status;
+    } else if (!isStatusOnlyUpdate) {
+      // For regular content updates (not status-only admin changes), set status to PENDING for review
+      updateData.status = 'PENDING';
+    }
+
+    // Perform the update
     const recipe = await Recipe.findByIdAndUpdate(
       req.params.id,
-      {
-        ...rest,
-        cuisineTag: populatedCuisineTag,
-        flavourTag: populatedFlavourTag,
-        ingredientTag: populatedIngredientTag,
-        dietaryRestrictions: dietaryRestrictions || [], // Handle new field
-        allergies: allergies || [], // Handle new field
-      },
+      updateData,
       { new: true }
     );
-
-    if (!recipe) return res.status(404).json({ message: 'Recipe not found' });
-
-    // Update recipe references in tags
-    await updateRecipeReferences(populatedCuisineTag, recipe._id);
-    await updateRecipeReferences(populatedFlavourTag, recipe._id);
-    await updateRecipeReferences(populatedIngredientTag, recipe._id);
 
     return res.status(200).json(recipe);
   } catch (error) {

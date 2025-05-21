@@ -604,6 +604,7 @@ export default function CreateRecipe() {
                             "Steamed",
                             "Simmered",
                             "Fresh",
+                            "Pressure Cooker",
                           ].map((opt) => (
                             <div
                               className={`kh-recipe-form__checkbox--item ${
@@ -960,21 +961,6 @@ export default function CreateRecipe() {
                           </div>
                         </div>
                       ))}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setFormData({
-                            ...formData,
-                            ingredients: [
-                              ...formData.ingredients,
-                              { name: "", quantity: "" },
-                            ],
-                          })
-                        }
-                        className=""
-                      >
-                        Add Ingredient
-                      </button>
                     </div>
                   </div>
                 </div>

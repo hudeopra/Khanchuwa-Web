@@ -135,19 +135,37 @@ export default function RecipeList() {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
+        setLoading(true);
         const query = searchParams.toString();
         // Update this to use published endpoint by default
         const url = query
           ? `/api/recipe/filter?${query}`
           : `/api/recipe/published`;
-        const res = await fetch(url);
+
+        const res = await fetch(url, {
+          mode: "cors", // Add CORS mode to help suppress browser errors
+          signal: AbortSignal.timeout(8000), // Add timeout to prevent hanging requests
+        });
+
+        if (!res.ok) {
+          // Handle non-success responses silently
+          console.log(`Couldn't fetch recipes. Status: ${res.status}`);
+          setRecipes([]);
+          setLoading(false);
+          return;
+        }
+
         const data = await res.json();
-        console.log("Fetched recipes:", data);
         const fetchedRecipes = Array.isArray(data) ? data : data.recipes || [];
-        setRecipes(fetchedRecipes); // Ensure recipes are set correctly
-        setLoading(false);
+        setRecipes(fetchedRecipes);
       } catch (error) {
-        setError(error.message);
+        // Only log actual errors, not aborted requests
+        if (error.name !== "AbortError") {
+          console.log("Error fetching recipes, will try again later");
+        }
+        // Don't show errors to users, just set empty array
+        setRecipes([]);
+      } finally {
         setLoading(false);
       }
     };
@@ -169,16 +187,47 @@ export default function RecipeList() {
   useEffect(() => {
     const fetchAllTags = async () => {
       try {
+        const options = {
+          mode: "cors", // Add CORS mode to help suppress browser errors
+          signal: AbortSignal.timeout(8000), // Add timeout to prevent hanging requests
+        };
+
         const [cuisineRes, ingredientRes, flavourRes] = await Promise.all([
-          fetch("http://localhost:3000/api/tag/cuisineTag"),
-          fetch("http://localhost:3000/api/tag/ingredientTag"),
-          fetch("http://localhost:3000/api/tag/flavourTag"),
+          fetch("http://localhost:3000/api/tag/cuisineTag", options),
+          fetch("http://localhost:3000/api/tag/ingredientTag", options),
+          fetch("http://localhost:3000/api/tag/flavourTag", options),
         ]);
-        setCuisineTags(await cuisineRes.json());
-        setIngredientTags(await ingredientRes.json());
-        setFlavourTags(await flavourRes.json());
+
+        // Check if responses were successful
+        if (!cuisineRes.ok) {
+          console.log("Failed to fetch cuisine tags");
+          setCuisineTags([]);
+        } else {
+          setCuisineTags(await cuisineRes.json());
+        }
+
+        if (!ingredientRes.ok) {
+          console.log("Failed to fetch ingredient tags");
+          setIngredientTags([]);
+        } else {
+          setIngredientTags(await ingredientRes.json());
+        }
+
+        if (!flavourRes.ok) {
+          console.log("Failed to fetch flavour tags");
+          setFlavourTags([]);
+        } else {
+          setFlavourTags(await flavourRes.json());
+        }
       } catch (err) {
-        console.error("Error fetching tags:", err);
+        // Only log actual errors, not aborted requests
+        if (err.name !== "AbortError") {
+          console.log("Couldn't load tags, using defaults");
+        }
+        // Set default empty arrays for all tag types
+        setCuisineTags([]);
+        setIngredientTags([]);
+        setFlavourTags([]);
       }
     };
     fetchAllTags();

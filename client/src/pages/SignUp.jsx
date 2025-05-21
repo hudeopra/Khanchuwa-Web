@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa"; // Import FontAwesome icons
+import { useAlert } from "../components/AlertContext"; // Import useAlert hook
 
 import OAuth from "../components/OAuth";
 
@@ -14,13 +15,27 @@ export default function SignUp() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [invalidFields, setInvalidFields] = useState({
+    username: false,
+    email: false,
+    password: false,
+  });
   const navigate = useNavigate();
+  const { showAlert } = useAlert(); // Initialize useAlert hook
 
   const handleChange = (e) => {
     setUserData({
       ...userData,
       [e.target.id]: e.target.value,
     });
+
+    // Clear the invalid state for this field when user types
+    if (invalidFields[e.target.id]) {
+      setInvalidFields((prev) => ({
+        ...prev,
+        [e.target.id]: false,
+      }));
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -30,33 +45,111 @@ export default function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Regex patterns
-    const usernameRegex = /^[a-zA-Z0-9_]{3,15}$/; // Alphanumeric, 3-15 chars
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email format
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // Min 8 chars, 1 letter, 1 number
+    // Reset validation state
+    setInvalidFields({
+      username: false,
+      email: false,
+      password: false,
+    });
 
-    // Validation
-    if (!usernameRegex.test(userData.username)) {
-      setError("Username must be 3-15 characters and alphanumeric.");
+    // Username validation with improved user-friendly messages with examples
+    if (!userData.username || userData.username.trim() === "") {
+      showAlert("warning", "Please enter a username");
+      setInvalidFields((prev) => ({ ...prev, username: true }));
       return;
-    }
-    if (!emailRegex.test(userData.email)) {
-      setError("Invalid email format. Please enter a valid email address.");
-      return;
-    }
-    if (!passwordRegex.test(userData.password)) {
-      let passwordError =
-        "Password must be at least 8 characters long, include at least one letter and one number.";
-      if (userData.password.length < 8) {
-        passwordError =
-          "Password is too short. It must be at least 8 characters long.";
-      } else if (!/[A-Za-z]/.test(userData.password)) {
-        passwordError = "Password must include at least one letter.";
-      } else if (!/\d/.test(userData.password)) {
-        passwordError = "Password must include at least one number.";
+    } else {
+      const usernameLength = userData.username.length;
+      const containsNumbers = /[0-9]/.test(userData.username);
+      const containsSpecialChars = /[^a-zA-Z0-9]/.test(userData.username);
+      const containsUppercase = /[A-Z]/.test(userData.username);
+
+      if (usernameLength < 3) {
+        showAlert(
+          "warning",
+          "Username is too short (minimum 3 characters). Examples: tom, ana, sam"
+        );
+        setInvalidFields((prev) => ({ ...prev, username: true }));
+        return;
+      } else if (usernameLength > 15) {
+        showAlert(
+          "warning",
+          "Username is too long (maximum 15 characters). Try something shorter like 'robert' instead of 'robertjohnsonsmith'"
+        );
+        setInvalidFields((prev) => ({ ...prev, username: true }));
+        return;
+      } else if (containsNumbers) {
+        showAlert(
+          "warning",
+          "Username should not contain numbers. Use 'robert' instead of 'robert123'"
+        );
+        setInvalidFields((prev) => ({ ...prev, username: true }));
+        return;
+      } else if (containsSpecialChars) {
+        showAlert(
+          "warning",
+          "Username should not contain special characters (@, #, $, %, &, *, etc). Use 'robert' instead of 'robert@smith'"
+        );
+        setInvalidFields((prev) => ({ ...prev, username: true }));
+        return;
+      } else if (containsUppercase) {
+        showAlert(
+          "warning",
+          "Username should be all lowercase. Use 'robert' instead of 'Robert' or 'ROBERT'"
+        );
+        setInvalidFields((prev) => ({ ...prev, username: true }));
+        return;
       }
-      setError(passwordError);
+    }
+
+    // Email validation with improved user-friendly messages
+    if (!userData.email || userData.email.trim() === "") {
+      showAlert("warning", "Please enter an email address");
+      setInvalidFields((prev) => ({ ...prev, email: true }));
       return;
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(userData.email)) {
+        showAlert(
+          "warning",
+          "Please enter a valid email address (e.g., name@example.com)"
+        );
+        setInvalidFields((prev) => ({ ...prev, email: true }));
+        return;
+      }
+    }
+
+    // Password validation with improved user-friendly messages and examples
+    if (!userData.password) {
+      showAlert("warning", "Please enter a password");
+      setInvalidFields((prev) => ({ ...prev, password: true }));
+      return;
+    } else {
+      const passwordLength = userData.password.length;
+      const containsLetter = /[A-Za-z]/.test(userData.password);
+      const containsNumber = /\d/.test(userData.password);
+
+      if (passwordLength < 8) {
+        showAlert(
+          "warning",
+          "Password is too short (minimum 8 characters). Example: sunshine2023"
+        );
+        setInvalidFields((prev) => ({ ...prev, password: true }));
+        return;
+      } else if (!containsLetter) {
+        showAlert(
+          "warning",
+          "Password must include at least one letter. Example: recipe123 instead of 12345678"
+        );
+        setInvalidFields((prev) => ({ ...prev, password: true }));
+        return;
+      } else if (!containsNumber) {
+        showAlert(
+          "warning",
+          "Password must include at least one number. Example: khanchuwa2 instead of khanchuwa"
+        );
+        setInvalidFields((prev) => ({ ...prev, password: true }));
+        return;
+      }
     }
 
     try {
@@ -72,15 +165,52 @@ export default function SignUp() {
       console.log("SignUp: ", data);
       if (data.success === false) {
         setLoading(false);
-        setError(data.message);
+
+        // Check for specific error patterns and provide user-friendly messages
+        if (data.message && data.message.includes("duplicate key error")) {
+          // Handle duplicate key errors
+          if (data.message.includes("username_1 dup key")) {
+            showAlert(
+              "warning",
+              "This username is already taken. Please choose a different username."
+            );
+            setInvalidFields((prev) => ({ ...prev, username: true }));
+          } else if (data.message.includes("email_1 dup key")) {
+            showAlert(
+              "warning",
+              "An account with this email already exists. Please use a different email or sign in."
+            );
+            setInvalidFields((prev) => ({ ...prev, email: true }));
+          } else {
+            // Generic duplicate key error
+            showAlert(
+              "warning",
+              "This account already exists. Please try a different username or email."
+            );
+          }
+        } else if (data.statusCode === 500) {
+          showAlert(
+            "error",
+            "Something went wrong on our servers. Please try again later."
+          );
+        } else {
+          // For other error messages
+          showAlert(
+            "error",
+            data.message || "Failed to create account. Please try again."
+          );
+        }
         return;
       }
       setLoading(false);
-      setError(null);
+      showAlert("success", "Sign up successful! Please sign in.");
       navigate("/signin");
     } catch (error) {
       setLoading(false);
-      setError(error.message);
+      showAlert(
+        "error",
+        "Connection error. Please check your internet connection and try again."
+      );
     }
   };
 
@@ -93,7 +223,11 @@ export default function SignUp() {
             onSubmit={handleSubmit}
             className="kh-signup__form kh-form flex gap-5 p-12 "
           >
-            <div className="kh-signup__input-wrapper">
+            <div
+              className={`kh-signup__input-wrapper ${
+                invalidFields.username ? "invalid" : ""
+              }`}
+            >
               <label htmlFor="username">Username</label>
               <input
                 type="text"
@@ -102,7 +236,11 @@ export default function SignUp() {
                 onChange={handleChange}
               />
             </div>
-            <div className="kh-signup__input-wrapper">
+            <div
+              className={`kh-signup__input-wrapper ${
+                invalidFields.email ? "invalid" : ""
+              }`}
+            >
               <label htmlFor="email">Email</label>
               <input
                 type="email"
@@ -111,7 +249,11 @@ export default function SignUp() {
                 onChange={handleChange}
               />
             </div>
-            <div className="kh-signup__input-wrapper">
+            <div
+              className={`kh-signup__input-wrapper ${
+                invalidFields.password ? "invalid" : ""
+              }`}
+            >
               <label htmlFor="password">Password</label>
               <div className="relative">
                 <input
@@ -144,7 +286,6 @@ export default function SignUp() {
               <Link to="/signin">Sign In</Link>
             </p>
           </div>
-          {error && <p className="">{error}</p>}
         </div>
       </div>
     </main>

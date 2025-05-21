@@ -35,6 +35,8 @@ export default function RecipeDetail() {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [currentUser, setCurrentUser] = useState(null); // State for current user
   const [isFavorite, setIsFavorite] = useState(false); // State for favorite toggle
+  const [isCreator, setIsCreator] = useState(false); // State for creator check
+  const [isAdmin, setIsAdmin] = useState(false); // State for admin check
 
   const dispatch = useDispatch();
   const { showAlert } = useAlert(); // Use AlertContext
@@ -93,20 +95,114 @@ export default function RecipeDetail() {
     const fetchRecipeData = async () => {
       try {
         setLoading(true);
-        // Update to use the published recipe endpoint
-        const res = await fetch(`/api/recipe/published/${id}`);
-        const data = await res.json();
+        setError(null);
 
-        if (!res.ok) {
-          throw new Error(data.message || "Failed to fetch recipe");
+        // Step 1: Check if this is the recipe creator or an admin
+        // First, try to get the current user
+        let userData = null;
+        try {
+          const userRes = await fetch("/api/user/current", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+            credentials: "include",
+            // Add timeout to prevent hanging requests
+            signal: AbortSignal.timeout(5000),
+          });
+
+          if (userRes.ok) {
+            userData = await userRes.json();
+          }
+        } catch (userError) {
+          // Silently handle user fetch errors without showing in console
+          console.log("Not logged in or session expired");
         }
 
-        setRecipe(data);
-        setLoading(false);
+        const isAdmin = userData?.role === "admin";
+        let isCreator = false;
+
+        // If no user is logged in or there was an error, use the public endpoint
+        let recipeEndpoint = `/api/recipe/published/${id}`;
+
+        // If admin or trying to check if user is creator, we need the recipe ID first
+        if (isAdmin || userData) {
+          try {
+            // Get basic recipe info first to check ownership
+            const basicRecipeRes = await fetch(`/api/recipe/${id}`, {
+              credentials: "include",
+              // Add timeout to prevent hanging requests
+              signal: AbortSignal.timeout(5000),
+            });
+
+            if (basicRecipeRes.ok) {
+              const basicRecipeData = await basicRecipeRes.json();
+              // Check if current user is the creator
+              isCreator =
+                userData &&
+                (basicRecipeData.userRef === userData._id ||
+                  basicRecipeData.userRef === userData?.user?._id);
+
+              // If admin or creator, they can access the recipe directly
+              if (isAdmin || isCreator) {
+                recipeEndpoint = `/api/recipe/${id}`;
+              }
+            }
+          } catch (recipeError) {
+            // Silently handle basic recipe fetch errors
+            if (recipeError.name !== "AbortError") {
+              console.log("Couldn't verify recipe ownership");
+            }
+          }
+        }
+
+        // Fetch the recipe data from the appropriate endpoint
+        try {
+          const res = await fetch(recipeEndpoint, {
+            credentials: "include",
+            mode: "cors", // Add CORS mode to help suppress browser errors
+            // Add timeout to prevent hanging requests
+            signal: AbortSignal.timeout(8000),
+          });
+
+          if (!res.ok) {
+            if (res.status === 404) {
+              setError("Recipe not found or not yet published");
+              console.log("Recipe not found or not yet published");
+            } else {
+              const errorText = await res.text();
+              let errorMessage;
+              try {
+                const errorData = JSON.parse(errorText);
+                errorMessage = errorData.message || "Failed to fetch recipe";
+              } catch (e) {
+                errorMessage = "Failed to fetch recipe";
+              }
+              setError(errorMessage);
+            }
+            setLoading(false);
+            return;
+          }
+
+          const data = await res.json();
+          setRecipe(data);
+
+          // Store the permission flags for UI display
+          setIsCreator(isCreator);
+          setIsAdmin(isAdmin);
+        } catch (fetchError) {
+          if (fetchError.name !== "AbortError") {
+            setError("Error loading recipe details. Please try again later.");
+            console.log("Error fetching recipe details:", fetchError.message);
+          } else {
+            setError("Request timed out. Please try again.");
+          }
+        }
       } catch (error) {
-        setError(error.message || "Error fetching recipe");
+        setError("Something went wrong. Please try again later.");
+        console.log("General error in recipe fetch process");
+      } finally {
         setLoading(false);
-        console.error("Error fetching recipe:", error);
       }
     };
 
@@ -167,6 +263,70 @@ export default function RecipeDetail() {
             <div className="kh-recipe-single__head">
               <div className="kh-recipe-single__head--title">
                 <h1>{recipe.recipeName || "N/A"}</h1>
+                {/* Add status banner for unpublished recipes */}
+                {recipe.status !== "PUBLISHED" && (
+                  <div
+                    className={`alert alert-${
+                      recipe.status === "PENDING" ? "warning" : "secondary"
+                    } mt-2`}
+                  >
+                    <strong>Notice:</strong> This recipe is currently in{" "}
+                    <strong>{recipe.status.toLowerCase()}</strong> status
+                    {(isCreator || isAdmin) && " and is only visible to you."}
+                    {isAdmin && (
+                      <div className="mt-2">
+                        <select
+                          className="form-select form-select-sm d-inline-block w-auto me-2"
+                          value={recipe.status}
+                          onChange={async (e) => {
+                            try {
+                              const newStatus = e.target.value;
+                              const token =
+                                localStorage.getItem("access_token");
+                              const res = await fetch(
+                                `/api/recipe/update/${id}`,
+                                {
+                                  method: "POST",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${token}`,
+                                  },
+                                  credentials: "include",
+                                  body: JSON.stringify({ status: newStatus }),
+                                }
+                              );
+
+                              if (res.ok) {
+                                setRecipe({ ...recipe, status: newStatus });
+                                showAlert(
+                                  "success",
+                                  `Recipe status changed to ${newStatus}`
+                                );
+                              } else {
+                                showAlert(
+                                  "error",
+                                  "Failed to update recipe status"
+                                );
+                              }
+                            } catch (err) {
+                              console.error(err);
+                              showAlert(
+                                "error",
+                                "Error updating recipe status"
+                              );
+                            }
+                          }}
+                        >
+                          <option value="DRAFT">DRAFT</option>
+                          <option value="PENDING">PENDING</option>
+                          <option value="PUBLISHED">PUBLISHED</option>
+                          <option value="REJECTED">REJECTED</option>
+                        </select>
+                        <span className="text-muted">Admin: Change status</span>
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className="kh-recipe-single__head--actions">
                   {currentUserId && recipe.userRef === currentUserId && (
                     <div className="py-4">
