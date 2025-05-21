@@ -29,6 +29,21 @@ export default function Cart({
 
   const handleQuantityChangeWithAlert = (itemId, newQuantity) => {
     const item = cartItems.find((item) => item.id === itemId);
+
+    // Enforce minimum quantity of 1
+    if (newQuantity < 1) {
+      newQuantity = 1;
+    }
+
+    // Check if the item has a maximum quantity restriction
+    if (item.maxQuantity !== undefined && newQuantity > item.maxQuantity) {
+      showAlert(
+        "warning",
+        `Only ${item.maxQuantity} units available in stock.`
+      );
+      newQuantity = item.maxQuantity;
+    }
+
     const change = newQuantity - item.quantity;
 
     if (change > 0) {

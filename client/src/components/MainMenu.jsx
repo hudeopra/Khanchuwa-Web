@@ -164,7 +164,7 @@ export default function MainMenu({
               </Link>
             </li>
             <li onClick={handleLinkClick}>
-              <Link to={"/site-map"}>
+              <Link to={"/sitemap"}>
                 <FaSitemap />
                 <span>Site Map</span>
               </Link>

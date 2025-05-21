@@ -26,11 +26,34 @@ export default function EditRecipe() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const [imageUploadError, setImageUploadError] = useState(false);
+  const [localCurrentUser, setLocalCurrentUser] = useState(null);
   const [previousTags, setPreviousTags] = useState({
     ingredientTag: [],
     cuisineTag: [],
     flavourTag: [],
   });
+
+  // Add new useEffect to fetch current user data
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const res = await fetch("/api/user/current", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch current user");
+        const data = await res.json();
+        console.log("Current user data:", data);
+        setLocalCurrentUser(data);
+      } catch (error) {
+        console.error("Error fetching current user:", error.message);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
 
   useEffect(() => {
     async function fetchRecipe() {
@@ -80,6 +103,7 @@ export default function EditRecipe() {
           mealType: data.mealType || [], // Ensure default array
           dietaryRestrictions: data.dietaryRestrictions || [], // Ensure default array
           allergies: data.allergies || [], // Ensure default array
+          status: data.status || "PENDING", // Include status in formData
         });
         // Save the original tag arrays for future diff
         setPreviousTags({
@@ -95,6 +119,11 @@ export default function EditRecipe() {
     }
     if (currentUser) fetchRecipe();
   }, [id, currentUser]);
+
+  // Add useEffect to log all form data changes
+  useEffect(() => {
+    console.log("Form data updated:", formData);
+  }, [formData]);
 
   const handleArrayChange = (field, index, value) => {
     const newArr = [...formData[field]];
@@ -115,6 +144,14 @@ export default function EditRecipe() {
 
   const handleChange = (e) => {
     const { id, value, type, name } = e.target;
+
+    console.log("Form field changed:", {
+      field: id || name,
+      oldValue: formData[id || name],
+      newValue: value,
+      event: e.type,
+    });
+
     if (type === "radio") {
       setFormData({ ...formData, [name]: value });
     } else {
@@ -249,9 +286,13 @@ export default function EditRecipe() {
     }
   };
 
+  // Modify the handleSubmit function to handle different statuses
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true);
+      console.log("Submitting recipe with data:", formData);
+
       // Create a clean copy of formData for submission
       const cleanFormData = { ...formData };
 
@@ -260,13 +301,52 @@ export default function EditRecipe() {
         (ing) => ing.name && ing.name.trim() !== ""
       );
 
-      // Filter out any empty/unknown tag entries (entries without tagId)
-      cleanFormData.cuisineTag = formData.cuisineTag.filter((tag) => tag.tagId);
-      cleanFormData.flavourTag = formData.flavourTag.filter((tag) => tag.tagId);
-      cleanFormData.ingredientTag = formData.ingredientTag.filter(
-        (tag) => tag.tagId
-      );
+      // Make sure we have proper tag structures for all tag types
+      // Only include tags with valid IDs
+      cleanFormData.cuisineTag = formData.cuisineTag
+        .filter((tag) => tag && (tag.tagId || tag._id))
+        .map((tag) => ({
+          tagId: tag.tagId || tag._id,
+          tagName: tag.name || tag.tagName || "Unknown",
+        }));
 
+      cleanFormData.flavourTag = formData.flavourTag
+        .filter((tag) => tag && (tag.tagId || tag._id))
+        .map((tag) => ({
+          tagId: tag.tagId || tag._id,
+          tagName: tag.name || tag.tagName || "Unknown",
+        }));
+
+      cleanFormData.ingredientTag = formData.ingredientTag
+        .filter((tag) => tag && (tag.tagId || tag._id))
+        .map((tag) => ({
+          tagId: tag.tagId || tag._id,
+          tagName: tag.name || tag.tagName || "Unknown",
+        }));
+
+      // Determine the final status for the recipe based on user role and selected status
+      let finalStatus = formData.status;
+
+      // If user selects "PUBLISH" but is not admin, set to PENDING
+      if (finalStatus === "PUBLISH") {
+        if (localCurrentUser && localCurrentUser.role === "admin") {
+          finalStatus = "PUBLISHED";
+        } else {
+          finalStatus = "PENDING";
+        }
+      }
+
+      cleanFormData.status = finalStatus;
+
+      // Log what we're about to submit
+      console.log("Cleaned form data with tags and status:", {
+        cuisineTag: cleanFormData.cuisineTag,
+        flavourTag: cleanFormData.flavourTag,
+        ingredientTag: cleanFormData.ingredientTag,
+        status: cleanFormData.status,
+      });
+
+      // Make the API request
       const res = await fetch(`/api/recipe/update/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -276,46 +356,131 @@ export default function EditRecipe() {
       const data = await res.json();
       if (data.success === false) {
         setError(data.message);
-      } else {
-        // Compute removed tags per type
-        const removedIngredientTags = previousTags.ingredientTag.filter(
-          (tagId) => !cleanFormData.ingredientTag.includes(tagId)
-        );
-        const removedCuisineTags = previousTags.cuisineTag.filter(
-          (tagId) => !cleanFormData.cuisineTag.includes(tagId)
-        );
-        const removedFlavourTags = previousTags.flavourTag.filter(
-          (tagId) => !cleanFormData.flavourTag.includes(tagId)
-        );
-        // Remove tag references for removed tags
-        await Promise.all(
-          removedIngredientTags.map((tagId) => removeTagReference(tagId, id))
-        );
-        await Promise.all(
-          removedCuisineTags.map((tagId) => removeTagReference(tagId, id))
-        );
-        await Promise.all(
-          removedFlavourTags.map((tagId) => removeTagReference(tagId, id))
-        );
-        // For current tags, add recipe reference (optionally you can check new ones only)
-        await Promise.all(
-          cleanFormData.ingredientTag.map((tag) =>
-            updateTagReference(tag.tagId, id)
-          )
-        );
-        await Promise.all(
-          cleanFormData.cuisineTag.map((tag) =>
-            updateTagReference(tag.tagId, id)
-          )
-        );
-        await Promise.all(
-          cleanFormData.flavourTag.map((tag) =>
-            updateTagReference(tag.tagId, id)
-          )
-        );
-        navigate(`/recipes/${id}`);
+        setLoading(false);
+        return;
       }
+
+      // Get tag IDs from current tags for reference management
+      const currentTagIds = {
+        ingredientTag: cleanFormData.ingredientTag.map(
+          (tag) => tag.tagId || tag._id
+        ),
+        cuisineTag: cleanFormData.cuisineTag.map((tag) => tag.tagId || tag._id),
+        flavourTag: cleanFormData.flavourTag.map((tag) => tag.tagId || tag._id),
+      };
+
+      // Get tag IDs from previous tags
+      const previousTagIds = {
+        ingredientTag: previousTags.ingredientTag
+          .filter((tag) => tag && (tag.tagId || tag._id))
+          .map((tag) => tag.tagId || tag._id),
+        cuisineTag: previousTags.cuisineTag
+          .filter((tag) => tag && (tag.tagId || tag._id))
+          .map((tag) => tag.tagId || tag._id),
+        flavourTag: previousTags.flavourTag
+          .filter((tag) => tag && (tag.tagId || tag._id))
+          .map((tag) => tag.tagId || tag._id),
+      };
+
+      // Compute removed tags by comparing IDs
+      const removedTags = {
+        ingredientTag: previousTagIds.ingredientTag.filter(
+          (id) => !currentTagIds.ingredientTag.includes(id)
+        ),
+        cuisineTag: previousTagIds.cuisineTag.filter(
+          (id) => !currentTagIds.cuisineTag.includes(id)
+        ),
+        flavourTag: previousTagIds.flavourTag.filter(
+          (id) => !currentTagIds.flavourTag.includes(id)
+        ),
+      };
+
+      console.log("Tags to remove:", removedTags);
+
+      // Remove tag references for removed tags
+      for (const tagId of removedTags.ingredientTag) {
+        try {
+          await removeTagReference(tagId, id);
+          console.log(
+            `Successfully removed reference for ingredient tag ${tagId}`
+          );
+        } catch (err) {
+          console.error(
+            `Failed to remove reference for ingredient tag ${tagId}:`,
+            err
+          );
+        }
+      }
+
+      for (const tagId of removedTags.cuisineTag) {
+        try {
+          await removeTagReference(tagId, id);
+          console.log(
+            `Successfully removed reference for cuisine tag ${tagId}`
+          );
+        } catch (err) {
+          console.error(
+            `Failed to remove reference for cuisine tag ${tagId}:`,
+            err
+          );
+        }
+      }
+
+      for (const tagId of removedTags.flavourTag) {
+        try {
+          await removeTagReference(tagId, id);
+          console.log(
+            `Successfully removed reference for flavour tag ${tagId}`
+          );
+        } catch (err) {
+          console.error(
+            `Failed to remove reference for flavour tag ${tagId}:`,
+            err
+          );
+        }
+      }
+
+      // Update references for current tags
+      for (const tag of cleanFormData.ingredientTag) {
+        try {
+          const tagId = tag.tagId || tag._id;
+          await updateTagReference(tagId, id);
+          console.log(
+            `Successfully updated reference for ingredient tag ${tagId}`
+          );
+        } catch (err) {
+          console.error(`Failed to update reference for ingredient tag:`, err);
+        }
+      }
+
+      for (const tag of cleanFormData.cuisineTag) {
+        try {
+          const tagId = tag.tagId || tag._id;
+          await updateTagReference(tagId, id);
+          console.log(
+            `Successfully updated reference for cuisine tag ${tagId}`
+          );
+        } catch (err) {
+          console.error(`Failed to update reference for cuisine tag:`, err);
+        }
+      }
+
+      for (const tag of cleanFormData.flavourTag) {
+        try {
+          const tagId = tag.tagId || tag._id;
+          await updateTagReference(tagId, id);
+          console.log(
+            `Successfully updated reference for flavour tag ${tagId}`
+          );
+        } catch (err) {
+          console.error(`Failed to update reference for flavour tag:`, err);
+        }
+      }
+
+      setLoading(false);
+      navigate(`/recipes/${id}`);
     } catch (err) {
+      setLoading(false);
       setError(err.message);
     }
   };
@@ -332,6 +497,37 @@ export default function EditRecipe() {
     });
   };
 
+  // New function to handle tag removal for all three tag types
+  const removeTag = (tagType, tagId) => {
+    console.log("e - removeTag called with:", { tagType, tagId });
+
+    // Log the current state before modification
+    console.log("e - Current formData before removal:", {
+      [tagType]: [...formData[tagType]],
+      formDataStructure: Object.keys(formData),
+    });
+
+    setFormData((prevData) => {
+      // Handle both possible tag object structures
+      const updatedTags = prevData[tagType].filter((tag) => {
+        // Check based on object structure - either tagId or _id could be used
+        if (typeof tag === "object") {
+          return tag.tagId !== tagId && tag._id !== tagId;
+        }
+        return tag !== tagId;
+      });
+
+      console.log("e - Updated tags after removal:", updatedTags);
+
+      return {
+        ...prevData,
+        [tagType]: updatedTags,
+      };
+    });
+
+    console.log(`e - Removed ${tagType} with ID: ${tagId}`);
+  };
+
   if (loading) return <p>Loading recipe data...</p>;
   if (error) return <p>Error: {error}</p>;
 
@@ -344,12 +540,14 @@ export default function EditRecipe() {
               <h1 className="text-3xl font-semibold text-center my-7">
                 Edit a Recipe
               </h1>
-              {/* New notification banner about PENDING status */}
-              <div className="alert alert-info my-3">
-                <i className="fas fa-info-circle me-2"></i>
-                When you update a recipe, it will be set to "PENDING" status and
-                require admin approval before being published again.
-              </div>
+              {/* New notification banner about PENDING status - only show if not DRAFT */}
+              {formData.status !== "DRAFT" && (
+                <div className="alert alert-info my-3">
+                  <i className="fas fa-info-circle me-2"></i>
+                  When you update a recipe, it will be set to "PENDING" status
+                  and require admin approval before being published again.
+                </div>
+              )}
             </div>
             <div className="col-12 col-md-8">
               <AccordionItem title="Recipe Information">
@@ -373,7 +571,8 @@ export default function EditRecipe() {
                               id="recipeName"
                               maxLength="62"
                               minLength="10"
-                              pattern="^[A-Za-z\s\-\'\u00C0-\u017F]{10,62}$" // Regex pattern for validating recipe name
+                              // Fixed pattern by properly escaping special characters
+                              pattern="^[A-Za-z\\s\\-'\\u00C0-\\u017F]{10,62}$"
                               onChange={handleChange}
                               value={formData.recipeName}
                             />
@@ -600,54 +799,28 @@ export default function EditRecipe() {
                       <span>Cuisine Tags</span>
                       <TagSelector
                         attribute="cuisineTag"
-                        value={formData.cuisineTag.map((t) => t.tagName)} // Map to tagName
+                        value={formData.cuisineTag}
                         onSelect={(selected) =>
-                          setFormData((prev) => {
-                            const existingTags = prev.cuisineTag || [];
-                            const updatedTags = selected.map((t) => ({
-                              tagId: t.tagId || t._id, // Preserve tagId or fallback to _id
-                              tagName: t.tagName,
-                            }));
-                            return {
-                              ...prev,
-                              cuisineTag: [
-                                ...existingTags,
-                                ...updatedTags,
-                              ].filter(
-                                (tag, index, self) =>
-                                  index ===
-                                  self.findIndex((t) => t.tagId === tag.tagId)
-                              ), // Ensure no duplicates
-                            };
-                          })
+                          setFormData((prev) => ({
+                            ...prev,
+                            cuisineTag: selected,
+                          }))
                         }
+                        onRemove={(tagId) => removeTag("cuisineTag", tagId)}
                       />
                     </div>
                     <div className="kh-recipe-form__form--item  ">
                       <span>Flavour Tags</span>
                       <TagSelector
                         attribute="flavourTag"
-                        value={formData.flavourTag.map((t) => t.tagName)} // Map to tagName
+                        value={formData.flavourTag}
                         onSelect={(selected) =>
-                          setFormData((prev) => {
-                            const existingTags = prev.flavourTag || [];
-                            const updatedTags = selected.map((t) => ({
-                              tagId: t.tagId || t._id, // Preserve tagId or fallback to _id
-                              tagName: t.tagName,
-                            }));
-                            return {
-                              ...prev,
-                              flavourTag: [
-                                ...existingTags,
-                                ...updatedTags,
-                              ].filter(
-                                (tag, index, self) =>
-                                  index ===
-                                  self.findIndex((t) => t.tagId === tag.tagId)
-                              ), // Ensure no duplicates
-                            };
-                          })
+                          setFormData((prev) => ({
+                            ...prev,
+                            flavourTag: selected,
+                          }))
                         }
+                        onRemove={(tagId) => removeTag("flavourTag", tagId)}
                       />
                     </div>
                   </div>
@@ -655,27 +828,14 @@ export default function EditRecipe() {
                     <span>Ingredient Tags</span>
                     <TagSelector
                       attribute="ingredientTag"
-                      value={formData.ingredientTag.map((t) => t.tagName)} // Map to tagName
+                      value={formData.ingredientTag}
                       onSelect={(selected) =>
-                        setFormData((prev) => {
-                          const existingTags = prev.ingredientTag || [];
-                          const updatedTags = selected.map((t) => ({
-                            tagId: t.tagId || t._id, // Preserve tagId or fallback to _id
-                            tagName: t.tagName,
-                          }));
-                          return {
-                            ...prev,
-                            ingredientTag: [
-                              ...existingTags,
-                              ...updatedTags,
-                            ].filter(
-                              (tag, index, self) =>
-                                index ===
-                                self.findIndex((t) => t.tagId === tag.tagId)
-                            ), // Ensure no duplicates
-                          };
-                        })
+                        setFormData((prev) => ({
+                          ...prev,
+                          ingredientTag: selected,
+                        }))
                       }
+                      onRemove={(tagId) => removeTag("ingredientTag", tagId)}
                     />
 
                     <div className="kh-recipe-form__form--item">
@@ -799,6 +959,36 @@ export default function EditRecipe() {
                   value={formData.chefName}
                   onChange={handleChange}
                 />
+
+                {/* Status Selection for creators and admins */}
+                {localCurrentUser &&
+                  (localCurrentUser.role === "creator" ||
+                    localCurrentUser.role === "admin") && (
+                    <div className="kh-recipe-form__form--item kh-input-item mb-4">
+                      <label htmlFor="status">Recipe Status:</label>
+                      <select
+                        id="status"
+                        className="form-select"
+                        value={formData.status}
+                        onChange={(e) =>
+                          setFormData({ ...formData, status: e.target.value })
+                        }
+                      >
+                        <option value="DRAFT">Save as Draft</option>
+                        {localCurrentUser.role === "admin" ? (
+                          <option value="PUBLISHED">Publish</option>
+                        ) : (
+                          <option value="PUBLISH">Submit for Review</option>
+                        )}
+                      </select>
+                      {formData.status === "DRAFT" && (
+                        <small className="text-muted">
+                          Draft recipes don't count toward your recipe limit
+                        </small>
+                      )}
+                    </div>
+                  )}
+
                 <div className="kh-recipe-form__admin--submit">
                   <input type="hidden" id="userRef" value={currentUser._id} />
 
@@ -812,6 +1002,7 @@ export default function EditRecipe() {
                   {error && <p className="text-red-700 text-sm">{error}</p>}
                 </div>
               </div>
+
               <AccordionItem title="Fivegrid ">
                 <div className="div-input-wrapper">
                   <h4>Cooking and Prep</h4>

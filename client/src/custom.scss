@@ -58,7 +58,7 @@ $bg-gray: #303030;
   text-decoration: none;
   transition: all 0.5s;
   color: $white;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 html,
@@ -192,6 +192,7 @@ textarea {
       border-radius: 50%;
       border: 10px solid $bg-gray;
       position: relative;
+      object-fit: cover;
       z-index: 2;
     }
     &--data {
@@ -235,6 +236,50 @@ textarea {
         }
       }
     }
+  }
+  &__tab {
+    &--item {
+      margin-top: 30px;
+    }
+  }
+  &__social-icons {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  &__social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+
+    svg {
+      font-size: 28px;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover svg {
+      transform: scale(1.2);
+    }
+
+    // Platform-specific colors
+    &[title="instagram"] svg {
+      color: #e1306c;
+    }
+
+    &[title="youtube"] svg {
+      color: #ff0000;
+    }
+
+    &[title="tiktok"] svg {
+      color: #000000;
+    }
+  }
+
+  &__content--social {
+    margin-bottom: 20px;
   }
 }
 main {

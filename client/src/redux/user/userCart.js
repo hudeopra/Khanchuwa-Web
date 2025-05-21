@@ -12,28 +12,72 @@ const userCartSlice = createSlice({
       state.items = [];
     },
     addToCart: (state, action) => {
-      const { _id, productName, quantity, price, favImg, disPrice, mrkPrice } = action.payload; // Include favImg
+      const { _id, productName, quantity, price, favImg, disPrice, mrkPrice, maxQuantity } = action.payload;
       const existing = state.items.find((item) => item.id === _id);
-      if (existing) {
-        existing.quantity += quantity; // Increment quantity
-        existing.price = existing.quantity * (price / quantity); // Recalculate total price based on unit price
+
+      // Check if maxQuantity is provided
+      if (maxQuantity !== undefined) {
+        if (existing) {
+          // Calculate new quantity
+          const newQuantity = existing.quantity + quantity;
+
+          // Check if new quantity exceeds the maximum available stock
+          if (newQuantity > maxQuantity) {
+            // Only update to maxQuantity if more is requested
+            existing.quantity = maxQuantity;
+            // Recalculate price based on unit price
+            existing.price = existing.quantity * (price / quantity);
+            return; // Exit early as we've updated to the maximum
+          }
+
+          // Otherwise, proceed with normal update
+          existing.quantity = newQuantity;
+          existing.price = existing.quantity * (price / quantity);
+        } else {
+          // For new items, respect the maxQuantity
+          const finalQuantity = Math.min(quantity, maxQuantity);
+          state.items.push({
+            id: _id,
+            productName,
+            quantity: finalQuantity,
+            price: (price / quantity) * finalQuantity,
+            unitPrice: price / quantity,
+            favImg,
+            disPrice,
+            mrkPrice,
+            maxQuantity,
+          });
+        }
       } else {
-        state.items.push({
-          id: _id,
-          productName,
-          quantity,
-          price, // Total price for the initial quantity
-          unitPrice: price / quantity, // Store unit price for future calculations
-          favImg: favImg, // Provide a default value for favImg
-          disPrice, // Add disPrice if available
-          mrkPrice, // Add mrkPrice if available
-        });
+        // Original behavior for items without maxQuantity
+        if (existing) {
+          existing.quantity += quantity;
+          existing.price = existing.quantity * (price / quantity);
+        } else {
+          state.items.push({
+            id: _id,
+            productName,
+            quantity,
+            price,
+            unitPrice: price / quantity,
+            favImg,
+            disPrice,
+            mrkPrice,
+          });
+        }
       }
     },
     updateQuantity: (state, action) => {
       const { productId, quantity } = action.payload;
       const item = state.items.find(item => item.id === productId);
-      if (item) item.quantity = quantity;
+      if (item) {
+        // Respect maxQuantity if it exists
+        if (item.maxQuantity !== undefined) {
+          item.quantity = Math.min(quantity, item.maxQuantity);
+        } else {
+          item.quantity = quantity;
+        }
+      }
     },
     removeFromCart: (state, action) => {
       state.items = state.items.filter(item => item.id !== action.payload);
@@ -42,8 +86,13 @@ const userCartSlice = createSlice({
       const { id, quantity } = action.payload;
       const item = state.items.find((item) => item.id === id);
       if (item) {
-        item.quantity = quantity; // Update quantity
-        item.price = item.unitPrice * quantity; // Recalculate total price
+        // Respect maxQuantity if it exists
+        if (item.maxQuantity !== undefined) {
+          item.quantity = Math.min(quantity, item.maxQuantity);
+        } else {
+          item.quantity = quantity;
+        }
+        item.price = item.unitPrice * item.quantity; // Recalculate total price
       }
     }
   }

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
+const SingleTagSelector = ({ attribute, onSelect, onRemove, value = [] }) => {
   const [selectedTags, setSelectedTags] = useState(value);
   const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [dbTags, setDbTags] = useState([]);
+  // Add a ref to track if we're handling internal changes
+  const isInternalChange = useRef(false);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -19,10 +21,23 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
     fetchTags();
   }, [attribute]);
 
-  // Call onSelect after selectedTags state updates
+  // Update selected tags when value prop changes, but only if it's not from our internal change
   useEffect(() => {
-    if (onSelect) onSelect(selectedTags);
-  }, [selectedTags]); // Removed onSelect from dependency array
+    // Don't update if the change was triggered internally
+    if (
+      JSON.stringify(value) !== JSON.stringify(selectedTags) &&
+      !isInternalChange.current
+    ) {
+      setSelectedTags(value);
+    }
+    // Reset the flag after each render
+    isInternalChange.current = false;
+  }, [value]);
+
+  // Call onSelect after selectedTags state updates, but only for internal changes
+  useEffect(() => {
+    if (onSelect && isInternalChange.current) onSelect(selectedTags);
+  }, [selectedTags, onSelect]); // Added onSelect back to dependency array
 
   const handleInputChange = (e) => {
     const val = e.target.value;
@@ -62,6 +77,7 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
       })
     )
       return;
+
     let tagObj = dbTags.find(
       (t) => t.name.toLowerCase() === tagName.toLowerCase()
     );
@@ -79,7 +95,15 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
         return;
       }
     }
-    setSelectedTags((prev) => [...prev, tagObj]);
+
+    // Set flag to indicate this is an internal change
+    isInternalChange.current = true;
+
+    // Update state and notify parent
+    const newTags = [...selectedTags, tagObj];
+    setSelectedTags(newTags);
+    if (onSelect) onSelect(newTags);
+
     setInputValue("");
     setSuggestions([]);
   };
@@ -98,14 +122,55 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
   };
 
   const handleRemoveTag = (tagIdentifier) => {
-    setSelectedTags((prev) =>
-      prev.filter((t) =>
-        // Compare by _id if available; otherwise, compare tag string's lower case.
-        t && t._id
-          ? t._id !== tagIdentifier
-          : t.toLowerCase() !== tagIdentifier.toLowerCase()
-      )
-    );
+    console.log("e - Tag removal initiated:", {
+      tagIdentifier,
+      allTags: [...selectedTags],
+      attribute,
+    });
+
+    // Find the tag to be removed
+    const tagToRemove = selectedTags.find((t) => {
+      if (typeof t === "string") {
+        return t === tagIdentifier;
+      } else if (t && typeof t === "object") {
+        // Check for both _id and tagId fields
+        return t._id === tagIdentifier || t.tagId === tagIdentifier;
+      }
+      return false;
+    });
+
+    console.log("e - Found tag to remove:", tagToRemove);
+
+    // Set flag to indicate this is an internal change
+    isInternalChange.current = true;
+
+    // Update state with filtered tags
+    const newTags = selectedTags.filter((t) => {
+      if (typeof t === "string") {
+        return t !== tagIdentifier;
+      } else if (t && typeof t === "object") {
+        // Check for both _id and tagId fields
+        return !(t._id === tagIdentifier || t.tagId === tagIdentifier);
+      }
+      return true;
+    });
+
+    // Update state and notify parent
+    setSelectedTags(newTags);
+    if (onSelect) onSelect(newTags);
+
+    // Call the onRemove prop if provided
+    if (onRemove) {
+      console.log("e - Calling onRemove with tag:", tagToRemove);
+
+      // Get the appropriate ID from the tag
+      const tagId =
+        tagToRemove && typeof tagToRemove === "object"
+          ? tagToRemove._id || tagToRemove.tagId
+          : tagIdentifier;
+
+      onRemove(tagId);
+    }
   };
 
   // Use a safe array filtering out null or undefined values.
@@ -116,14 +181,27 @@ const SingleTagSelector = ({ attribute, onSelect, value = [] }) => {
       <div className="selected-tags">
         {safeSelected.length > 0 ? (
           safeSelected.map((tag, index) => {
-            const displayName = tag && tag.name ? tag.name : tag;
-            const keyVal = (tag && tag._id) || `${displayName}-${index}`;
+            // Handle different tag object structures
+            let displayName = "";
+            let tagId = "";
+
+            if (typeof tag === "string") {
+              displayName = tag;
+              tagId = tag;
+            } else if (tag && typeof tag === "object") {
+              // Handle both name and tagName formats
+              displayName = tag.name || tag.tagName || "Unknown Tag";
+              tagId = tag._id || tag.tagId || `tag-${index}`;
+            }
+
+            const keyVal = tagId || `tag-${index}`;
+
             return (
               <span key={keyVal} className="tag-badge">
                 <span className="tag-name">{displayName}</span>
                 <button
                   className="kh-btn kh-btn__x"
-                  onClick={() => handleRemoveTag((tag && tag._id) || tag)}
+                  onClick={() => handleRemoveTag(tagId)}
                 >
                   &times;
                 </button>

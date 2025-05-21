@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
+import { FaInstagramSquare, FaYoutube, FaTiktok } from "react-icons/fa";
 
 export default function ProfileCard() {
   const [user, setUser] = useState(null);
@@ -64,29 +65,53 @@ export default function ProfileCard() {
       <div className="kh-profile-card__head">
         <div className="kh-profile-card__head--content">
           <div className="kh-profile-card__head--content--item">
-            {user.email && <p>{user.email}</p>}
-          </div>
-          <div className="kh-profile-card__head--content--item">
-            {user.address && <p>{user.address}</p>}
-          </div>
+            {user.socialMedia && user.socialMedia.length > 0 && (
+              <div className="kh-profile-card__content--item kh-profile-card__content--social">
+                <div className="kh-profile-card__social-icons">
+                  {user.socialMedia.map((social, index) => {
+                    // Filter to only show YouTube, TikTok, and Instagram
+                    if (
+                      !["youtube", "tiktok", "instagram"].includes(
+                        social.platform.toLowerCase()
+                      )
+                    ) {
+                      return null;
+                    }
 
-          <div className="kh-profile-card__head--content--item">
-            {user.phoneNumber && (
-              <div className="kh-profile__tab--item">
-                <p>{user.phoneNumber}</p>
+                    // Determine the appropriate icon component based on platform
+                    let IconComponent = null;
+                    switch (social.platform.toLowerCase()) {
+                      case "instagram":
+                        IconComponent = FaInstagramSquare;
+                        break;
+                      case "youtube":
+                        IconComponent = FaYoutube;
+                        break;
+                      case "tiktok":
+                        IconComponent = FaTiktok;
+                        break;
+                      default:
+                        return null; // Skip any other platforms
+                    }
+
+                    return (
+                      <a
+                        key={index}
+                        href={social.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="kh-profile-card__social-link"
+                        title={social.platform}
+                      >
+                        <IconComponent />
+                      </a>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
-        </div>
-      </div>
-      <div className="kh-profile-card__user">
-        <div className="kh-profile-card__user--img">
-          {user.avatar && (
-            <img src={user.avatar} alt="Avatar" className="profile-avatar" />
-          )}
-        </div>
-        <div className="kh-profile-card__user--info">
-          <div className="kh-profile-card__user--data">
+          <div className="kh-profile-card__head--content--item">
             {user.role && (
               <div className="kh-profile-card__tab--item">
                 <p>
@@ -108,12 +133,57 @@ export default function ProfileCard() {
               </div>
             )}
           </div>
+        </div>
+      </div>
+      <div className="kh-profile-card__user">
+        <div className="kh-profile-card__user--img">
+          {user.avatar && (
+            <img src={user.avatar} alt="Avatar" className="profile-avatar" />
+          )}
+        </div>
+        <div className="kh-profile-card__user--info">
+          <div className="kh-profile-card__user--data"></div>
+
+          {user.userStatus && (
+            <span
+              className="user-status-badge"
+              style={{
+                backgroundColor:
+                  user.userStatus === "ACTIVE"
+                    ? "#28a745" // green
+                    : user.userStatus === "INACTIVE"
+                    ? "#f8f9fa" // white
+                    : user.userStatus === "BANNED"
+                    ? "#ffc107" // yellow
+                    : user.userStatus === "WARNED"
+                    ? "#dc3545" // red
+                    : "#6c757d", // default gray
+                color: user.userStatus === "INACTIVE" ? "#212529" : "#fff",
+                padding: "3px 10px",
+                borderRadius: "4px",
+                display: "inline-block",
+                marginRight: "10px",
+                fontSize: "0.8rem",
+              }}
+            >
+              {/* {user.userStatus} */}
+            </span>
+          )}
           {user.fullname && <h2>{user.fullname}</h2>}
           <span>@{user.username}</span>
           <div className="kh-profile-card__user--bio">
             {user.bio && (
               <div className="kh-profile-card__tab--item">
+                <h6>Bio:</h6>
                 <p>{user.bio}</p>
+
+                {user.email && <p>{user.email}</p>}
+                {user.address && <p>{user.address}</p>}
+                {user.phoneNumber && (
+                  <div className="kh-profile__tab--item">
+                    <p>{user.phoneNumber}</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -174,24 +244,23 @@ export default function ProfileCard() {
           )}
         </div>
         <div className="kh-profile-card__content--item  kh-profile-card__content--details">
-          <h4>asd</h4>
-          {user.recipelimit !== undefined && user.role !== "user" && (
-            <div className="kh-profile-card__tab--item">
-              <p>
-                <strong>Recipe Limit:</strong> {user.recipelimit}
-              </p>
-            </div>
-          )}
-          {user.userFavRecipe && user.userFavRecipe.length > 0 && (
-            <div className="kh-profile-card__tab--item">
-              <p>
-                <strong>Favorite Recipes:</strong>{" "}
-                <Link to="/user-favourites">
-                  {user.userFavRecipe.length} saved
-                </Link>
-              </p>
-            </div>
-          )}
+          <div>
+            {user.recipelimit !== undefined && user.role !== "user" && (
+              <div className="kh-profile-card__tab--item">
+                <p>
+                  <strong>New Recipe:</strong> {user.recipelimit} Left
+                </p>
+              </div>
+            )}
+            {user.userFavRecipe && user.userFavRecipe.length > 0 && (
+              <div className="kh-profile-card__tab--item">
+                <p>
+                  <strong>Favorite Recipes:</strong>{" "}
+                  <Link to="/user-favourites">{user.userFavRecipe.length}</Link>
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

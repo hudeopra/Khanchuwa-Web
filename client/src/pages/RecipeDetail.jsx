@@ -44,7 +44,7 @@ export default function RecipeDetail() {
   const sliderForRef = useRef(null);
   const sliderNavRef = useRef(null);
 
-  console.log("User data:", userData);
+  // console.log("User data:", userData);
   if (userData.currentUser) {
   }
 

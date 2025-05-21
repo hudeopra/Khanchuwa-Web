@@ -195,7 +195,7 @@ const Footer = () => {
                 <Link to="/quick-easy">Contact Us</Link>
               </li>
               <li>
-                <Link to="/quick-easy">Site Map</Link>
+                <Link to="/sitemap">Site Map</Link>
               </li>
             </ul>
           </div>

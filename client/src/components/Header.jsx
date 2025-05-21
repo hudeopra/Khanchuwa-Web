@@ -250,6 +250,25 @@ export default function Header({ pagename }) {
                       <span className="kh-header__user--label">Favorites</span>
                     </Link>
                   </div>
+                  {currentUser.role === "admin" && (
+                    <>
+                      <div className="kh-header__user--admin-recipes">
+                        <Link to="/admin/recipes" onClick={handleLinkClick}>
+                          Admin Recipes
+                        </Link>
+                      </div>
+                      <div className="kh-header__user--admin-users">
+                        <Link to="/admin/users" onClick={handleLinkClick}>
+                          Admin Users
+                        </Link>
+                      </div>
+                      <div className="kh-header__user--admin-users">
+                        <Link to="/admin/cookshop" onClick={handleLinkClick}>
+                          Admin Users
+                        </Link>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             ) : (

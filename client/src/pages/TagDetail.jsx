@@ -162,6 +162,18 @@ const TagDetail = () => {
       return;
     }
 
+    // Check if item is in stock
+    if (!tag.inStock || tag.quantity === 0) {
+      showAlert("error", "This product is out of stock");
+      return;
+    }
+
+    // Check if requested quantity exceeds available stock
+    if (quantity > tag.quantity) {
+      showAlert("error", `Only ${tag.quantity} units available in stock`);
+      return;
+    }
+
     if (tag) {
       const unitPrice = tag.disPrice || tag.mrkPrice || 0; // Calculate unit price
       const cartItem = {
@@ -191,7 +203,7 @@ const TagDetail = () => {
             <div className="kh-tag-detail__wrapper">
               <div className=" d-flex justify-content-between align-items-end mb-2">
                 <h1>{tag.name}</h1>
-                <span className="kh-tag-detail__tag-name">{tag.tagType}</span>
+                <p className="kh-tag-detail__tag-name">{tag.tagType}</p>
               </div>
               <div className="kh-tag-detail__banner">
                 {tag.bannerImg && (
@@ -204,7 +216,7 @@ const TagDetail = () => {
                 {currentUser?.role === "admin" && (
                   <div className="kh-tag-detail__admin-actions">
                     <a
-                      href={`/product/edit/${tag._id}`}
+                      href={`/admin/product/edit/${tag._id}`}
                       className="mt-2 ml-4 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90 me-2"
                     >
                       Edit Tag
@@ -281,9 +293,28 @@ const TagDetail = () => {
                 </div>
                 <button
                   onClick={handleAddToCart}
-                  className="mt-2 p-3 bg-green-600 text-white rounded-lg hover:opacity-90"
+                  disabled={
+                    !currentUser ||
+                    !tag.inStock ||
+                    tag.quantity === 0 ||
+                    quantity > tag.quantity
+                  }
+                  className={`mt-2 p-3 text-white rounded-lg hover:opacity-90 ${
+                    !currentUser ||
+                    !tag.inStock ||
+                    tag.quantity === 0 ||
+                    quantity > tag.quantity
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-green-600"
+                  }`}
                 >
-                  Add to Cart
+                  {!currentUser
+                    ? "Sign in to purchase"
+                    : !tag.inStock || tag.quantity === 0
+                    ? "Out of stock"
+                    : quantity > tag.quantity
+                    ? `Limited stock (${tag.quantity})`
+                    : "Add to Cart"}
                 </button>
                 {/* New Edit Product Link */}
               </div>
@@ -318,11 +349,13 @@ const TagDetail = () => {
                         <h5 className="card-title">
                           {recipe.recipeName || "N/A"}
                         </h5>
-                        <div className="card-text mb-2">
-                          {recipe.description.length > 150
-                            ? `${recipe.description.slice(0, 110)}...`
-                            : recipe.description}
-                        </div>
+                        <p className="card-text mb-2">
+                          <p>
+                            {recipe.description.length > 150
+                              ? `${recipe.description.slice(0, 110)}...`
+                              : recipe.description}
+                          </p>{" "}
+                        </p>
                         <a
                           href={`/recipes/${recipe._id}`}
                           className="btn btn-primary"

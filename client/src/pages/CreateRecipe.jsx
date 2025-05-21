@@ -55,6 +55,7 @@ export default function CreateRecipe() {
     cookingMethod: [], // UPDATED: cooking methods (multiple), will include extra +1 option
     dietaryRestrictions: [], // NEW: dietary restrictions
     allergies: [], // NEW: allergies
+    status: "PENDING", // Default status
   });
   const [imageUploadError, setImageUploadError] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -162,6 +163,14 @@ export default function CreateRecipe() {
 
   const handleChange = (e) => {
     const { id, value, type, name } = e.target;
+
+    console.log("Form field changed:", {
+      field: id || name,
+      oldValue: formData[id || name],
+      newValue: value,
+      event: e.type,
+    });
+
     if (type === "radio") {
       setFormData({
         ...formData,
@@ -218,15 +227,28 @@ export default function CreateRecipe() {
         return { tagId, tagName: tag?.name || "Unknown" };
       });
 
+    // Determine the final status for the recipe
+    let finalStatus = formData.status;
+
+    // If user selects "PUBLISH" but is not admin, set to PENDING
+    if (finalStatus === "PUBLISH") {
+      if (localCurrentUser && localCurrentUser.role === "admin") {
+        finalStatus = "PUBLISHED";
+      } else {
+        finalStatus = "PENDING";
+      }
+    }
+
     const bodyData = {
       ...formData,
-      cuisineTag: formatTags(formData.cuisineTag, formData.cuisineTagDb || []), // Ensure cuisineTag is included
+      cuisineTag: formatTags(formData.cuisineTag, formData.cuisineTagDb || []),
       flavourTag: formatTags(formData.flavourTag, formData.flavourTagDb || []),
       ingredientTag: formatTags(
         formData.ingredientTag,
         formData.ingredientTagDb || []
       ),
       userRef: userId,
+      status: finalStatus,
     };
 
     try {
@@ -250,8 +272,12 @@ export default function CreateRecipe() {
           )
         );
 
-        // Call the endpoint to decrement the recipe limit
-        if (localCurrentUser && localCurrentUser.role !== "admin") {
+        // Only decrement recipe limit if not a DRAFT
+        if (
+          data.shouldDecrementLimit &&
+          localCurrentUser &&
+          localCurrentUser.role !== "admin"
+        ) {
           try {
             const decrementRes = await fetch(
               "/api/user/decrement-recipe-limit",
@@ -269,10 +295,8 @@ export default function CreateRecipe() {
 
             const decrementData = await decrementRes.json();
             if (decrementData.success) {
-              // Update local state with new recipe limit
               setRecipeLimit(decrementData.newLimit);
 
-              // Show remaining recipes alert
               if (decrementData.newLimit <= 3 && decrementData.newLimit > 0) {
                 showAlert(
                   "warning",
@@ -285,7 +309,6 @@ export default function CreateRecipe() {
                 );
               }
 
-              // Update Redux store with new user data
               dispatch({
                 type: "user/updateUserSuccess",
                 payload: {
@@ -374,7 +397,6 @@ export default function CreateRecipe() {
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
-      // If we've already shown the alert and redirected, don't do it again
       if (redirected) return;
 
       try {
@@ -386,7 +408,7 @@ export default function CreateRecipe() {
         });
         if (!res.ok) throw new Error("Failed to fetch current user");
         const data = await res.json();
-        console.log("Current user data:", data); // Debugging log
+        console.log("Current user data:", data);
 
         // Store user data regardless of role
         setRecipeLimit(data.recipelimit);
@@ -396,20 +418,14 @@ export default function CreateRecipe() {
           payload: data,
         });
 
-        // Check if user has creator or admin role
-        if (data.role !== "creator" && data.role !== "admin") {
-          // Don't redirect, allow them to see the page with "become creator" button
-          return;
+        // Set default status based on role
+        if (data.role === "admin") {
+          setFormData((prev) => ({ ...prev, status: "PUBLISHED" }));
+        } else {
+          setFormData((prev) => ({ ...prev, status: "PENDING" }));
         }
 
-        // Check recipe limit - if it's 0 and user is not an admin, show alert and redirect
-        if (data.recipelimit <= 0 && data.role !== "admin") {
-          showAlert(
-            "warning",
-            "You've reached your recipe creation limit. Please contact an administrator."
-          );
-          return;
-        }
+        // No longer redirect users away - all users can create recipes
       } catch (error) {
         console.error("Error fetching current user:", error.message);
       }
@@ -428,18 +444,8 @@ export default function CreateRecipe() {
                 Create a Recipe
               </h1>
 
-              {/* Alert for regular users */}
-              {localCurrentUser && localCurrentUser.role === "user" && (
-                <div className="alert alert-danger">
-                  You need to be a creator to publish recipes.
-                  <button className="btn btn-primary ms-3">
-                    Become a Creator
-                  </button>
-                </div>
-              )}
-
-              {/* Alert for creators with recipe limits */}
-              {localCurrentUser && localCurrentUser.role === "creator" && (
+              {/* Recipe limit alerts - show for all users */}
+              {localCurrentUser && localCurrentUser.role !== "admin" && (
                 <div
                   className={`alert ${
                     recipeLimit <= 0
@@ -451,6 +457,13 @@ export default function CreateRecipe() {
                 >
                   Recipe Creation Limit: <strong>{recipeLimit}</strong> recipes
                   remaining
+                  {recipeLimit <= 0 && (
+                    <div className="mt-2">
+                      <small>
+                        Draft recipes don't count toward your limit!
+                      </small>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -702,11 +715,13 @@ export default function CreateRecipe() {
                     <span>Cuisine Tags</span>
                     <TagSelector
                       attribute="cuisineTag"
-                      value={formData.cuisineTag.map((t) => t._id)} // Map to tag IDs
+                      value={formData.cuisineTag}
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          cuisineTag: selected.map((t) => t._id), // Store only tag IDs
+                          cuisineTag: selected,
+                          // Store full objects for backend consumption
+                          cuisineTagDb: selected,
                         }))
                       }
                     />
@@ -715,11 +730,13 @@ export default function CreateRecipe() {
                     <span>Flavour Tags</span>
                     <TagSelector
                       attribute="flavourTag"
-                      value={formData.flavourTag.map((t) => t._id)} // Map to tag IDs
+                      value={formData.flavourTag}
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          flavourTag: selected.map((t) => t._id), // Store only tag IDs
+                          flavourTag: selected,
+                          // Store full objects for backend consumption
+                          flavourTagDb: selected,
                         }))
                       }
                     />
@@ -728,15 +745,22 @@ export default function CreateRecipe() {
                     <span>Ingredient Tags</span>
                     <TagSelector
                       attribute="ingredientTag"
-                      value={formData.ingredientTag.map((t) => t._id)} // Map to tag IDs
+                      value={formData.ingredientTag}
                       onSelect={(selected) =>
                         setFormData((prev) => ({
                           ...prev,
-                          ingredientTag: selected.map((t) => t._id), // Store only tag IDs
-                          ingredients: selected.map((t) => ({
-                            name: t.name,
-                            quantity: "",
-                          })),
+                          ingredientTag: selected,
+                          // Store full objects for backend consumption
+                          ingredientTagDb: selected,
+                          // Optional: Update ingredients based on selected ingredient tags
+                          ingredients:
+                            prev.ingredients.length <= 1 &&
+                            prev.ingredients[0].name === ""
+                              ? selected.map((t) => ({
+                                  name: t.name || "",
+                                  quantity: "",
+                                }))
+                              : prev.ingredients,
                         }))
                       }
                     />
@@ -767,46 +791,72 @@ export default function CreateRecipe() {
                 <p>
                   Author: <span>@{formData.chefName}</span>
                 </p>
+
+                {/* Status Selection for creators and admins */}
+                {localCurrentUser &&
+                  (localCurrentUser.role === "creator" ||
+                    localCurrentUser.role === "admin") && (
+                    <div className="kh-recipe-form__form--item kh-input-item mb-4">
+                      <label htmlFor="status">Recipe Status:</label>
+                      <select
+                        id="status"
+                        className="form-select"
+                        value={formData.status}
+                        onChange={(e) =>
+                          setFormData({ ...formData, status: e.target.value })
+                        }
+                      >
+                        <option value="DRAFT">Save as Draft</option>
+                        {localCurrentUser.role === "admin" ? (
+                          <option value="PUBLISHED">Publish</option>
+                        ) : (
+                          <option value="PUBLISH">Submit for Review</option>
+                        )}
+                      </select>
+                      {formData.status === "DRAFT" && (
+                        <small className="text-muted">
+                          Draft recipes don't count toward your recipe limit
+                        </small>
+                      )}
+                    </div>
+                  )}
+
                 <div className="kh-recipe-form__admin--submit">
                   <input type="hidden" id="userRef" value={currentUser._id} />
 
-                  {localCurrentUser && localCurrentUser.role === "user" ? (
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={() => navigate("/upgrade-account")} // Replace with your actual upgrade route
-                    >
-                      Become a Creator to Publish Recipes
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={
-                        loading ||
-                        uploading ||
-                        (localCurrentUser &&
+                  <button
+                    type="submit"
+                    disabled={
+                      loading ||
+                      uploading ||
+                      (localCurrentUser &&
+                        localCurrentUser.role !== "admin" &&
+                        recipeLimit <= 0 &&
+                        formData.status !== "DRAFT") // Can always create DRAFT recipes
+                    }
+                    className={`${
+                      loading
+                        ? "loading"
+                        : localCurrentUser &&
                           localCurrentUser.role !== "admin" &&
-                          recipeLimit <= 0)
-                      }
-                      className={`${
-                        loading
-                          ? "loading"
-                          : localCurrentUser &&
-                            localCurrentUser.role !== "admin" &&
-                            recipeLimit <= 0
-                          ? "disabled"
-                          : ""
-                      }`}
-                    >
-                      {loading ? "Creating..." : "Create Recipe"}
-                    </button>
-                  )}
+                          recipeLimit <= 0 &&
+                          formData.status !== "DRAFT"
+                        ? "disabled"
+                        : ""
+                    }`}
+                  >
+                    {loading ? "Creating..." : "Create Recipe"}
+                  </button>
 
                   {recipeLimit <= 0 &&
                     localCurrentUser &&
-                    localCurrentUser.role === "creator" && (
+                    localCurrentUser.role !== "admin" &&
+                    formData.status !== "DRAFT" && (
                       <p className="text-red-700 text-sm">
-                        You've reached your recipe creation limit
+                        You've reached your recipe creation limit for published
+                        recipes.
+                        <br />
+                        <small>You can still create draft recipes.</small>
                       </p>
                     )}
                   {error && <p className="text-red-700 text-sm">{error}</p>}

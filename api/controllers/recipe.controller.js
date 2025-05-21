@@ -56,8 +56,16 @@ export const createRecipe = async (req, res, next) => {
       allergies,
       userRef,
       imageUrls, // Add imageUrls here
-      status, // Remove the default value to respect the schema's default
+      status, // The status field from the client
     } = req.body;
+
+    // Determine the actual status based on user role and chosen status
+    let finalStatus = status || 'PENDING'; // Default to PENDING if not specified
+
+    // If status is DRAFT, keep it as DRAFT
+    // If status is PUBLISH and user role is admin, set to PUBLISHED
+    // If status is PUBLISH and user role is creator, set to PENDING
+    // This validation will be in the frontend, we'll trust the status coming from there
 
     // Populate tagName for each tag type
     const populatedCuisineTag = await populateTags(cuisineTag || []);
@@ -90,7 +98,7 @@ export const createRecipe = async (req, res, next) => {
       allergies: allergies || [], // Handle new field
       userRef,
       imageUrls, // Include imageUrls in the recipe creation
-      status, // Include status in the recipe creation
+      status: finalStatus, // Use the determined final status
     });
 
     // Update recipe references in tags
@@ -98,7 +106,11 @@ export const createRecipe = async (req, res, next) => {
     await updateRecipeReferences(populatedFlavourTag, recipe._id);
     await updateRecipeReferences(populatedIngredientTag, recipe._id);
 
-    return res.status(201).json(recipe);
+    // Return the new recipe with additional info about whether to decrement
+    return res.status(201).json({
+      ...recipe.toObject(),
+      shouldDecrementLimit: finalStatus !== 'DRAFT' // Only decrement if not a draft
+    });
   } catch (error) {
     console.error("Error creating recipe:", error);
     res.status(500).json({ success: false, message: error.message });

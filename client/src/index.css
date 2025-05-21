@@ -415,6 +415,7 @@ main {
   border-radius: 12px;
   position: relative;
   overflow: hidden;
+  max-height: 400px;
 }
 
 .kh-recipe-block__item:hover .kh-recipe-block__info {
@@ -717,6 +718,7 @@ body {
 .kh-profile__menu--menu-wrapper {
   position: sticky;
   top: 147px;
+  margin-bottom: 20px;
 }
 ul.kh-profile__menu--sub-menu-block {
   max-height: 0;
@@ -762,8 +764,7 @@ ul.kh-profile__menu--sub-menu-block.active {
   width: 120px;
   object-fit: cover;
 }
-.kh-recipe-post .recipe-block-wrapper {
-}
+
 /* Profile Page ends */
 /* Profile edit page start */
 .card {
@@ -1024,8 +1025,6 @@ ul.kh-profile__menu--sub-menu-block.active {
   padding: 15px;
 }
 
-.kh-profile .recipe-block-wrapper {
-}
 /* Prodile Edit page ends */
 
 /* textbox */
@@ -1163,7 +1162,6 @@ ul.kh-profile__menu--sub-menu-block.active {
 /* 404 page not found starts*/
 .page_404 {
   padding: 40px 0;
-  font-family: "Arvo", serif;
 }
 
 .page_404 img {

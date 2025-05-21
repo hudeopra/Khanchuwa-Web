@@ -8,6 +8,7 @@ export default function AdminAllRecipe() {
   const [error, setError] = useState(null);
   const [statusChanging, setStatusChanging] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
+  const [activeRecipe, setActiveRecipe] = useState(null);
   const navigate = useNavigate();
   const { currentUser } = useSelector((state) => state.user);
 
@@ -25,6 +26,9 @@ export default function AdminAllRecipe() {
         const data = await res.json();
         setRecipes(data);
         setLoading(false);
+        if (data.length > 0) {
+          setActiveRecipe(data[0]);
+        }
       } catch (err) {
         setError(err.message);
         setLoading(false);
@@ -75,6 +79,12 @@ export default function AdminAllRecipe() {
             setSuccessMessage(
               `Recipe status updated to ${newStatus} successfully!`
             );
+
+            // Also update the active recipe if it's the one being changed
+            if (activeRecipe && activeRecipe._id === recipeId) {
+              setActiveRecipe({ ...activeRecipe, status: newStatus });
+            }
+
             setTimeout(() => setSuccessMessage(""), 3000); // Clear after 3 seconds
             return;
           }
@@ -105,6 +115,11 @@ export default function AdminAllRecipe() {
             recipe._id === recipeId ? { ...recipe, status: newStatus } : recipe
           )
         );
+
+        // Also update the active recipe if it's the one being changed
+        if (activeRecipe && activeRecipe._id === recipeId) {
+          setActiveRecipe({ ...activeRecipe, status: newStatus });
+        }
 
         setSuccessMessage(
           `Recipe status updated to ${newStatus} successfully!`
@@ -140,76 +155,128 @@ export default function AdminAllRecipe() {
     );
 
   return (
-    <main className="container mt-4">
-      <h1 className="text-center mb-4">Recipe Administration</h1>
-      {successMessage && (
-        <div className="alert alert-success text-center">{successMessage}</div>
-      )}
-      <div className="table-responsive">
-        <table className="table table-hover">
-          <thead className="thead-dark">
-            <tr>
-              <th>ID</th>
-              <th>Recipe Name</th>
-              <th>Chef</th>
-              <th>Created Date</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {recipes.map((recipe) => (
-              <tr key={recipe._id}>
-                <td>{recipe._id.substring(0, 8)}...</td>
-                <td>{recipe.recipeName}</td>
-                <td>{recipe.chefName || "Unknown"}</td>
-                <td>{new Date(recipe.createdAt).toLocaleDateString()}</td>
-                <td>
-                  <div className="position-relative">
-                    <select
-                      className="form-select"
-                      value={recipe.status || "PENDING"}
-                      onChange={(e) =>
-                        handleStatusChange(recipe._id, e.target.value)
-                      }
-                      disabled={statusChanging[recipe._id]}
-                    >
-                      <option value="DRAFT">DRAFT</option>
-                      <option value="PENDING">PENDING</option>
-                      <option value="PUBLISHED">PUBLISHED</option>
-                      <option value="REJECTED">REJECTED</option>
-                    </select>
-                    {statusChanging[recipe._id] && (
-                      <div className="position-absolute top-0 end-0 bottom-0 start-0 d-flex align-items-center justify-content-center bg-light bg-opacity-75">
-                        <div
-                          className="spinner-border spinner-border-sm text-primary"
-                          role="status"
-                        >
-                          <span className="visually-hidden">Loading...</span>
+    <main className="kh-cookshop-page kh-cookshop">
+      <section className="container">
+        <div className="row">
+          <div className="col-12 mb-4">
+            <h1 className="text-center">Recipe Administration</h1>
+            {successMessage && (
+              <div className="alert alert-success text-center">
+                {successMessage}
+              </div>
+            )}
+          </div>
+          <div className="col-12 col-md-6 col-lg-8">
+            <div className="kh-cookshop__list">
+              <ul className="kh-cookshop__list--items">
+                {recipes.map((recipe) => (
+                  <li
+                    key={recipe._id}
+                    className={`kh-cookshop__list--item ${
+                      activeRecipe?._id === recipe._id ? "active" : ""
+                    }`}
+                    onClick={() => setActiveRecipe(recipe)}
+                  >
+                    <img
+                      src={recipe.favImgUrl || "https://via.placeholder.com/50"}
+                      alt={recipe.recipeName}
+                      width="50"
+                    />
+                    <p>{recipe.recipeName}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="col-12 col-md-6 col-lg-4">
+            {activeRecipe && (
+              <div className="kh-cookshop__details">
+                <div className="mb-4">
+                  <img
+                    src={
+                      activeRecipe.favImgUrl ||
+                      "https://via.placeholder.com/400x300"
+                    }
+                    alt={activeRecipe.recipeName}
+                    className="w-full h-auto rounded-lg object-cover"
+                  />
+                </div>
+                <h3>{activeRecipe.recipeName}</h3>
+
+                <div className="mt-3 mb-3">
+                  <p>
+                    <strong>Chef:</strong> {activeRecipe.chefName || "Unknown"}
+                  </p>
+                  <p>
+                    <strong>Created:</strong>{" "}
+                    {new Date(activeRecipe.createdAt).toLocaleDateString()}
+                  </p>
+                  <p>
+                    <strong>ID:</strong> {activeRecipe._id}
+                  </p>
+
+                  <div className="mt-3">
+                    <label className="mb-1">
+                      <strong>Status:</strong>
+                    </label>
+                    <div className="position-relative">
+                      <select
+                        className="form-select mb-3"
+                        value={activeRecipe.status || "PENDING"}
+                        onChange={(e) =>
+                          handleStatusChange(activeRecipe._id, e.target.value)
+                        }
+                        disabled={statusChanging[activeRecipe._id]}
+                      >
+                        <option value="DRAFT">DRAFT</option>
+                        <option value="PENDING">PENDING</option>
+                        <option value="PUBLISHED">PUBLISHED</option>
+                        <option value="REJECTED">REJECTED</option>
+                      </select>
+                      {statusChanging[activeRecipe._id] && (
+                        <div className="position-absolute top-0 end-0 bottom-0 start-0 d-flex align-items-center justify-content-center bg-light bg-opacity-75">
+                          <div
+                            className="spinner-border spinner-border-sm text-primary"
+                            role="status"
+                          >
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </td>
-                <td>
-                  <button
-                    className="btn btn-primary btn-sm me-2"
-                    onClick={() => navigate(`/recipes/${recipe._id}`)}
-                  >
-                    View
-                  </button>
-                  <button
-                    className="btn btn-info btn-sm"
-                    onClick={() => navigate(`/edit-recipe/${recipe._id}`)}
-                  >
-                    Edit
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+
+                  <div className="mt-4">
+                    <p className="mb-2">
+                      {activeRecipe.description
+                        ? activeRecipe.description.substring(0, 100) +
+                          (activeRecipe.description.length > 100 ? "..." : "")
+                        : "No description"}
+                    </p>
+                  </div>
+
+                  <div className="d-flex gap-2 mt-4">
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => navigate(`/recipes/${activeRecipe._id}`)}
+                    >
+                      View Recipe
+                    </button>
+                    <button
+                      className="btn btn-info"
+                      onClick={() =>
+                        navigate(`/recipes/edit/${activeRecipe._id}`)
+                      }
+                    >
+                      Edit Recipe
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

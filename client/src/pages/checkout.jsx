@@ -7,21 +7,29 @@ import {
   removeFromCart,
   updateCartItem,
 } from "../redux/user/userCart"; // Ensure consistent imports
+import { useAlert } from "../components/AlertContext"; // Import useAlert hook
 
 const Checkout = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [shippingCost, setShippingCost] = useState(0); // State to track selected shipping cost
   const [editingField, setEditingField] = useState(null); // Track which field is being edited
   const [updatedPhoneNumber, setUpdatedPhoneNumber] = useState(""); // Track the updated phone number
+  const [updatedEmail, setUpdatedEmail] = useState(""); // Track the updated email
+  const [updatedFullname, setUpdatedFullname] = useState(""); // Track the updated fullname
   const [updatedAddress, setUpdatedAddress] = useState(""); // Track the updated address
   const [userData, setUserData] = useState({}); // State to store user data
   const [paymentMethod, setPaymentMethod] = useState(""); // Track selected payment method
   const [formErrors, setFormErrors] = useState({}); // State to track individual field errors
   const [showAlert, setShowAlert] = useState(false); // State to show success alert
+  const [initialPhoneNumberEntered, setInitialPhoneNumberEntered] =
+    useState(false); // Track if phone number was initially empty and then filled
+  const [initialAddressEntered, setInitialAddressEntered] = useState(false); // Track if address was initially empty and then filled
   const cartItems = useSelector((state) => state.userCart?.items || []); // Dynamically fetch cart items
   const currentUser = useSelector((state) => state.user?.currentUser); // Updated to match the structure in Header.jsx
+  const isCartEmpty = cartItems.length === 0; // Check if cart is empty
 
   const dispatch = useDispatch();
+  const { showAlert: showSuccessAlert } = useAlert(); // Get showAlert function from AlertContext
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -35,11 +43,25 @@ const Checkout = () => {
         if (!res.ok) throw new Error("Failed to fetch user data");
         const data = await res.json();
 
+        // If fullname is not available, use username instead
+        const displayName = data.fullname || data.username || "";
+
         setUserData({
-          fullname: data.fullname || "",
+          fullname: displayName,
           email: data.email || "",
           phoneNumber: data.phoneNumber || "",
+          address: data.address || "",
         });
+
+        // Initialize updated fields with current values
+        setUpdatedFullname(displayName);
+        setUpdatedEmail(data.email || "");
+        setUpdatedPhoneNumber(data.phoneNumber || "");
+        setUpdatedAddress(data.address || "");
+
+        // Set initial state flags based on whether fields were empty
+        setInitialPhoneNumberEntered(!!data.phoneNumber);
+        setInitialAddressEntered(!!data.address);
       } catch (error) {
         console.error(error.message);
       }
@@ -133,16 +155,31 @@ const Checkout = () => {
     }
   };
 
-  const handlePhoneNumberUpdate = () => {
-    // Dispatch an action to update the phone number in Redux (not implemented here)
-    console.log(`Updated phoneNumber:`, updatedPhoneNumber);
-    setEditingField(null);
-  };
-
-  const handleAddressUpdate = () => {
-    // Dispatch an action to update the address in Redux (not implemented here)
-    console.log(`Updated address:`, updatedAddress);
-    setEditingField(null);
+  const handleFieldUpdate = (field) => {
+    if (field === "phoneNumber") {
+      if (updatedPhoneNumber.trim()) {
+        setUserData((prev) => ({ ...prev, phoneNumber: updatedPhoneNumber }));
+        setEditingField(null);
+        // Set flag to show that the phone number was initially entered
+        if (!initialPhoneNumberEntered) {
+          setInitialPhoneNumberEntered(true);
+        }
+      }
+    } else if (field === "address") {
+      if (updatedAddress.trim()) {
+        setUserData((prev) => ({ ...prev, address: updatedAddress }));
+        setEditingField(null);
+        // Set flag to show that the address was initially entered
+        if (!initialAddressEntered) {
+          setInitialAddressEntered(true);
+        }
+      }
+    } else if (field === "email") {
+      if (updatedEmail.trim()) {
+        setUserData((prev) => ({ ...prev, email: updatedEmail }));
+        setEditingField(null);
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -161,7 +198,8 @@ const Checkout = () => {
     if (Object.keys(errors).length > 0) return;
 
     if (paymentMethod === "cash") {
-      alert("Order placed successfully with Cash on Delivery.");
+      // Process cash payment - the actual processing happens in the onClick handler
+      // No alert here to avoid interrupting the flow
     } else if (paymentMethod === "esewa") {
       handlePayment(e); // Call the existing eSewa payment logic
     }
@@ -278,22 +316,41 @@ const Checkout = () => {
                       <div className="mt-checkout__overview">
                         <div className="mt-checkout__overview--item">
                           <h3>Full Name</h3>
-                          <p>{userData.fullname || "N/A"}</p>
+                          <p>{userData.fullname}</p>
                           {formErrors.fullname && (
                             <p className="error-text">{formErrors.fullname}</p>
                           )}
                         </div>
                         <div className="mt-checkout__overview--item">
                           <h3>Email</h3>
-                          <p>{userData.email || "N/A"}</p>
+                          {!userData.email ? (
+                            <>
+                              <input
+                                type="email"
+                                value={updatedEmail}
+                                onChange={(e) =>
+                                  setUpdatedEmail(e.target.value)
+                                }
+                                placeholder="Enter your email"
+                              />
+                              <button
+                                type="button"
+                                className="ok-button"
+                                onClick={() => handleFieldUpdate("email")}
+                              >
+                                OK
+                              </button>
+                            </>
+                          ) : (
+                            <p>{userData.email}</p>
+                          )}
                           {formErrors.email && (
                             <p className="error-text">{formErrors.email}</p>
                           )}
                         </div>
                         <div className="mt-checkout__overview--item">
                           <h3>Phone Number</h3>
-                          {editingField === "phoneNumber" ||
-                          !userData.phoneNumber ? (
+                          {editingField === "phoneNumber" ? (
                             <>
                               <input
                                 type="text"
@@ -304,18 +361,33 @@ const Checkout = () => {
                                     setUpdatedPhoneNumber(value);
                                   }
                                 }}
+                                placeholder="Enter your phone number"
                               />
                               <button
                                 type="button"
-                                onClick={() => {
-                                  if (updatedPhoneNumber.length === 10) {
-                                    setUserData((prev) => ({
-                                      ...prev,
-                                      phoneNumber: updatedPhoneNumber,
-                                    }));
-                                    setEditingField(null);
+                                className="ok-button"
+                                onClick={() => handleFieldUpdate("phoneNumber")}
+                              >
+                                OK
+                              </button>
+                            </>
+                          ) : !userData.phoneNumber ? (
+                            <>
+                              <input
+                                type="text"
+                                value={updatedPhoneNumber}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  if (/^\d{0,10}$/.test(value)) {
+                                    setUpdatedPhoneNumber(value);
                                   }
                                 }}
+                                placeholder="Enter your phone number"
+                              />
+                              <button
+                                type="button"
+                                className="ok-button"
+                                onClick={() => handleFieldUpdate("phoneNumber")}
                               >
                                 OK
                               </button>
@@ -323,12 +395,15 @@ const Checkout = () => {
                           ) : (
                             <>
                               <p>{userData.phoneNumber}</p>
-                              <button
-                                type="button"
-                                onClick={() => handleEditClick("phoneNumber")}
-                              >
-                                Change
-                              </button>
+                              {initialPhoneNumberEntered && (
+                                <button
+                                  type="button"
+                                  className="change-button"
+                                  onClick={() => handleEditClick("phoneNumber")}
+                                >
+                                  Change
+                                </button>
+                              )}
                             </>
                           )}
                           {formErrors.phoneNumber && (
@@ -339,7 +414,7 @@ const Checkout = () => {
                         </div>
                         <div className="mt-checkout__overview--item">
                           <h3>Shipping Address</h3>
-                          {editingField === "address" || !updatedAddress ? (
+                          {editingField === "address" ? (
                             <>
                               <input
                                 type="text"
@@ -347,27 +422,46 @@ const Checkout = () => {
                                 onChange={(e) =>
                                   setUpdatedAddress(e.target.value)
                                 }
+                                placeholder="Enter your shipping address"
                               />
                               <button
                                 type="button"
-                                onClick={() => {
-                                  if (updatedAddress.trim()) {
-                                    setEditingField(null);
-                                  }
-                                }}
+                                className="ok-button"
+                                onClick={() => handleFieldUpdate("address")}
+                              >
+                                OK
+                              </button>
+                            </>
+                          ) : !userData.address ? (
+                            <>
+                              <input
+                                type="text"
+                                value={updatedAddress}
+                                onChange={(e) =>
+                                  setUpdatedAddress(e.target.value)
+                                }
+                                placeholder="Enter your shipping address"
+                              />
+                              <button
+                                type="button"
+                                className="ok-button"
+                                onClick={() => handleFieldUpdate("address")}
                               >
                                 OK
                               </button>
                             </>
                           ) : (
                             <>
-                              <p>{updatedAddress}</p>
-                              <button
-                                type="button"
-                                onClick={() => handleEditClick("address")}
-                              >
-                                Change
-                              </button>
+                              <p>{userData.address}</p>
+                              {initialAddressEntered && (
+                                <button
+                                  type="button"
+                                  className="change-button"
+                                  onClick={() => handleEditClick("address")}
+                                >
+                                  Change
+                                </button>
+                              )}
                             </>
                           )}
                           {formErrors.address && (
@@ -451,11 +545,18 @@ const Checkout = () => {
                       {formErrors.common && (
                         <p className="error-text">{formErrors.common}</p>
                       )}
+                      {isCartEmpty && (
+                        <p className="error-text">
+                          Your cart is empty. Please add items to your cart
+                          before checkout.
+                        </p>
+                      )}
                       {paymentMethod === "cash" && (
                         <input
                           className="mt-btn mt-btn__invert"
                           type="submit"
                           value={`Continue with Payment (Total: $${totalAmount})`}
+                          disabled={isCartEmpty} // Disable button if cart is empty
                           onClick={async (e) => {
                             e.preventDefault();
                             const errors = {};
@@ -518,8 +619,17 @@ const Checkout = () => {
                                 }
                               );
 
-                              // Redirect to homepage with success alert
-                              setShowAlert(true);
+                              // Clear the cart after successful order
+                              dispatch(clearCart());
+
+                              // Show success alert with correct parameters (type, message, duration)
+                              showSuccessAlert(
+                                "success",
+                                "Order placed successfully with Cash on Delivery!",
+                                3000
+                              );
+
+                              // Redirect to homepage after alert is shown
                               setTimeout(() => {
                                 window.location.href = "/";
                               }, 3000);
@@ -548,7 +658,7 @@ const Checkout = () => {
                               errors.email = "Email is required.";
                             if (!userData.phoneNumber)
                               errors.phoneNumber = "Phone Number is required.";
-                            if (!updatedAddress)
+                            if (!userData.address)
                               errors.address = "Shipping Address is required.";
                             if (!shippingCost)
                               errors.shipping =
@@ -557,9 +667,15 @@ const Checkout = () => {
                               errors.payment = "Payment Method is required.";
 
                             if (Object.keys(errors).length > 0) {
-                              errors.common =
-                                "All fields are required. Please fill out all fields.";
-                              setFormErrors(errors);
+                              // Show all errors in a single alert message
+                              const errorMessages =
+                                Object.values(errors).join("\n• ");
+                              showSuccessAlert(
+                                "error",
+                                `Please correct the following:\n• ${errorMessages}`,
+                                5000
+                              );
+                              setFormErrors(errors); // Set form errors for highlighting
                               return;
                             }
 
@@ -569,8 +685,9 @@ const Checkout = () => {
                             !userData.fullname ||
                             !userData.email ||
                             !userData.phoneNumber ||
-                            !updatedAddress ||
-                            !shippingCost
+                            !userData.address ||
+                            !shippingCost ||
+                            isCartEmpty // Disable button if cart is empty
                           }
                         >
                           Pay with eSewa (Total: ${totalAmount})

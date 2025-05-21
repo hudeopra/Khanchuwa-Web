@@ -66,11 +66,28 @@ const Cookshop = () => {
     }
 
     if (activeItem) {
+      // Check if item is in stock
+      if (!activeItem.inStock || activeItem.quantity === 0) {
+        showAlert("error", "This product is out of stock");
+        return;
+      }
+
       const quantity = quantities[activeItem._id] || 1;
+
+      // Check if requested quantity exceeds available stock
+      if (quantity > activeItem.quantity) {
+        showAlert(
+          "error",
+          `Only ${activeItem.quantity} units available in stock`
+        );
+        return;
+      }
+
       const unitPrice = activeItem.disPrice || activeItem.mrkPrice || 0;
       const cartItem = {
         _id: activeItem._id,
         productName: activeItem.name,
+        description: activeItem.description || "",
         quantity,
         price: unitPrice * quantity,
         favImg: activeItem.favImg,
@@ -112,11 +129,42 @@ const Cookshop = () => {
           <div className="col-12 col-md-6 col-lg-4">
             {activeItem && (
               <div className="kh-cookshop__details">
+                <div className="mb-4">
+                  <img
+                    src={activeItem.favImg}
+                    alt={activeItem.name}
+                    className="w-full h-auto rounded-lg object-cover"
+                  />
+                </div>
                 <h3>{activeItem.name}</h3>
-                <p>
-                  Price: <span>${activeItem.mrkPrice}</span>
-                  {activeItem.disPrice && <span> ${activeItem.disPrice}</span>}
+                <p className="flex items-center gap-2">
+                  Price:
+                  {activeItem.disPrice &&
+                  activeItem.disPrice < activeItem.mrkPrice ? (
+                    <>
+                      <span className="line-through text-gray-500">
+                        ${activeItem.mrkPrice}
+                      </span>
+                      <span className="font-bold">${activeItem.disPrice}</span>
+                      <span className="bg-red-600 text-white px-2 py-1 rounded text-xs">
+                        SALE
+                      </span>
+                    </>
+                  ) : !activeItem.mrkPrice && activeItem.disPrice ? (
+                    <span className="font-bold">${activeItem.disPrice}</span>
+                  ) : (
+                    <span className="font-bold">${activeItem.mrkPrice}</span>
+                  )}
                 </p>
+                <div className="mt-2 mb-3">
+                  <p className="mb-1">{activeItem.description}</p>
+                  <p className="text-sm font-medium">
+                    Quantity Available:{" "}
+                    <span className="font-bold">
+                      {activeItem.quantity || "Out of stock"}
+                    </span>
+                  </p>
+                </div>
                 <div>
                   <button
                     onClick={() => handleDecreaseQuantity(activeItem._id)}
@@ -141,9 +189,28 @@ const Cookshop = () => {
                   </button>
                   <button
                     onClick={handleAddToCart}
-                    className="mt-2 p-3 bg-green-600 text-white rounded-lg hover:opacity-90"
+                    disabled={
+                      !userData.currentUser ||
+                      !activeItem.inStock ||
+                      activeItem.quantity === 0 ||
+                      (quantities[activeItem._id] || 1) > activeItem.quantity
+                    }
+                    className={`mt-2 p-3 text-white rounded-lg hover:opacity-90 ${
+                      !userData.currentUser ||
+                      !activeItem.inStock ||
+                      activeItem.quantity === 0 ||
+                      (quantities[activeItem._id] || 1) > activeItem.quantity
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-green-600"
+                    }`}
                   >
-                    Add to Cart
+                    {!userData.currentUser
+                      ? "Sign in to purchase"
+                      : !activeItem.inStock || activeItem.quantity === 0
+                      ? "Out of stock"
+                      : (quantities[activeItem._id] || 1) > activeItem.quantity
+                      ? `Limited stock (${activeItem.quantity})`
+                      : "Add to Cart"}
                   </button>
                   <button
                     onClick={() =>

@@ -1,110 +1,239 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { updateUserSuccess } from "../redux/user/userSlice";
+import { useAlert } from "./AlertContext";
 
 const AllUsers = () => {
   const allUsers = useSelector((state) => state.user.allUsers);
-  const [updateMessage, setUpdateMessage] = useState(null);
-  const [editedUsers, setEditedUsers] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeUser, setActiveUser] = useState(null);
+  const [editedFields, setEditedFields] = useState({});
+  const [updatingUser, setUpdatingUser] = useState(false);
   const dispatch = useDispatch();
+  const { showAlert } = useAlert();
 
-  const handleInputChange = (userId, field, value) => {
-    setEditedUsers((prev) => ({
+  // Fetch users if not available in redux
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (allUsers && allUsers.length > 0) {
+        setActiveUser(allUsers[0]);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/user/all", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch users");
+        }
+
+        const data = await res.json();
+        if (data && data.length > 0) {
+          setActiveUser(data[0]);
+        }
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [allUsers]);
+
+  const handleInputChange = (field, value) => {
+    if (!activeUser) return;
+
+    setEditedFields((prev) => ({
       ...prev,
-      [userId]: {
-        ...prev[userId],
-        [field]: value,
-      },
+      [field]: value,
     }));
   };
 
-  const handleUpdateUser = async (userId) => {
-    const updatedData = editedUsers[userId];
-    if (!updatedData) {
-      setUpdateMessage(`No changes made for user with ID ${userId}`);
+  const handleUpdateUser = async () => {
+    if (!activeUser || Object.keys(editedFields).length === 0) {
+      showAlert("warning", "No changes to update");
       return;
     }
 
     try {
-      const res = await fetch(`/api/user/update/${userId}`, {
+      setUpdatingUser(true);
+      const res = await fetch(`/api/user/update/${activeUser._id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
-        body: JSON.stringify(updatedData),
+        body: JSON.stringify(editedFields),
       });
 
       const data = await res.json();
       if (data.success) {
-        setUpdateMessage(`User with ID ${userId} updated successfully!`);
-        dispatch(updateUserSuccess(data.data)); // Update Redux state with new user data
-      } else {
-        setUpdateMessage(
-          `Failed to update user with ID ${userId}: ${data.message}`
+        showAlert(
+          "success",
+          `User ${activeUser.username} updated successfully!`
         );
+        dispatch(updateUserSuccess(data.data));
+
+        // Update the active user with new data
+        setActiveUser({
+          ...activeUser,
+          ...editedFields,
+        });
+
+        // Clear edited fields
+        setEditedFields({});
+      } else {
+        showAlert("error", `Failed to update user: ${data.message}`);
       }
     } catch (error) {
-      setUpdateMessage(
-        `Error updating user with ID ${userId}: ${error.message}`
-      );
+      showAlert("error", `Error updating user: ${error.message}`);
+    } finally {
+      setUpdatingUser(false);
     }
   };
 
-  if (!allUsers) {
-    return <div>No users available.</div>;
-  }
+  if (loading)
+    return <div className="container mt-5 text-center">Loading users...</div>;
+  if (error)
+    return <div className="container mt-5 text-center">Error: {error}</div>;
+  if (!allUsers || allUsers.length === 0)
+    return (
+      <div className="container mt-5 text-center">No users available.</div>
+    );
 
   return (
-    <main>
-      <h1>All Users</h1>
-      {updateMessage && <p>{updateMessage}</p>}
-      <ul>
-        {allUsers.map((user) => (
-          <li key={user._id}>
-            <p>Username: {user.username}</p>
-            <p>Full Name: {user.fullname}</p>
-            <p>Email: {user.email}</p>
+    <main className="kh-cookshop-page kh-cookshop">
+      <section className="container">
+        <div className="row">
+          <div className="col-12 mb-4">
+            <h1 className="text-center">User Administration</h1>
+          </div>
+          <div className="col-12 col-md-6 col-lg-8">
+            <div className="kh-cookshop__list">
+              <ul className="kh-cookshop__list--items">
+                {allUsers.map((user) => (
+                  <li
+                    key={user._id}
+                    className={`kh-cookshop__list--item ${
+                      activeUser?._id === user._id ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setActiveUser(user);
+                      setEditedFields({}); // Clear edited fields when switching users
+                    }}
+                  >
+                    <img
+                      src={user.avatar || "https://via.placeholder.com/50"}
+                      alt={user.username}
+                      width="50"
+                      className="rounded-circle"
+                    />
+                    <p>{user.username}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="col-12 col-md-6 col-lg-4">
+            {activeUser && (
+              <div className="kh-cookshop__details">
+                <div className="mb-4 text-center">
+                  <img
+                    src={activeUser.avatar || "https://via.placeholder.com/150"}
+                    alt={activeUser.username}
+                    className="rounded-circle w-50 h-auto"
+                  />
+                </div>
+                <h3 className="text-center mb-4">{activeUser.username}</h3>
+                <span className="text-center mb-4">{activeUser._id}</span>
 
-            <label>Role:</label>
-            <select
-              value={editedUsers[user._id]?.role || user.role}
-              onChange={(e) =>
-                handleInputChange(user._id, "role", e.target.value)
-              }
-            >
-              <option value="user">User</option>
-              <option value="creator">Creator</option>
-              <option value="admin">Admin</option>
-            </select>
+                <form>
+                  {/* Username, fullname, email, and user ID fields have been removed */}
 
-            <label>Status:</label>
-            <select
-              value={editedUsers[user._id]?.userStatus || user.userStatus}
-              onChange={(e) =>
-                handleInputChange(user._id, "userStatus", e.target.value)
-              }
-            >
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="INACTIVE">INACTIVE</option>
-              <option value="BANNED">BANNED</option>
-            </select>
+                  <div className="mb-3">
+                    <label className="form-label">
+                      <strong>Role:</strong>
+                    </label>
+                    <select
+                      className="form-select"
+                      value={
+                        editedFields.role !== undefined
+                          ? editedFields.role
+                          : activeUser.role
+                      }
+                      onChange={(e) =>
+                        handleInputChange("role", e.target.value)
+                      }
+                    >
+                      <option value="user">User</option>
+                      <option value="creator">Creator</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
 
-            <label>Recipe Limit:</label>
-            <input
-              type="number"
-              value={editedUsers[user._id]?.recipelimit || user.recipelimit}
-              onChange={(e) =>
-                handleInputChange(user._id, "recipelimit", e.target.value)
-              }
-            />
+                  <div className="mb-3">
+                    <label className="form-label">
+                      <strong>Status:</strong>
+                    </label>
+                    <select
+                      className="form-select"
+                      value={
+                        editedFields.userStatus !== undefined
+                          ? editedFields.userStatus
+                          : activeUser.userStatus
+                      }
+                      onChange={(e) =>
+                        handleInputChange("userStatus", e.target.value)
+                      }
+                    >
+                      <option value="ACTIVE">ACTIVE</option>
+                      <option value="INACTIVE">INACTIVE</option>
+                      <option value="WARNED">WARNED</option>
+                      <option value="BANNED">BANNED</option>
+                    </select>
+                  </div>
 
-            <button onClick={() => handleUpdateUser(user._id)}>
-              Update User
-            </button>
-          </li>
-        ))}
-      </ul>
+                  <div className="mb-3">
+                    <label className="form-label">
+                      <strong>Recipe Limit:</strong>
+                    </label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      value={
+                        editedFields.recipelimit !== undefined
+                          ? editedFields.recipelimit
+                          : activeUser.recipelimit || 0
+                      }
+                      onChange={(e) =>
+                        handleInputChange("recipelimit", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    className="btn btn-primary w-100"
+                    onClick={handleUpdateUser}
+                    disabled={
+                      updatingUser || Object.keys(editedFields).length === 0
+                    }
+                  >
+                    {updatingUser ? "Updating..." : "Update User"}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
     </main>
   );
 };

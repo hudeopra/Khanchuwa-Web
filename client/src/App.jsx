@@ -15,6 +15,8 @@ import Profile from "./pages/Profile.jsx";
 import ProfileEdit from "./pages/ProfileEdit.jsx";
 import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
+import SiteMap from "./pages/SiteMap.jsx"; // Import SiteMap
+import Faq from "./pages/Faq.jsx"; // Import FAQ page
 
 // Recipes
 import CreateRecipe from "./pages/CreateRecipe.jsx";
@@ -24,6 +26,7 @@ import UserRecipie from "./pages/UserRecipie.jsx"; // Import UserRecipie compone
 import EditRecipe from "./pages/EditRecipe.jsx"; // Updated import name
 import AdminAllRecipe from "./pages/AdminAllRecipe.jsx"; // Import AdminAllRecipe component
 import AdminTagDetail from "./pages/AdminTagDetail.jsx"; // Import AdminTagDetail component
+import AdminCookshop from "./pages/AdminCookshop.jsx"; // Import AdminCookshop component
 
 // Blogs
 import CreateBlog from "./pages/CreateBlog.jsx";
@@ -290,6 +293,24 @@ export default function App() {
               </>
             }
           />
+          <Route
+            path="/sitemap"
+            element={
+              <>
+                <Header pagename="Site Map" />
+                <SiteMap />
+              </>
+            }
+          />
+          <Route
+            path="/faq"
+            element={
+              <>
+                <Header pagename="FAQ" />
+                <Faq />
+              </>
+            }
+          />
 
           {/* USER AUTHENTICATED ROUTES - Requires login */}
           <Route element={<PrivateRoute />}>
@@ -432,6 +453,15 @@ export default function App() {
                 <>
                   <Header pagename="Admin Tag Details" />
                   <AdminTagDetail />
+                </>
+              }
+            />
+            <Route
+              path="/admin/cookshop"
+              element={
+                <>
+                  <Header pagename="Admin Cookshop" />
+                  <AdminCookshop />
                 </>
               }
             />

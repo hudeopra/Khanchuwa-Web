@@ -53,7 +53,7 @@ label {
   text-decoration: none;
   transition: all 0.5s;
   color: #fff;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 html,
@@ -208,6 +208,8 @@ textarea {
   border-radius: 50%;
   border: 10px solid #303030;
   position: relative;
+  -o-object-fit: cover;
+     object-fit: cover;
   z-index: 2;
 }
 .kh-profile-card__user--data {
@@ -250,6 +252,40 @@ textarea {
 }
 .kh-profile-card__content--preferences-item ul:not(:last-of-type) {
   margin-bottom: 10px;
+}
+.kh-profile-card__tab--item {
+  margin-top: 30px;
+}
+.kh-profile-card__social-icons {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.kh-profile-card__social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+.kh-profile-card__social-link svg {
+  font-size: 28px;
+  transition: transform 0.3s ease;
+}
+.kh-profile-card__social-link:hover svg {
+  transform: scale(1.2);
+}
+.kh-profile-card__social-link[title=instagram] svg {
+  color: #e1306c;
+}
+.kh-profile-card__social-link[title=youtube] svg {
+  color: #ff0000;
+}
+.kh-profile-card__social-link[title=tiktok] svg {
+  color: #000000;
+}
+.kh-profile-card__content--social {
+  margin-bottom: 20px;
 }
 
 .kh-slide {
