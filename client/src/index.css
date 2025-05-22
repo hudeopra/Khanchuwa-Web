@@ -99,11 +99,13 @@ textarea {
   color: rgba(255, 255, 255, 0.6);
   animation-name: onAutoFillStart;
   border: unset;
+  text-transform: unset !important;
 }
 input,
 select {
   min-height: 45px;
   padding: 16px 8px 6px;
+  text-transform: unset;
 }
 
 textarea {
@@ -324,6 +326,7 @@ main {
   position: relative;
   display: inline-block;
   padding: 10px 5px;
+  text-transform: capitalize;
 }
 .kh-category__item h3:after {
   content: "";
@@ -378,7 +381,7 @@ main {
 .kh-recipe-block__wrapper {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: repeat(7, 85px);
+  grid-template-rows: repeat(6, 85px);
   gap: 30px;
 }
 .kh-recipe-block__item {
@@ -415,7 +418,7 @@ main {
   border-radius: 12px;
   position: relative;
   overflow: hidden;
-  max-height: 400px;
+  height: 300px;
 }
 
 .kh-recipe-block__item:hover .kh-recipe-block__info {
@@ -1097,7 +1100,7 @@ ul.kh-profile__menu--sub-menu-block.active {
 .kh-recipe-list__filter {
   background-color: var(--hover-color);
   position: fixed;
-  top: 270px;
+  top: 220px;
   left: 50%;
   transform: translateX(-50%);
   height: auto;
@@ -1112,7 +1115,7 @@ ul.kh-profile__menu--sub-menu-block.active {
   visibility: visible;
   position: fixed;
   height: auto;
-  width: 50%;
+  width: 80%;
   z-index: 5;
   padding: 30px;
 }
@@ -1247,7 +1250,7 @@ ul.kh-profile__menu--sub-menu-block.active {
 }
 .kh-header__cart--count .count {
   position: absolute;
-  top: -5px;
+  top: 16px;
   right: -1px;
   background-color: var(--primary-color);
   color: var(--dark-charcol);
@@ -1272,7 +1275,7 @@ ul.kh-profile__menu--sub-menu-block.active {
 }
 
 .kh-header__cart--content.active {
-  right: 15px;
+  right: -15px;
 }
 .kh-header__cart--body {
   min-height: calc(100vh - 180px);
@@ -1411,8 +1414,24 @@ ul.kh-profile__menu--sub-menu-block.active {
   right: 0;
 }
 
-.kh-header__cart--checkout a {
+.kh-header__cart--checkout button {
   display: block;
   text-align: center;
+  width: 100%;
 }
 /* header cart ends */
+.alert.alert-info strong {
+  color: var(--primary-color);
+}
+.kh-cookshop__details h3,
+.kh-tag-detail__wrapper h1 {
+  text-transform: capitalize;
+}
+.kh-cookshop__list--item img {
+  height: 120px;
+  object-fit: cover;
+}
+.kh-cookshop__details {
+  background-color: var(--dark-charcol);
+  padding: 30px;
+}

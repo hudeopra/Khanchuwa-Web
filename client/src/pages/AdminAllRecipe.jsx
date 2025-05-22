@@ -256,20 +256,12 @@ export default function AdminAllRecipe() {
                   </div>
 
                   <div className="d-flex gap-2 mt-4">
-                    <button
+                    <a
+                      href={`/recipes/${activeRecipe._id}`}
                       className="btn btn-primary"
-                      onClick={() => navigate(`/recipes/${activeRecipe._id}`)}
                     >
                       View Recipe
-                    </button>
-                    <button
-                      className="btn btn-info"
-                      onClick={() =>
-                        navigate(`/recipes/edit/${activeRecipe._id}`)
-                      }
-                    >
-                      Edit Recipe
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>

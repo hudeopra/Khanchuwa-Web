@@ -200,8 +200,25 @@ export const getAllRecipes = async (req, res, next) => {
 // New function: Get all published recipes
 export const getPublishedRecipes = async (req, res, next) => {
   try {
-    const recipes = await Recipe.find({ status: 'PUBLISHED' });
-    return res.status(200).json(recipes);
+    const limit = parseInt(req.query.limit) || 0; // Add limit parameter
+
+    // Find published recipes with optional limit
+    const query = Recipe.find({ status: 'PUBLISHED' });
+
+    if (limit > 0) {
+      query.limit(limit);
+    }
+
+    // Sort by createdAt by default (newest first)
+    query.sort({ createdAt: -1 });
+
+    const recipes = await query;
+
+    return res.status(200).json({
+      success: true,
+      message: "getPublishedRecipes",
+      recipes
+    });
   } catch (error) {
     next(error);
   }

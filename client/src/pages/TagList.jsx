@@ -9,6 +9,7 @@ const TagList = ({ tagType }) => {
   const [error, setError] = useState(null);
   const [quantities, setQuantities] = useState({}); // State to track quantities for each tag
   const [currentUser, setCurrentUser] = useState(null); // State for current user
+  const [activeTag, setActiveTag] = useState(null); // State for the active/selected tag
 
   const dispatch = useDispatch();
   const navigate = useNavigate(); // For navigation
@@ -74,6 +75,12 @@ const TagList = ({ tagType }) => {
         return acc;
       }, {});
       setQuantities(initialQuantities);
+
+      // Set the first tag as active
+      if (data.length > 0) {
+        setActiveTag(data[0]);
+      }
+
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -88,10 +95,6 @@ const TagList = ({ tagType }) => {
     }));
   };
 
-  const handleAddToCart = (tag) => {
-    // Removed Add to Cart functionality
-  };
-
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
@@ -100,70 +103,140 @@ const TagList = ({ tagType }) => {
     return null; // Extra protection, should not normally reach here due to redirect
   }
 
-  const renderTagsByType = (type, title) => {
-    const filteredTags = tags.filter((tag) => tag.tagType === type);
-    if (filteredTags.length === 0) return null;
-
-    return (
-      <section className="tag-section">
-        <div className="container py-5">
-          <h2>{title}</h2>
-          <ul className="d-flex flex-wrap gap-3">
-            {filteredTags.map((tag) => (
-              <li key={tag._id}>
-                <Link to={`/cookshop/${tag.tagType}/${tag._id}`}>
-                  <h3>{tag.name}</h3>
-                  {tag.favImg && (
-                    <img
-                      src={tag.favImg}
-                      alt={`${tag.name} favorite`}
-                      width="100"
-                    />
-                  )}
-                  {type === "ingredientTag" && (
-                    <>
-                      {tag.inStock !== undefined && (
-                        <p>In Stock: {tag.inStock ? "Yes" : "No"}</p>
-                      )}
-                      <p>
-                        Price:{" "}
-                        <span className={tag.disPrice ? "offer" : ""}>
-                          ${tag.mrkPrice}
-                        </span>
-                        {tag.disPrice && <span> ${tag.disPrice}</span>}
-                      </p>
-                    </>
-                  )}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-    );
+  const getTagTypeTitle = () => {
+    switch (tagType) {
+      case "ingredientTag":
+        return "Ingredients";
+      case "cuisineTag":
+        return "Cuisines";
+      case "flavorTag":
+        return "Flavors";
+      default:
+        return "Tags";
+    }
   };
 
   return (
-    <main className="kh-tag-page">
+    <main className="kh-cookshop-page kh-cookshop kh-tag-page">
       <section className="container">
         <div className="row">
-          <div className="col-12">
-            <h1>
-              {tagType === "ingredientTag"
-                ? "Ingredients"
-                : tagType === "cuisineTag"
-                ? "Cuisines"
-                : "Flavours"}
-            </h1>
-            {renderTagsByType(
-              tagType,
-              `${
-                tagType === "ingredientTag"
-                  ? "Ingredient"
-                  : tagType === "cuisineTag"
-                  ? "Cuisine"
-                  : "Flavour"
-              } Tags`
+          <div className="col-12 mb-4">
+            <h1>{getTagTypeTitle()}</h1>
+            {currentUser?.role === "admin" && tagType === "ingredientTag" && (
+              <div className="mb-3 d-flex justify-content-end">
+                <Link to="/admin/product/add" className="btn btn-primary">
+                  Add New {tagType === "ingredientTag" ? "Ingredient" : "Tag"}
+                </Link>
+              </div>
+            )}
+          </div>
+          <div className="col-12 col-md-6 col-lg-8">
+            <div className="kh-cookshop__list">
+              <ul className="kh-cookshop__list--items">
+                {tags.map((tag) => (
+                  <li
+                    key={tag._id}
+                    className={`kh-cookshop__list--item ${
+                      activeTag?._id === tag._id ? "active" : ""
+                    }`}
+                    onClick={() => setActiveTag(tag)}
+                  >
+                    <img
+                      src={tag.favImg || "https://via.placeholder.com/50"}
+                      alt={tag.name}
+                      width="50"
+                    />
+                    <p>{tag.name}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="col-12 col-md-6 col-lg-4">
+            {activeTag && (
+              <div className="kh-cookshop__details">
+                <div className="mb-4">
+                  <img
+                    src={
+                      activeTag.favImg || "https://via.placeholder.com/400x300"
+                    }
+                    alt={activeTag.name}
+                    className="w-full h-auto rounded-lg object-cover"
+                  />
+                </div>
+                <h3>{activeTag.name}</h3>
+
+                {activeTag.description && (
+                  <p className="mb-3">{activeTag.description}</p>
+                )}
+
+                {activeTag.tagType === "ingredientTag" && (
+                  <div className="mt-2 mb-3">
+                    <p className="flex items-center gap-2">
+                      Price:
+                      {activeTag.disPrice &&
+                      activeTag.disPrice < activeTag.mrkPrice ? (
+                        <>
+                          <span className="line-through text-gray-500">
+                            ${activeTag.mrkPrice}
+                          </span>
+                          <span className="font-bold">
+                            ${activeTag.disPrice}
+                          </span>
+                          <span className="bg-red-600 text-white px-2 py-1 rounded text-xs">
+                            SALE
+                          </span>
+                        </>
+                      ) : !activeTag.mrkPrice && activeTag.disPrice ? (
+                        <span className="font-bold">${activeTag.disPrice}</span>
+                      ) : (
+                        <span className="font-bold">${activeTag.mrkPrice}</span>
+                      )}
+                    </p>
+
+                    <p className="text-sm font-medium mt-2">
+                      In Stock:{" "}
+                      <span className="font-bold">
+                        {activeTag.inStock ? "Yes" : "No"}
+                      </span>
+                    </p>
+
+                    {activeTag.quantity !== undefined && (
+                      <p className="text-sm font-medium">
+                        Quantity Available:{" "}
+                        <span className="font-bold">
+                          {activeTag.quantity || "Out of stock"}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {activeTag.category && activeTag.category.length > 0 && (
+                  <div className="mb-3">
+                    <strong>Categories:</strong>{" "}
+                    <span>{activeTag.category.join(", ")}</span>
+                  </div>
+                )}
+
+                <div className="mt-4">
+                  <Link
+                    to={`/cookshop/${activeTag.tagType}/${activeTag._id}`}
+                    className="btn btn-primary"
+                  >
+                    View Details
+                  </Link>
+
+                  {currentUser?.role === "admin" && (
+                    <Link
+                      to={`/admin/product/edit/${activeTag._id}`}
+                      className="btn btn-secondary ms-2"
+                    >
+                      Edit Tag
+                    </Link>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </div>

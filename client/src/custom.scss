@@ -848,6 +848,7 @@ main {
   }
   &__banner {
     position: relative;
+    min-height: 300px;
     img {
       width: 100%;
       max-height: 400px;
@@ -1086,3 +1087,33 @@ main {
   }
 }
 // cookshop ends
+.kh-profile-card__content--preferences-item,
+.kh-profile-card__head--content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.kh-signin__form,
+.kh-signup__form {
+  padding: 50px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+}
+.kh-signin__input-wrapper {
+  display: flex;
+}
+.kh-signin__input-wrapper,
+.kh-sigin__half {
+  max-width: 400px;
+}
+.relative {
+  position: relative;
+}
+
+@media (max-width: 1200px) {
+}

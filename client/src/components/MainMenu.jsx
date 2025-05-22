@@ -53,12 +53,12 @@ export default function MainMenu({
                 <span>Home</span>
               </Link>
             </li>
-            <li onClick={handleLinkClick}>
+            {/* <li onClick={handleLinkClick}>
               <Link to={"/about"}>
                 <FaInfoCircle />
                 <span>About Khanchuwa</span>
               </Link>
-            </li>
+            </li> */}
             <li onClick={handleLinkClick}>
               <Link to={"/recipes"}>
                 <FaUtensils />

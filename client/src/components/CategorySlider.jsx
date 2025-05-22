@@ -15,26 +15,48 @@ const CategorySlider = ({ keyParam, valueParam, tag }) => {
   const [containerWidth, setContainerWidth] = useState(0);
   const [items, setItems] = useState([]); // State for fetched recipes
   const [sortedItems, setSortedItems] = useState([]); // State for sorted recipes
-
   // Fetch recipes based on provided key and value props
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const response = await fetch(
-          `/api/recipe/filter-by-attributes?${keyParam}=${valueParam}`
-        );
+        // For "Popular Recipes" - no filter, just get all published recipes
+        // For other categories - use filter-by-attributes endpoint
+        let url;
+        if (keyParam && valueParam) {
+          url = `/api/recipe/filter-by-attributes?${keyParam}=${valueParam}`;
+          console.log(`Fetching ${tag} recipes with ${keyParam}=${valueParam}`);
+        } else {
+          // If no filter parameters, fetch all published recipes (for Popular Recipes)
+          url = "/api/recipe/published";
+          console.log(`Fetching ${tag} recipes (all published)`);
+        }
+
+        const response = await fetch(url);
         const data = await response.json();
-        console.log("Fetched recipes:", data);
+        console.log(`Fetched ${tag} recipes:`, data);
+
         if (data.success && Array.isArray(data.recipes)) {
-          setItems(data.recipes);
-          setSortedItems(sortByPropertyDesc(data.recipes, "recipeFav"));
+          // For popular recipes, limit to 10 recipes and sort by views or date
+          if (!keyParam && !valueParam) {
+            // Sort by views or popularity for "Popular Recipes"
+            const popularRecipes = [...data.recipes]
+              .sort((a, b) => (b.views || 0) - (a.views || 0))
+              .slice(0, 10); // Limit to 10 recipes
+
+            setItems(popularRecipes);
+            setSortedItems(sortByPropertyDesc(popularRecipes, "recipeFav"));
+          } else {
+            setItems(data.recipes);
+            setSortedItems(sortByPropertyDesc(data.recipes, "recipeFav"));
+          }
         }
       } catch (error) {
-        console.error("Error fetching recipes:", error);
+        console.error(`Error fetching ${tag} recipes:`, error);
       }
     };
+
     fetchRecipes();
-  }, [keyParam, valueParam]);
+  }, [keyParam, valueParam, tag]);
 
   // Calculate dimensions and update slider container height
   useLayoutEffect(() => {

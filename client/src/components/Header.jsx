@@ -264,7 +264,7 @@ export default function Header({ pagename }) {
                       </div>
                       <div className="kh-header__user--admin-users">
                         <Link to="/admin/cookshop" onClick={handleLinkClick}>
-                          Admin Users
+                          Admin Cookshop
                         </Link>
                       </div>
                     </>

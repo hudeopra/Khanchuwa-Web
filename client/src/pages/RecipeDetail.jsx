@@ -568,63 +568,78 @@ export default function RecipeDetail() {
       </p>
       <p>
         <strong>User Reference:</strong> {recipe.userRef || "N/A"}
-      </p>*/}
-      <div className="container"></div>
-      {/* Reviews Section */}
-      <div className="py-4">
-        <h2 className="text-2xl font-semibold">Comments</h2>
-        {recipe.reviews && recipe.reviews.length > 0 ? (
-          recipe.reviews.map((rev, idx) => (
-            <div key={idx} className="border p-2 my-2">
-              <p>
-                <strong>Rating:</strong> {rev.rating}
-              </p>
-              <p>{rev.comment}</p>
+      </p>*/}      <div className="container">
+        <div className="py-6">
+          <h2 className="text-2xl font-semibold mb-4">Comments ({recipe.reviews ? recipe.reviews.length : 0})</h2>
+          {recipe.reviews && recipe.reviews.length > 0 ? (
+            recipe.reviews.map((rev, idx) => (
+              <div key={idx} className="border rounded-lg p-4 my-3 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center mb-2">
+                  <div className="flex text-yellow-400">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className={i < rev.rating ? "text-yellow-400" : "text-gray-300"}>★</span>
+                    ))}
+                  </div>
+                  <span className="ml-2 text-sm text-gray-600">({rev.rating}/5)</span>
+                </div>
+                <p className="text-gray-800">{rev.comment}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 italic">No comments yet. Be the first to share your thoughts!</p>
+          )}
+        </div>        {userData.currentUser && (
+          <form onSubmit={handleCommentSubmit} className="border rounded-lg p-6 my-6 shadow-sm bg-gray-50">
+            <h3 className="text-lg font-semibold mb-4">Share Your Thoughts</h3>
+            <div className="mb-4">
+              <label htmlFor="commentRating" className="block text-sm font-medium text-gray-700 mb-1">Your Rating:</label>
+              <select
+                id="commentRating"
+                value={commentRating}
+                onChange={(e) => setCommentRating(e.target.value)}
+                required
+                className="border rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select Rating</option>
+                <option value="1">1 - Poor</option>
+                <option value="2">2 - Fair</option>
+                <option value="3">3 - Good</option>
+                <option value="4">4 - Very Good</option>
+                <option value="5">5 - Excellent</option>
+              </select>
             </div>
-          ))
-        ) : (
-          <p>No comments yet.</p>
+            <div className="mb-4">
+              <label htmlFor="commentText" className="block text-sm font-medium text-gray-700 mb-1">Your Comment:</label>
+              <textarea
+                id="commentText"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                required
+                placeholder="Share your thoughts about this recipe..."
+                className="border rounded-md p-3 w-full h-28 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            {commentError && (
+              <p className="text-red-700 text-sm mb-3">{commentError}</p>
+            )}
+            <button
+              type="submit"
+              className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
+            >
+              <span>Submit Comment</span>
+            </button>
+          </form>
+        )}
+        {showDeleteConfirmation && (
+          <ConfirmDelete
+            deleteType="recipe"
+            deleteId={id}
+            deleteApi="/api/recipe/delete"
+            redirectPath="/recipes"
+          />
         )}
       </div>
-      {userData.currentUser && (
-        <form onSubmit={handleCommentSubmit} className="border p-4 py-4">
-          <h3 className="text-xl font-semibold">Add a Comment</h3>
-          <label htmlFor="commentRating">Rating:</label>
-          <input
-            type="number"
-            id="commentRating"
-            value={commentRating}
-            onChange={(e) => setCommentRating(e.target.value)}
-            className="border p-2 my-2 block"
-            required
-          />
-          <label htmlFor="commentText">Comment:</label>
-          <textarea
-            id="commentText"
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-            className="border p-2 my-2 block"
-            required
-          />
-          {commentError && (
-            <p className="text-red-700 text-sm">{commentError}</p>
-          )}
-          <button
-            type="submit"
-            className="p-3 text-white rounded-lg hover:opacity-90"
-          >
-            Submit Comment
-          </button>
-        </form>
-      )}
-      {showDeleteConfirmation && (
-        <ConfirmDelete
-          deleteType="recipe"
-          deleteId={id}
-          deleteApi="/api/recipe/delete"
-          redirectPath="/recipes"
-        />
-      )}
+      {/* Reviews Section */}
     </main>
   );
 }

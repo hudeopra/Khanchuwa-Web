@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Add useNavigate import
+import { useParams, useNavigate, Link } from "react-router-dom"; // Add Link and useNavigate imports
 import { useDispatch } from "react-redux"; // Import useDispatch
 import { addToCart } from "../redux/user/userCart"; // Import addToCart action
 import { useAlert } from "../components/AlertContext"; // Import the alert context
@@ -197,7 +197,7 @@ const TagDetail = () => {
 
   return (
     <main className="kh-tag-detail-page">
-      <section className="container">
+      <section className="container py-5">
         <div className="row">
           <div className="col-12">
             <div className="kh-tag-detail__wrapper">
@@ -325,10 +325,12 @@ const TagDetail = () => {
               </p>
             )}
           </div>
-        </div>
+        </div>{" "}
         <div className="row">
           <div className="col-12 py-5">
-            <h2>Recipes list</h2>
+            <h4 className="text-3xl font-semibold my-4">
+              Recipes with this Tag
+            </h4>
             {pendingRecipes > 0 && (
               <div className="alert alert-info">
                 {pendingRecipes} more recipe
@@ -338,31 +340,61 @@ const TagDetail = () => {
             <div className="row">
               {recipes.length > 0 ? (
                 recipes.map((recipe) => (
-                  <div className="col-md-4 mb-4" key={`recipe-${recipe._id}`}>
-                    <div className="card">
-                      <img
-                        src={recipe.favImgUrl || ""}
-                        alt={recipe.recipeName || "Recipe"}
-                        className="card-img-top"
-                      />
-                      <div className="card-body">
-                        <h5 className="card-title">
-                          {recipe.recipeName || "N/A"}
-                        </h5>
-                        <p className="card-text mb-2">
+                  <div
+                    key={recipe._id}
+                    className="col-12 col-lg-3 col-md-4 col-sm-6 mb-3"
+                  >
+                    <div className="kh-recipe-block__item mb-3">
+                      <Link to={`/recipes/${recipe._id}`} className="">
+                        <div className="kh-recipe-block__content">
+                          <h3 className="">{recipe.recipeName}</h3>
+                          <p className="">
+                            {recipe.shortDescription ||
+                              recipe.description?.substring(0, 60) + "..."}
+                          </p>
+                          <span className="">By {recipe.chefName}</span>
+                        </div>
+                        <div className="kh-recipe-block__item--img">
+                          <img
+                            src={
+                              recipe.imageUrls?.[0] || recipe.favImgUrl || ""
+                            }
+                            alt={recipe.recipeName || "Recipe"}
+                            className=""
+                          />
+                        </div>
+                        <div className="d-none">
+                          <p>Cook Time: {recipe.cookTime}</p>
+                          <p>Diet: {recipe.diet}</p>
+                          <p>Difficulty: {recipe.difficulty}</p>
                           <p>
-                            {recipe.description.length > 150
-                              ? `${recipe.description.slice(0, 110)}...`
-                              : recipe.description}
-                          </p>{" "}
-                        </p>
-                        <a
-                          href={`/recipes/${recipe._id}`}
-                          className="btn btn-primary"
-                        >
-                          View Recipe
-                        </a>
-                      </div>
+                            Ingredient Tags:{" "}
+                            {Array.isArray(recipe.ingredientTag)
+                              ? recipe.ingredientTag
+                                  .map((tag) => tag.tagName)
+                                  .join(", ")
+                              : recipe.ingredientTag}
+                          </p>
+                          <p>Prep Time: {recipe.prepTime}</p>
+                          <p>Portion: {recipe.portion}</p>
+                          <p>
+                            Flavour Tags:{" "}
+                            {Array.isArray(recipe.flavourTag)
+                              ? recipe.flavourTag
+                                  .map((tag) => tag.tagName)
+                                  .join(", ")
+                              : recipe.flavourTag}
+                          </p>
+                          <p>
+                            Cuisine Tags:{" "}
+                            {Array.isArray(recipe.cuisineTag)
+                              ? recipe.cuisineTag
+                                  .map((tag) => tag.tagName)
+                                  .join(", ")
+                              : recipe.cuisineTag}
+                          </p>
+                        </div>
+                      </Link>
                     </div>
                   </div>
                 ))
@@ -370,9 +402,9 @@ const TagDetail = () => {
                 <p>No recipes found.</p>
               )}
             </div>
-          </div>
+          </div>{" "}
           <div className="col-12 py-5">
-            <h2>Blogs list</h2>
+            <h4 className="text-3xl font-semibold my-4">Blogs with this Tag</h4>
             <div className="row">
               {blogs.length > 0 ? (
                 blogs.map((blog) => (

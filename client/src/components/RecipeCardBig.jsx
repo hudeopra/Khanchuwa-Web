@@ -26,9 +26,10 @@ const RecipeCardBig = () => {
           setLoading(false);
           return;
         }
-
         const data = await res.json();
-        const dataArr = Array.isArray(data) ? data : [];
+        // Handle the API response structure which contains a 'recipes' property
+        const dataArr = data.recipes ? data.recipes : [];
+        console.log("Recipes fetched:", dataArr.length);
         setRecipes(dataArr);
         setSortedRecipes(sortByPropertyDesc(dataArr, "recipeFav"));
       } catch (error) {
@@ -48,10 +49,11 @@ const RecipeCardBig = () => {
     fetchRecipes();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
-  // Show a more user-friendly message instead of an error
-  if (sortedRecipes.length === 0)
+  if (loading) return <p>Loading...</p>; // Debug information and show a more user-friendly message instead of an error
+  if (sortedRecipes.length === 0) {
+    console.log("No recipes to display, sortedRecipes array is empty");
     return <p>No recipes available yet. Check back soon!</p>;
+  }
 
   // Get top 11 recipes
   const displayedCards = sortedRecipes.slice(0, 7);
