@@ -4,10 +4,12 @@ import { Link } from "react-router-dom";
 export default function UserBlogFive({ recentBlogs }) {
   return (
     <div className="kh-profile__posts row">
-      <h2>My Blogs</h2>
-      <Link to={`/user-blog`} className="btn btn-edit">
-        View All Blogs
-      </Link>
+      <div className="col-12 ">
+        <h2>My Blogs</h2>
+        <Link to={`/user-blog`} className="btn btn-edit">
+          View All Blogs
+        </Link>
+      </div>
       {recentBlogs.length > 0 ? (
         recentBlogs.map((blog) => (
           <div className="col-6">

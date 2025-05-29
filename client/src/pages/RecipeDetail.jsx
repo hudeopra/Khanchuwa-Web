@@ -568,31 +568,57 @@ export default function RecipeDetail() {
       </p>
       <p>
         <strong>User Reference:</strong> {recipe.userRef || "N/A"}
-      </p>*/}      <div className="container">
+      </p>*/}{" "}
+      <div className="container">
         <div className="py-6">
-          <h2 className="text-2xl font-semibold mb-4">Comments ({recipe.reviews ? recipe.reviews.length : 0})</h2>
+          <h2 className="text-2xl font-semibold mb-4">
+            Comments ({recipe.reviews ? recipe.reviews.length : 0})
+          </h2>
           {recipe.reviews && recipe.reviews.length > 0 ? (
             recipe.reviews.map((rev, idx) => (
-              <div key={idx} className="border rounded-lg p-4 my-3 shadow-sm hover:shadow-md transition-shadow">
+              <div
+                key={idx}
+                className="border rounded-lg p-4 my-3 shadow-sm hover:shadow-md transition-shadow"
+              >
                 <div className="flex items-center mb-2">
                   <div className="flex text-yellow-400">
                     {[...Array(5)].map((_, i) => (
-                      <span key={i} className={i < rev.rating ? "text-yellow-400" : "text-gray-300"}>★</span>
+                      <span
+                        key={i}
+                        className={
+                          i < rev.rating ? "text-yellow-400" : "text-gray-300"
+                        }
+                      >
+                        ★
+                      </span>
                     ))}
                   </div>
-                  <span className="ml-2 text-sm text-gray-600">({rev.rating}/5)</span>
+                  <span className="ml-2 text-sm text-gray-600">
+                    ({rev.rating}/5)
+                  </span>
                 </div>
                 <p className="text-gray-800">{rev.comment}</p>
               </div>
             ))
           ) : (
-            <p className="text-gray-500 italic">No comments yet. Be the first to share your thoughts!</p>
+            <p className="text-gray-500 italic">
+              No comments yet. Be the first to share your thoughts!
+            </p>
           )}
-        </div>        {userData.currentUser && (
-          <form onSubmit={handleCommentSubmit} className="border rounded-lg p-6 my-6 shadow-sm bg-gray-50">
+        </div>{" "}
+        {userData.currentUser && (
+          <form
+            onSubmit={handleCommentSubmit}
+            className="border rounded-lg p-6 my-6 shadow-sm bg-gray-50"
+          >
             <h3 className="text-lg font-semibold mb-4">Share Your Thoughts</h3>
             <div className="mb-4">
-              <label htmlFor="commentRating" className="block text-sm font-medium text-gray-700 mb-1">Your Rating:</label>
+              <label
+                htmlFor="commentRating"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Your Rating:
+              </label>
               <select
                 id="commentRating"
                 value={commentRating}
@@ -609,7 +635,12 @@ export default function RecipeDetail() {
               </select>
             </div>
             <div className="mb-4">
-              <label htmlFor="commentText" className="block text-sm font-medium text-gray-700 mb-1">Your Comment:</label>
+              <label
+                htmlFor="commentText"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Your Comment:
+              </label>
               <textarea
                 id="commentText"
                 value={commentText}

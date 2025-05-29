@@ -31,10 +31,12 @@ export default function UserRecipeFive({ recentRecipes, currentUser }) {
 
   return (
     <div className="kh-profile__posts row">
-      <h3>My Recipes</h3>
-      <Link to={`/user-recipe`} className="btn btn-edit">
-        View All recipes
-      </Link>
+      <div className="col-12 ">
+        <h3>My Recipes</h3>
+        <Link to={`/user-recipe`} className="btn btn-edit">
+          View All recipes
+        </Link>
+      </div>
       {recentRecipes.length > 0 ? (
         recentRecipes.map((recipe) => (
           <div className="col-6">

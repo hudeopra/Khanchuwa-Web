@@ -54,7 +54,7 @@ const UserFavouritesComponent = () => {
       <h1>My Favorite Recipes</h1>
       <div className="row">
         {favRecipes.map((item, index) => (
-          <div key={item._id || index} className="kcol-6 col-mg-3 col-lg-4">
+          <div key={item._id || index} className="col-6 col-mg-3 col-lg-4 mb-3">
             <div className="kh-recipe-block__item ">
               <ToggleFavorite recipeId={item._id} />
               <Link

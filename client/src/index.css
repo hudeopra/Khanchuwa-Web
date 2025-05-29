@@ -85,6 +85,13 @@ button:focus-visible {
 :disabled {
   /* display: none; */
 }
+body {
+  background-color: var(--bg-dark);
+}
+label {
+  width: 100%;
+  display: block;
+}
 button,
 input,
 optgroup,
@@ -1426,6 +1433,7 @@ ul.kh-profile__menu--sub-menu-block.active {
 .kh-cookshop__details h3,
 .kh-tag-detail__wrapper h1 {
   text-transform: capitalize;
+  font-size: 24px;
 }
 .kh-cookshop__list--item img {
   height: 120px;
@@ -1434,4 +1442,9 @@ ul.kh-profile__menu--sub-menu-block.active {
 .kh-cookshop__details {
   background-color: var(--dark-charcol);
   padding: 30px;
+  position: sticky;
+  top: 30px;
+}
+.kh-cookshop__details img {
+  max-height: 400px;
 }

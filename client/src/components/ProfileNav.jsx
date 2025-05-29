@@ -98,7 +98,7 @@ export default function ProfileNav({ active, subActive }) {
                 </li>
                 <li>
                   <Link
-                    to={"/user-recipe/favorites"}
+                    to={"/user-favourites"}
                     className={active === "Favorite Recipes" ? "active" : ""}
                   >
                     <FaHeart />

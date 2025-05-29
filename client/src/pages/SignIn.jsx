@@ -160,7 +160,7 @@ export default function SignIn() {
   return (
     <main className="kh-signin">
       <div className="container">
-        <div className="col-12">
+        <div className="col-12 col-sm-10 col-md-8 col-lg-6 mx-auto ">
           <h1>Sign In</h1>
           <form
             onSubmit={handleSubmit} // Ensure the form is making a POST request

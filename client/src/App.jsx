@@ -15,6 +15,7 @@ import Profile from "./pages/Profile.jsx";
 import ProfileEdit from "./pages/ProfileEdit.jsx";
 import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
+import Contact from "./pages/Contact.jsx"; // Import Contact page
 import SiteMap from "./pages/SiteMap.jsx"; // Import SiteMap
 import Faq from "./pages/Faq.jsx"; // Import FAQ page
 
@@ -42,7 +43,7 @@ import ProductEdit from "./pages/ProductEdit.jsx"; // Import ProductEdit compone
 
 // 404
 import NotFound from "./pages/404.jsx"; // Import NotFound component
-import PrivacyPolicy from "./pages/PrivacyPolicy.jsx"; // Import PrivacyPolicy
+// import PrivacyPolicy from "./pages/PrivacyPolicy.jsx"; // Import PrivacyPolicy
 import TermsAndConditions from "./pages/TermsAndConditions.jsx"; // Import TermsAndConditions
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import Checkout from "./pages/Checkout.jsx"; // Import Checkout component
@@ -157,7 +158,6 @@ export default function App() {
               </>
             }
           />
-
           {/* PUBLIC - Recipes and Blogs */}
           <Route
             path="/recipes"
@@ -204,7 +204,6 @@ export default function App() {
               </>
             }
           />
-
           {/* PUBLIC - Shop and Tags */}
           <Route
             path="/ingredient"
@@ -246,7 +245,6 @@ export default function App() {
             path="/cookshop/:tagType/:id"
             element={<CookshopPageWrapper />}
           />
-
           {/* PUBLIC - Payment and Legal */}
           <Route
             path="/payment-failure"
@@ -266,7 +264,7 @@ export default function App() {
               </>
             }
           />
-          <Route
+          {/* <Route
             path="/privacy-policy"
             element={
               <>
@@ -274,7 +272,7 @@ export default function App() {
                 <PrivacyPolicy />
               </>
             }
-          />
+          /> */}
           <Route
             path="/terms-and-conditions"
             element={
@@ -301,7 +299,7 @@ export default function App() {
                 <SiteMap />
               </>
             }
-          />
+          />{" "}
           <Route
             path="/faq"
             element={
@@ -311,7 +309,15 @@ export default function App() {
               </>
             }
           />
-
+          <Route
+            path="/contact"
+            element={
+              <>
+                <Header pagename="Contact Us" />
+                <Contact />
+              </>
+            }
+          />
           {/* USER AUTHENTICATED ROUTES - Requires login */}
           <Route element={<PrivateRoute />}>
             {/* User Profile */}
@@ -466,7 +472,6 @@ export default function App() {
               }
             />
           </Route>
-
           {/* 404 Route */}
           <Route
             path="*"

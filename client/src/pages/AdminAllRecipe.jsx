@@ -155,7 +155,7 @@ export default function AdminAllRecipe() {
     );
 
   return (
-    <main className="kh-cookshop-page kh-cookshop">
+    <main className="kh-cookshop-page kh-cookshop my-5">
       <section className="container">
         <div className="row">
           <div className="col-12 mb-4">

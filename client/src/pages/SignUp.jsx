@@ -215,9 +215,9 @@ export default function SignUp() {
   };
 
   return (
-    <main className="kh-signup">
+    <main className="kh-signup my-5">
       <div className="container">
-        <div className="col-12 ">
+        <div className="col-12 col-sm-10 col-md-8 col-lg-6 mx-auto  ">
           <h1>Sign Up</h1>
           <form
             onSubmit={handleSubmit}
@@ -278,7 +278,7 @@ export default function SignUp() {
             <button disabled={loading}>
               {loading ? "Loading..." : "Sign Up"}
             </button>
-            {/* <OAuth /> */}
+            <OAuth />
           </form>
           <div className="kh-signup__gotacc">
             <p>

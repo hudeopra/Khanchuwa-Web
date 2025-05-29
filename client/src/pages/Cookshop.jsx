@@ -104,8 +104,8 @@ const Cookshop = () => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <main className="kh-cookshop-page kh-cookshop">
-      <section className="container">
+    <main className="kh-cookshop-page kh-cookshop ">
+      <section className="container my-5">
         <div className="row">
           <div className="col-12 col-md-6 col-lg-8">
             <h1>Cookshop</h1>
