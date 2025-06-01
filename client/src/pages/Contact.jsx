@@ -5,7 +5,7 @@ import { FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
 export default function Contact() {
   return (
     <main className="kh-contact">
-      <div className="container py-5">
+      <div className="container pb-5">
         <div className="row">
           <div className="col-md-8 mx-auto text-center mb-5">
             <h1 className="display-4 mb-4">Contact Us</h1>

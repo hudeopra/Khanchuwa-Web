@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/user/userCart";
 import { useAlert } from "../components/AlertContext";
+import { FaEye } from "react-icons/fa";
 
 const Cookshop = () => {
   const [items, setItems] = useState([]);
@@ -93,10 +94,10 @@ const Cookshop = () => {
         favImg: activeItem.favImg,
         disPrice: activeItem.disPrice || null,
         mrkPrice: activeItem.mrkPrice || null,
+        maxQuantity: activeItem.quantity, // Add maxQuantity to respect stock limits
       };
-
       dispatch(addToCart(cartItem));
-      showAlert("success", `${activeItem.name} added to cart!`);
+      showAlert("success", `${activeItem.name} (${quantity}) added to cart!`);
     }
   };
 
@@ -137,6 +138,9 @@ const Cookshop = () => {
                   />
                 </div>
                 <h3>{activeItem.name}</h3>
+                <span className="bg-red-600 text-white px-2 py-1 rounded text-xs">
+                  SALE
+                </span>
                 <p className="flex items-center gap-2">
                   Price:
                   {activeItem.disPrice &&
@@ -146,9 +150,6 @@ const Cookshop = () => {
                         ${activeItem.mrkPrice}
                       </span>
                       <span className="font-bold">${activeItem.disPrice}</span>
-                      <span className="bg-red-600 text-white px-2 py-1 rounded text-xs">
-                        SALE
-                      </span>
                     </>
                   ) : !activeItem.mrkPrice && activeItem.disPrice ? (
                     <span className="font-bold">${activeItem.disPrice}</span>
@@ -166,27 +167,29 @@ const Cookshop = () => {
                   </p>
                 </div>
                 <div>
-                  <button
-                    onClick={() => handleDecreaseQuantity(activeItem._id)}
-                    className="p-2 border"
-                  >
-                    -
-                  </button>
-                  <input
-                    type="number"
-                    value={quantities[activeItem._id] || 1}
-                    min="1"
-                    onChange={(e) =>
-                      handleQuantityChange(activeItem._id, e.target.value)
-                    }
-                    className="w-16 p-2 border text-center"
-                  />
-                  <button
-                    onClick={() => handleIncreaseQuantity(activeItem._id)}
-                    className="p-2 border"
-                  >
-                    +
-                  </button>
+                  <div className="d-flex">
+                    <button
+                      onClick={() => handleDecreaseQuantity(activeItem._id)}
+                      className="p-2 border"
+                    >
+                      -
+                    </button>
+                    <input
+                      type="number"
+                      value={quantities[activeItem._id] || 1}
+                      min="1"
+                      onChange={(e) =>
+                        handleQuantityChange(activeItem._id, e.target.value)
+                      }
+                      className="w-16 p-2 border text-center"
+                    />
+                    <button
+                      onClick={() => handleIncreaseQuantity(activeItem._id)}
+                      className="p-2 border"
+                    >
+                      +
+                    </button>
+                  </div>
                   <button
                     onClick={handleAddToCart}
                     disabled={
@@ -212,14 +215,16 @@ const Cookshop = () => {
                       ? `Limited stock (${activeItem.quantity})`
                       : "Add to Cart"}
                   </button>
-                  <button
-                    onClick={() =>
-                      (window.location.href = `/cookshop/${activeItem.tagType}/${activeItem._id}`)
-                    }
-                    className="mt-2 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
-                  >
-                    View Details
-                  </button>
+                  <div className="kh-buttons">
+                    <button
+                      onClick={() =>
+                        (window.location.href = `/cookshop/${activeItem.tagType}/${activeItem._id}`)
+                      }
+                      className="mt-2 p-3 bg-blue-600 text-white rounded-lg hover:opacity-90"
+                    >
+                      <FaEye />
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

@@ -1,5 +1,5 @@
 import express from "express";
-import { createOrder, updateOrder, getAllOrders, getOrderById, updateOrderByTransaction } from "../controllers/order.controller.js";
+import { createOrder, updateOrder, getAllOrders, getOrderById, updateOrderByTransaction, getOrderByTransactionId } from "../controllers/order.controller.js";
 
 const router = express.Router();
 
@@ -11,6 +11,9 @@ router.put("/update/:id", updateOrder);
 
 // Route to update order status by transaction UUID
 router.put("/update-by-transaction", updateOrderByTransaction);
+
+// Route to find order by transaction ID (used in PaymentSuccess)
+router.get("/by-transaction/:transactionId", getOrderByTransactionId);
 
 // Route to fetch all orders
 router.get("/all", getAllOrders);

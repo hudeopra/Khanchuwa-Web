@@ -209,7 +209,7 @@ textarea {
   border: 10px solid #303030;
   position: relative;
   -o-object-fit: cover;
-  object-fit: cover;
+     object-fit: cover;
   z-index: 2;
 }
 .kh-profile-card__user--data {
@@ -253,7 +253,9 @@ textarea {
 .kh-profile-card__content--preferences-item ul:not(:last-of-type) {
   margin-bottom: 10px;
 }
-
+.kh-profile-card__tab--item {
+  margin-top: 30px;
+}
 .kh-profile-card__social-icons {
   display: flex;
   gap: 15px;
@@ -273,20 +275,23 @@ textarea {
 .kh-profile-card__social-link:hover svg {
   transform: scale(1.2);
 }
-.kh-profile-card__social-link[title="instagram"] svg {
+.kh-profile-card__social-link[title=instagram] svg {
   color: #e1306c;
 }
-.kh-profile-card__social-link[title="youtube"] svg {
+.kh-profile-card__social-link[title=youtube] svg {
   color: #ff0000;
 }
-.kh-profile-card__social-link[title="tiktok"] svg {
+.kh-profile-card__social-link[title=tiktok] svg {
   color: #000000;
 }
-.user-status-badge {
-  height: 16px;
-  width: 16px;
-  border-radius: 50%;
+.kh-profile-card__content--social {
+  margin-bottom: 20px;
 }
+
+.mt-check-out .container-fluid {
+  margin: 0 -15px;
+}
+
 .kh-slide {
   position: relative;
   height: clamp(720px, 100vh, 100vh);
@@ -306,8 +311,7 @@ textarea {
   transition: 0.5s;
   overflow: hidden;
 }
-.kh-slide .kh-item:nth-child(1),
-.kh-slide .kh-item:nth-child(2) {
+.kh-slide .kh-item:nth-child(1), .kh-slide .kh-item:nth-child(2) {
   top: 0;
   left: 0;
   transform: translate(0, 0);
@@ -315,8 +319,7 @@ textarea {
   width: 100%;
   height: 100%;
 }
-.kh-slide .kh-item:nth-child(2) .kh-banner__recipe,
-.kh-slide .kh-item:nth-child(2) .kh-banner__recipe--title {
+.kh-slide .kh-item:nth-child(2) .kh-banner__recipe, .kh-slide .kh-item:nth-child(2) .kh-banner__recipe--title {
   display: block;
   opacity: 1;
 }
@@ -335,7 +338,7 @@ textarea {
 .kh-slide .kh-item:nth-child(5) .kh-banner__recipe--wrapper {
   display: block;
 }
-.kh-slide .kh-item:nth-child(n + 6) {
+.kh-slide .kh-item:nth-child(n+6) {
   left: calc(50% + 440px);
   overflow: hidden;
   visibility: hidden;
@@ -551,7 +554,7 @@ textarea {
 .kh-header__head--main-logo img {
   width: 100px;
   -o-object-fit: contain;
-  object-fit: contain;
+     object-fit: contain;
 }
 .kh-header__head--menu-wrapper {
   position: absolute;
@@ -622,14 +625,12 @@ textarea {
   background-color: #595959;
 }
 .kh-header__head--menu-block li a:hover img {
-  filter: invert(75%) sepia(65%) saturate(294%) hue-rotate(350deg)
-    brightness(93%) contrast(89%);
+  filter: invert(75%) sepia(65%) saturate(294%) hue-rotate(350deg) brightness(93%) contrast(89%);
 }
 .kh-header__head--menu-block img {
   width: 30px;
   height: 30px;
-  filter: invert(95%) sepia(95%) saturate(21%) hue-rotate(357deg)
-    brightness(104%) contrast(107%);
+  filter: invert(95%) sepia(95%) saturate(21%) hue-rotate(357deg) brightness(104%) contrast(107%);
 }
 .kh-header__head--menu-block span {
   font-weight: 400;
@@ -711,7 +712,7 @@ textarea {
   height: 36px;
   width: 36px;
   -o-object-fit: cover;
-  object-fit: cover;
+     object-fit: cover;
   border-radius: 50%;
 }
 .kh-header__user--profile a {
@@ -744,8 +745,7 @@ textarea {
 .kh-flavor-tag-slider {
   position: relative;
 }
-.kh-flavor-tag-slider:before,
-.kh-flavor-tag-slider:after {
+.kh-flavor-tag-slider:before, .kh-flavor-tag-slider:after {
   content: "";
   position: absolute;
   top: 0;
@@ -788,7 +788,7 @@ textarea {
   width: 100%;
   height: 80px;
   -o-object-fit: cover;
-  object-fit: cover;
+     object-fit: cover;
   border-radius: 4px;
 }
 
@@ -796,7 +796,7 @@ textarea {
 .kh-tag-detail-page .card img {
   max-height: 300px;
   -o-object-fit: cover;
-  object-fit: cover;
+     object-fit: cover;
 }
 .kh-tag-detail-page .card-body {
   background-color: rgba(255, 255, 255, 0.1);
@@ -810,7 +810,7 @@ textarea {
   width: 100%;
   max-height: 400px;
   -o-object-fit: cover;
-  object-fit: cover;
+     object-fit: cover;
   border-radius: 12px;
   opacity: 0.8;
 }
@@ -843,8 +843,7 @@ textarea {
   padding: 10px 15px;
   border-top-right-radius: 8px;
 }
-.kh-recipe-single__head--title,
-.kh-recipe-single__head--actions {
+.kh-recipe-single__head--title, .kh-recipe-single__head--actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -867,9 +866,9 @@ textarea {
   max-height: 350px;
   width: 100%;
   -o-object-fit: cover;
-  object-fit: cover;
+     object-fit: cover;
   -o-object-position: center 25%;
-  object-position: center 25%;
+     object-position: center 25%;
 }
 .kh-recipe-single__tags {
   margin-top: 20px;
@@ -986,7 +985,7 @@ textarea {
   flex-wrap: wrap;
 }
 .kh-cookshop__list--item {
-  width: 140px;
+  width: 120px;
   transition: all 0.5s;
   border: 6px solid transparent;
 }
@@ -997,8 +996,10 @@ textarea {
   color: #303030;
   margin-bottom: 0;
   text-transform: capitalize;
-  height: fit-content;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .kh-cookshop__list--item.active {
   border-color: #e66120;
@@ -1035,4 +1036,4 @@ textarea {
 .relative {
   position: relative;
   width: 100%;
-} /*# sourceMappingURL=custom.css.map */
+}/*# sourceMappingURL=custom.css.map */

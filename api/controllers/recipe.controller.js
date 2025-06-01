@@ -278,6 +278,18 @@ export const addComment = async (req, res, next) => {
     const { userId, rating, comment } = req.body;
     const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ message: 'Recipe not found' });
+
+    // Check if the user is the recipe owner
+    if (recipe.userRef.toString() === userId.toString()) {
+      return res.status(403).json({ message: 'Recipe owners cannot comment on their own recipes' });
+    }
+
+    // Check if the user has already commented
+    const existingComment = recipe.reviews.find(review => review.user.toString() === userId.toString());
+    if (existingComment) {
+      return res.status(409).json({ message: 'You have already commented on this recipe' });
+    }
+
     recipe.reviews.push({ user: userId, rating, comment });
     await recipe.save();
     return res.status(200).json({ reviews: recipe.reviews });

@@ -8,7 +8,7 @@ const TestingComponent = () => {
   console.log("Redux username:", username); // Log updated username
 
   return (
-    <div className="container py-5 my-5">
+    <div className="container pb-5 mb-5">
       <div className="row justify-content-center">
         <div className="col-10">
           <div className="hero py-5 my-5">

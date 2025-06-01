@@ -24,6 +24,18 @@ export const addComment = async (req, res, next) => {
     const { userId, rating, comment } = req.body;
     const blog = await Blog.findById(req.params.id);
     if (!blog) return res.status(404).json({ message: 'Blog not found' });
+
+    // Check if the user is the blog owner
+    if (blog.userRef.toString() === userId.toString()) {
+      return res.status(403).json({ message: 'Blog owners cannot comment on their own blogs' });
+    }
+
+    // Check if the user has already commented
+    const existingComment = blog.reviews.find(review => review.user.toString() === userId.toString());
+    if (existingComment) {
+      return res.status(409).json({ message: 'You have already commented on this blog' });
+    }
+
     // Ensure reviews is an array (similar to recipe logic)
     if (!blog.reviews || !Array.isArray(blog.reviews)) {
       blog.reviews = [];

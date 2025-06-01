@@ -122,13 +122,6 @@ const TagList = ({ tagType }) => {
         <div className="row">
           <div className="col-12 mb-4">
             <h1>{getTagTypeTitle()}</h1>
-            {currentUser?.role === "admin" && tagType === "ingredientTag" && (
-              <div className="mb-3 d-flex justify-content-end">
-                <Link to="/admin/product/add" className="btn btn-primary">
-                  Add New {tagType === "ingredientTag" ? "Ingredient" : "Tag"}
-                </Link>
-              </div>
-            )}
           </div>
           <div className="col-12 col-md-6 col-lg-8">
             <div className="kh-cookshop__list">

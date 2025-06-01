@@ -257,7 +257,7 @@ export default function RecipeDetail() {
 
   return (
     <main>
-      <div className="container py-5">
+      <div className="container pb-5">
         <div className="row">
           <div className="col-12">
             <div className="kh-recipe-single__head">
@@ -569,98 +569,159 @@ export default function RecipeDetail() {
       <p>
         <strong>User Reference:</strong> {recipe.userRef || "N/A"}
       </p>*/}{" "}
-      <div className="container">
-        <div className="py-6">
-          <h2 className="text-2xl font-semibold mb-4">
-            Comments ({recipe.reviews ? recipe.reviews.length : 0})
-          </h2>
-          {recipe.reviews && recipe.reviews.length > 0 ? (
-            recipe.reviews.map((rev, idx) => (
-              <div
-                key={idx}
-                className="border rounded-lg p-4 my-3 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-center mb-2">
-                  <div className="flex text-yellow-400">
-                    {[...Array(5)].map((_, i) => (
-                      <span
-                        key={i}
-                        className={
-                          i < rev.rating ? "text-yellow-400" : "text-gray-300"
-                        }
-                      >
-                        ★
+      <div className="container mb-5">
+        {/* Comments Section */}
+        <section className="kh-comments">
+          <div className="kh-comments__header">
+            <h2>Comments</h2>
+            <span className="kh-comments__count">
+              {recipe.reviews ? recipe.reviews.length : 0}
+            </span>
+          </div>
+          <div className="kh-comments__list">
+            {recipe.reviews && recipe.reviews.length > 0 ? (
+              recipe.reviews.map((rev, idx) => (
+                <div key={idx} className="kh-comment">
+                  <div className="kh-comment__header">
+                    <div className="kh-comment__rating">
+                      <div className="kh-comment__stars">
+                        {[...Array(5)].map((_, i) => (
+                          <span
+                            key={i}
+                            className={`kh-comment__star ${
+                              i < rev.rating
+                                ? "kh-comment__star--filled"
+                                : "kh-comment__star--empty"
+                            }`}
+                          >
+                            ★
+                          </span>
+                        ))}
+                      </div>
+                      <span className="kh-comment__rating-text">
+                        {rev.rating}/5
                       </span>
-                    ))}
+                    </div>
                   </div>
-                  <span className="ml-2 text-sm text-gray-600">
-                    ({rev.rating}/5)
-                  </span>
+                  <p className="kh-comment__text">{rev.comment}</p>
                 </div>
-                <p className="text-gray-800">{rev.comment}</p>
+              ))
+            ) : (
+              <div className="kh-comments__empty">
+                <div className="kh-comments__empty-icon">💬</div>
+                <p>No comments yet. Be the first to share your thoughts!</p>
               </div>
-            ))
-          ) : (
-            <p className="text-gray-500 italic">
-              No comments yet. Be the first to share your thoughts!
-            </p>
-          )}
-        </div>{" "}
-        {userData.currentUser && (
-          <form
-            onSubmit={handleCommentSubmit}
-            className="border rounded-lg p-6 my-6 shadow-sm bg-gray-50"
-          >
-            <h3 className="text-lg font-semibold mb-4">Share Your Thoughts</h3>
-            <div className="mb-4">
-              <label
-                htmlFor="commentRating"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Your Rating:
-              </label>
-              <select
-                id="commentRating"
-                value={commentRating}
-                onChange={(e) => setCommentRating(e.target.value)}
-                required
-                className="border rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Rating</option>
-                <option value="1">1 - Poor</option>
-                <option value="2">2 - Fair</option>
-                <option value="3">3 - Good</option>
-                <option value="4">4 - Very Good</option>
-                <option value="5">5 - Excellent</option>
-              </select>
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="commentText"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Your Comment:
-              </label>
-              <textarea
-                id="commentText"
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                required
-                placeholder="Share your thoughts about this recipe..."
-                className="border rounded-md p-3 w-full h-28 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            {commentError && (
-              <p className="text-red-700 text-sm mb-3">{commentError}</p>
             )}
-            <button
-              type="submit"
-              className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
-            >
-              <span>Submit Comment</span>
-            </button>
-          </form>
-        )}
+          </div>{" "}
+        </section>{" "}
+        {/* Add Comment Form */}
+        {userData.currentUser &&
+          (() => {
+            const currentUserId =
+              userData.currentUser._id || userData.currentUser?.user?._id;
+            const isRecipeOwner = recipe?.userRef === currentUserId;
+            const hasAlreadyCommented = recipe?.reviews?.some(
+              (review) =>
+                review.user === currentUserId ||
+                review.user?._id === currentUserId
+            );
+
+            // Don't show form if user is recipe owner or has already commented
+            if (isRecipeOwner) {
+              return (
+                <div className="kh-comment-form kh-comment-form--disabled">
+                  <div className="kh-comment-form__header">
+                    <h3 className="kh-comment-form__title">
+                      Comments Not Available
+                    </h3>
+                    <p className="kh-comment-form__subtitle">
+                      🍳 Recipe owners cannot comment on their own recipes
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
+            if (hasAlreadyCommented) {
+              return (
+                <div className="kh-comment-form kh-comment-form--disabled">
+                  <div className="kh-comment-form__header">
+                    <h3 className="kh-comment-form__title">Thank You!</h3>
+                    <p className="kh-comment-form__subtitle">
+                      ✅ You have already shared your thoughts on this recipe
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
+            // Show normal comment form
+            return (
+              <div className="kh-comment-form">
+                <div className="kh-comment-form__header">
+                  <h3 className="kh-comment-form__title">
+                    Share Your Thoughts
+                  </h3>
+                  <p className="kh-comment-form__subtitle">
+                    Your feedback helps other cooks discover amazing recipes
+                  </p>
+                </div>
+
+                <form onSubmit={handleCommentSubmit}>
+                  <div className="kh-comment-form__fields">
+                    <div className="kh-comment-form__field">
+                      <label
+                        htmlFor="commentRating"
+                        className="kh-comment-form__label"
+                      >
+                        Your Rating
+                      </label>
+                      <select
+                        id="commentRating"
+                        value={commentRating}
+                        onChange={(e) => setCommentRating(e.target.value)}
+                        required
+                        className="kh-comment-form__select"
+                      >
+                        <option value="">Select Rating</option>
+                        <option value="1">★ Poor</option>
+                        <option value="2">★★ Fair</option>
+                        <option value="3">★★★ Good</option>
+                        <option value="4">★★★★ Very Good</option>
+                        <option value="5">★★★★★ Excellent</option>
+                      </select>
+                    </div>
+
+                    <div className="kh-comment-form__field">
+                      <label
+                        htmlFor="commentText"
+                        className="kh-comment-form__label"
+                      >
+                        Your Comment
+                      </label>
+                      <textarea
+                        id="commentText"
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        required
+                        placeholder="Share your thoughts about this recipe..."
+                        className="kh-comment-form__textarea"
+                      />
+                    </div>
+                  </div>
+
+                  {commentError && (
+                    <div className="kh-comment-form__error">{commentError}</div>
+                  )}
+
+                  <button type="submit" className="kh-comment-form__submit">
+                    <span className="kh-comment-form__submit-icon">🍳</span>
+                    <span>Submit Comment</span>
+                  </button>
+                </form>
+              </div>
+            );
+          })()}
         {showDeleteConfirmation && (
           <ConfirmDelete
             deleteType="recipe"

@@ -1003,9 +1003,8 @@ export default function EditRecipe() {
                 </div>
               </div>
 
-              <AccordionItem title="Fivegrid ">
+              <AccordionItem title="Cooking and Prep ">
                 <div className="div-input-wrapper">
-                  <h4>Cooking and Prep</h4>
                   <div className="kh-recipe-form__fiveGrid">
                     <div className="kh-recipe-form__form--item">
                       <label htmlFor="diet">Diet</label>

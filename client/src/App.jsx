@@ -274,6 +274,15 @@ export default function App() {
             }
           /> */}
           <Route
+            path="/admin/product/edit/:id"
+            element={
+              <>
+                <Header pagename="Edit Product" />
+                <ProductEdit />
+              </>
+            }
+          />
+          <Route
             path="/terms-and-conditions"
             element={
               <>
@@ -339,7 +348,6 @@ export default function App() {
                 </>
               }
             />
-
             {/* User Content Creation */}
             <Route
               path="/create-recipe"
@@ -395,7 +403,6 @@ export default function App() {
                 </>
               }
             />
-
             {/* User Shopping */}
             <Route
               path="/user-favourites"
@@ -423,18 +430,8 @@ export default function App() {
                   <OrderDetail />
                 </>
               }
-            />
-
+            />{" "}
             {/* ADMIN ROUTES */}
-            <Route
-              path="/admin/product/edit/:id"
-              element={
-                <>
-                  <Header pagename="Edit Product" />
-                  <ProductEdit />
-                </>
-              }
-            />
             <Route
               path="/admin/users"
               element={

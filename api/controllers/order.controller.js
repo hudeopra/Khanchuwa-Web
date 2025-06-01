@@ -3,9 +3,17 @@ import RecipeTag from '../models/recipeTag.model.js';
 
 // Controller to create a new order
 export const createOrder = async (req, res) => {
-  const { transaction, user, cart } = req.body;
+  const { transaction, user, userInfo, shipping, paymentMethod, cart } = req.body;
   try {
-    const newOrder = new Order({ transaction, user, cart });
+    const newOrder = new Order({
+      transaction,
+      user,
+      userInfo,
+      shipping,
+      paymentMethod,
+      cart,
+      stockUpdated: false // Initially false for all orders
+    });
     await newOrder.save();
     res.status(201).json({ message: "Order created successfully", order: newOrder });
   } catch (error) {
@@ -18,7 +26,7 @@ export const updateOrder = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body.transaction || {};
 
-  const allowedStatuses = ["PENDING", "COMPLETE", "FAILED", "REFUNDED"];
+  const allowedStatuses = ["PENDING", "COMPLETE", "FAILED", "REFUNDED", "CASH"];
 
   if (!status) {
     return res.status(400).json({ message: "Status is required" });
@@ -29,15 +37,40 @@ export const updateOrder = async (req, res) => {
   }
 
   try {
+    // Find the current order to check its current status
+    const currentOrder = await Order.findById(id);
+    if (!currentOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    const previousStatus = currentOrder.transaction.status;
+    // Handle stock updates based on status changes
+    if (status === "REFUNDED" && (previousStatus === "COMPLETE" || previousStatus === "CASH") && currentOrder.stockUpdated) {
+      // Restore stock when refunding a completed order
+      await restoreStockHelper(currentOrder.cart);
+
+      // Update the order with new status and mark stock as not updated
+      const updatedOrder = await Order.findByIdAndUpdate(
+        id,
+        {
+          "transaction.status": status,
+          "stockUpdated": false
+        },
+        { new: true }
+      );
+
+      return res.status(200).json({
+        message: "Order refunded successfully and stock restored",
+        order: updatedOrder
+      });
+    }
+
+    // For other status updates, just update the status
     const updatedOrder = await Order.findByIdAndUpdate(
       id,
       { "transaction.status": status },
-      { new: true, fields: { "transaction.status": 1 } } // Restrict update to the status field only
+      { new: true }
     );
-
-    if (!updatedOrder) {
-      return res.status(404).json({ message: "Order not found" });
-    }
 
     res.status(200).json({ message: "Order status updated successfully", order: updatedOrder });
   } catch (error) {
@@ -99,10 +132,27 @@ export const getOrderById = async (req, res) => {
   }
 };
 
+// Controller to get order by transaction ID (used in PaymentSuccess)
+export const getOrderByTransactionId = async (req, res) => {
+  const { transactionId } = req.params;
+
+  try {
+    const order = await Order.findOne({ 'transaction.product_id': transactionId });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    res.status(200).json({ order });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching order', error: error.message });
+  }
+};
+
 // Function to update tag stock after an order is placed
 export const updateTagStock = async (req, res, next) => {
   try {
-    const { cart } = req.body; // Expecting cart array in the request body
+    const { cart, orderId } = req.body; // Expecting cart array and orderId in the request body
 
     if (!cart || !Array.isArray(cart)) {
       return res.status(400).json({ message: 'Invalid cart data' });
@@ -128,8 +178,86 @@ export const updateTagStock = async (req, res, next) => {
       await tag.save();
     }
 
+    // Mark the order as stock updated if orderId is provided
+    if (orderId) {
+      await Order.findByIdAndUpdate(orderId, { stockUpdated: true });
+    }
+
     res.status(200).json({ message: 'Stock updated successfully' });
   } catch (error) {
     next(error);
+  }
+};
+
+// Function to restore tag stock when an order is refunded
+export const restoreTagStock = async (req, res, next) => {
+  try {
+    const { orderId } = req.body;
+
+    if (!orderId) {
+      return res.status(400).json({ message: 'Order ID is required' });
+    }
+
+    // Find the order
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Check if stock was actually updated for this order
+    if (!order.stockUpdated) {
+      return res.status(400).json({ message: 'Stock was not updated for this order' });
+    }
+
+    // Restore stock for each item in the cart
+    for (const item of order.cart) {
+      const { id, quantity } = item;
+
+      const tag = await RecipeTag.findById(id);
+      if (!tag) {
+        console.warn(`Tag with ID ${id} not found during stock restoration`);
+        continue;
+      }
+
+      // Add the quantity back to the inStock and quantity fields
+      tag.inStock = tag.inStock + quantity;
+      tag.quantity = tag.quantity + quantity;
+      await tag.save();
+    }
+
+    // Mark the order as stock not updated since we've restored it
+    order.stockUpdated = false;
+    await order.save();
+
+    res.status(200).json({ message: 'Stock restored successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Helper function to restore stock (used internally)
+const restoreStockHelper = async (cart) => {
+  try {
+    for (const item of cart) {
+      const { id, quantity } = item;
+
+      if (!id || !quantity) {
+        continue; // Skip invalid items
+      }
+
+      const tag = await RecipeTag.findById(id);
+      if (!tag) {
+        console.warn(`Tag with ID ${id} not found during stock restoration`);
+        continue;
+      }
+
+      // Add the quantity back to the inStock and quantity fields
+      tag.inStock = tag.inStock + quantity;
+      tag.quantity = tag.quantity + quantity;
+      await tag.save();
+    }
+  } catch (error) {
+    console.error('Error restoring stock:', error);
+    throw error;
   }
 };

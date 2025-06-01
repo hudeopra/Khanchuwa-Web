@@ -173,7 +173,6 @@ const TagDetail = () => {
       showAlert("error", `Only ${tag.quantity} units available in stock`);
       return;
     }
-
     if (tag) {
       const unitPrice = tag.disPrice || tag.mrkPrice || 0; // Calculate unit price
       const cartItem = {
@@ -184,10 +183,11 @@ const TagDetail = () => {
         favImg: tag.favImg, // Include favImg
         disPrice: tag.disPrice || null, // Add disPrice if available
         mrkPrice: tag.mrkPrice || null, // Add mrkPrice if available
+        maxQuantity: tag.quantity, // Add maxQuantity to respect stock limits
       };
       console.log("Dispatching addToCart with:", cartItem); // Debugging log
       dispatch(addToCart(cartItem));
-      showAlert("success", `${tag.name} added to cart!`); // Show success alert
+      showAlert("success", `${tag.name} (${quantity}) added to cart!`); // Show success alert with quantity
     }
   };
 
@@ -197,7 +197,7 @@ const TagDetail = () => {
 
   return (
     <main className="kh-tag-detail-page">
-      <section className="container py-5">
+      <section className="container pb-5">
         <div className="row">
           <div className="col-12">
             <div className="kh-tag-detail__wrapper">
@@ -402,7 +402,7 @@ const TagDetail = () => {
                 <p>No recipes found.</p>
               )}
             </div>
-          </div>{" "}
+          </div>
           <div className="col-12 py-5">
             <h4 className="text-3xl font-semibold my-4">Blogs with this Tag</h4>
             <div className="row">

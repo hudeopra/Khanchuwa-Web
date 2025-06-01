@@ -50,7 +50,7 @@ const UserFavouritesComponent = () => {
   if (favRecipes.length === 0) return <p>No favorite recipes found.</p>;
 
   return (
-    <main className="container py-5">
+    <main className="container pb-5">
       <h1>My Favorite Recipes</h1>
       <div className="row">
         {favRecipes.map((item, index) => (

@@ -75,7 +75,6 @@ export default function BlogDetail() {
     };
     fetchBlog();
   }, [id]);
-
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -90,7 +89,13 @@ export default function BlogDetail() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setCommentError(data.message || "Failed to add comment");
+        if (res.status === 403) {
+          setCommentError("Blog owners cannot comment on their own blogs");
+        } else if (res.status === 409) {
+          setCommentError("You have already commented on this blog");
+        } else {
+          setCommentError(data.message || "Failed to add comment");
+        }
       } else {
         setBlog({ ...blog, reviews: data.reviews });
         setCommentRating("");
@@ -132,98 +137,158 @@ export default function BlogDetail() {
           </pre>
         </section>{" "}
         {/* Comments Section */}
-        <section className="my-6">
-          <h2 className="text-xl font-semibold mb-4">
-            Comments ({blog.reviews ? blog.reviews.length : 0})
-          </h2>
-          {blog.reviews && blog.reviews.length > 0 ? (
-            blog.reviews.map((rev, idx) => (
-              <div
-                key={idx}
-                className="border rounded-lg p-4 my-3 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-center mb-2">
-                  <div className="flex text-yellow-400">
-                    {[...Array(5)].map((_, i) => (
-                      <span
-                        key={i}
-                        className={
-                          i < rev.rating ? "text-yellow-400" : "text-gray-300"
-                        }
-                      >
-                        ★
+        <section className="kh-comments mb-5">
+          <div className="kh-comments__header">
+            <h2>Comments</h2>
+            <span className="kh-comments__count">
+              {blog.reviews ? blog.reviews.length : 0}
+            </span>
+          </div>
+
+          <div className="kh-comments__list">
+            {blog.reviews && blog.reviews.length > 0 ? (
+              blog.reviews.map((rev, idx) => (
+                <div key={idx} className="kh-comment">
+                  <div className="kh-comment__header">
+                    <div className="kh-comment__rating">
+                      <div className="kh-comment__stars">
+                        {[...Array(5)].map((_, i) => (
+                          <span
+                            key={i}
+                            className={`kh-comment__star ${
+                              i < rev.rating
+                                ? "kh-comment__star--filled"
+                                : "kh-comment__star--empty"
+                            }`}
+                          >
+                            ★
+                          </span>
+                        ))}
+                      </div>
+                      <span className="kh-comment__rating-text">
+                        {rev.rating}/5
                       </span>
-                    ))}
+                    </div>
                   </div>
-                  <span className="ml-2 text-sm text-gray-600">
-                    ({rev.rating}/5)
-                  </span>
+                  <p className="kh-comment__text">{rev.comment}</p>
                 </div>
-                <p className="text-gray-800">{rev.comment}</p>
+              ))
+            ) : (
+              <div className="kh-comments__empty">
+                <div className="kh-comments__empty-icon">💬</div>
+                <p>No comments yet. Be the first to share your thoughts!</p>
               </div>
-            ))
-          ) : (
-            <p className="text-gray-500 italic">
-              No comments yet. Be the first to share your thoughts!
-            </p>
-          )}
-        </section>{" "}
-        {/* Add Comment */}
-        {userData.currentUser && (
-          <form
-            onSubmit={handleCommentSubmit}
-            className="border rounded-lg p-6 my-6 shadow-sm bg-gray-50"
-          >
-            <h3 className="text-lg font-semibold mb-4">Share Your Thoughts</h3>
-            <div className="mb-4">
-              <label
-                htmlFor="commentRating"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Your Rating:
-              </label>
-              <select
-                id="commentRating"
-                value={commentRating}
-                onChange={(e) => setCommentRating(e.target.value)}
-                required
-                className="border rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Rating</option>
-                <option value="1">1 - Poor</option>
-                <option value="2">2 - Fair</option>
-                <option value="3">3 - Good</option>
-                <option value="4">4 - Very Good</option>
-                <option value="5">5 - Excellent</option>
-              </select>
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="commentText"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Your Comment:
-              </label>
-              <textarea
-                id="commentText"
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                required
-                placeholder="Share your thoughts about this blog post..."
-                className="border rounded-md p-3 w-full h-28 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            {commentError && (
-              <p className="text-red-700 text-sm mb-3">{commentError}</p>
             )}
-            <button
-              type="submit"
-              className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
-            >
-              <span>Submit Comment</span>
-            </button>
-          </form>
-        )}
+          </div>
+        </section>{" "}
+        {/* Add Comment Form */}
+        {userData.currentUser &&
+          (() => {
+            const currentUserId =
+              userData.currentUser._id || userData.currentUser?.user?._id;
+            const isBlogOwner = blog?.userRef === currentUserId;
+            const hasAlreadyCommented = blog?.reviews?.some(
+              (review) =>
+                review.user === currentUserId ||
+                review.user?._id === currentUserId
+            );
+
+            // Don't show form if user is blog owner or has already commented
+            if (isBlogOwner) {
+              return (
+                <div className="kh-comment-form kh-comment-form--disabled">
+                  <div className="kh-comment-form__header">
+                    <h3 className="kh-comment-form__title">
+                      Comments Not Available
+                    </h3>
+                    <p className="kh-comment-form__subtitle">
+                      📝 Blog owners cannot comment on their own blogs
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
+            if (hasAlreadyCommented) {
+              return (
+                <div className="kh-comment-form kh-comment-form--disabled">
+                  <div className="kh-comment-form__header">
+                    <h3 className="kh-comment-form__title">Thank You!</h3>
+                    <p className="kh-comment-form__subtitle">
+                      ✅ You have already shared your thoughts on this blog
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
+            // Show normal comment form
+            return (
+              <div className="kh-comment-form">
+                <div className="kh-comment-form__header">
+                  <h3 className="kh-comment-form__title">
+                    Share Your Thoughts
+                  </h3>
+                  <p className="kh-comment-form__subtitle">
+                    Your feedback helps other readers discover great content
+                  </p>
+                </div>
+
+                <form onSubmit={handleCommentSubmit}>
+                  <div className="kh-comment-form__fields">
+                    <div className="kh-comment-form__field">
+                      <label
+                        htmlFor="commentRating"
+                        className="kh-comment-form__label"
+                      >
+                        Your Rating
+                      </label>
+                      <select
+                        id="commentRating"
+                        value={commentRating}
+                        onChange={(e) => setCommentRating(e.target.value)}
+                        required
+                        className="kh-comment-form__select"
+                      >
+                        <option value="">Select Rating</option>
+                        <option value="1">★ Poor</option>
+                        <option value="2">★★ Fair</option>
+                        <option value="3">★★★ Good</option>
+                        <option value="4">★★★★ Very Good</option>
+                        <option value="5">★★★★★ Excellent</option>
+                      </select>
+                    </div>
+
+                    <div className="kh-comment-form__field">
+                      <label
+                        htmlFor="commentText"
+                        className="kh-comment-form__label"
+                      >
+                        Your Comment
+                      </label>
+                      <textarea
+                        id="commentText"
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        required
+                        placeholder="Share your thoughts about this blog post..."
+                        className="kh-comment-form__textarea"
+                      />
+                    </div>
+                  </div>
+
+                  {commentError && (
+                    <div className="kh-comment-form__error">{commentError}</div>
+                  )}
+
+                  <button type="submit" className="kh-comment-form__submit">
+                    <span className="kh-comment-form__submit-icon">💬</span>
+                    <span>Submit Comment</span>
+                  </button>
+                </form>
+              </div>
+            );
+          })()}
         {/* Edit and Delete Options for the Author */}
         {currentUser?._id === blog.userRef && (
           <div className="my-4">

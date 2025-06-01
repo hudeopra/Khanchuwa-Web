@@ -128,7 +128,7 @@ export default function ProductEdit() {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <main className="product-edit-form">
+    <main className="kh-product-edit-form">
       <h1 className="text-3xl font-semibold text-center my-7">Edit Product</h1>
       <form onSubmit={handleSubmit}>
         <div className="container">
@@ -248,43 +248,51 @@ export default function ProductEdit() {
                 {error && <p className="text-red-700 text-sm">{error}</p>}
               </div>
               <AccordionItem title="Media Upload">
-                <div>
-                  <label htmlFor="favImg">Favorite Image</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleImageSelect(e, "favImg")}
-                  />
-                  {formData.favImg && (
-                    <div>
-                      <img src={formData.favImg} alt="Favorite" width="100" />
-                      <button
-                        type="button"
-                        onClick={() => handleImageRemove("favImg")}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <label htmlFor="bannerImg">Banner Image</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleImageSelect(e, "bannerImg")}
-                  />
-                  {formData.bannerImg && (
-                    <div>
-                      <img src={formData.bannerImg} alt="Banner" width="100" />
-                      <button
-                        type="button"
-                        onClick={() => handleImageRemove("bannerImg")}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
+                <div className="kh-media-upload">
+                  <div className="kh-recipe-form__form--item">
+                    <label htmlFor="favImg">Favorite Image</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageSelect(e, "favImg")}
+                    />
+                    {formData.favImg && (
+                      <div className="kh-media-upload__preview">
+                        <img src={formData.favImg} alt="Favorite" width="100" />
+                        <button
+                          class="kh-btn kh-btn__x"
+                          type="button"
+                          onClick={() => handleImageRemove("favImg")}
+                        >
+                          x
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="kh-recipe-form__form--item">
+                    <label htmlFor="bannerImg">Banner Image</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageSelect(e, "bannerImg")}
+                    />
+                    {formData.bannerImg && (
+                      <div className="kh-media-upload__preview">
+                        <img
+                          src={formData.bannerImg}
+                          alt="Banner"
+                          width="100"
+                        />
+                        <button
+                          class="kh-btn kh-btn__x"
+                          type="button"
+                          onClick={() => handleImageRemove("bannerImg")}
+                        >
+                          x
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </AccordionItem>
             </div>

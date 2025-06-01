@@ -77,9 +77,8 @@ const Checkout = () => {
       setErrorMessage("Please enter a valid amount");
       return;
     }
-
     try {
-      // Create order in the database
+      // Create order in the database as PENDING (no stock update)
       const orderResponse = await axios.post(
         "http://localhost:3000/orders/create",
         {
@@ -88,11 +87,30 @@ const Checkout = () => {
             amount: Number(totalAmount),
             status: "PENDING",
           },
-          user: currentUser._id, // Pass user ID
+          user: currentUser._id,
+          userInfo: {
+            fullname: userData.fullname,
+            email: userData.email,
+            phoneNumber: userData.phoneNumber,
+            address: userData.address,
+          },
+          shipping: {
+            method:
+              shippingCost === 30
+                ? "standard"
+                : shippingCost === 40
+                ? "business"
+                : "premium",
+            cost: shippingCost,
+          },
+          paymentMethod: "esewa",
           cart: cartItems.map((item) => ({
             id: item.id,
             quantity: item.quantity,
+            productName: item.productName,
+            price: item.price,
           })),
+          stockUpdated: false, // Explicitly set to false for eSewa orders
         },
         {
           headers: {
@@ -100,6 +118,8 @@ const Checkout = () => {
           },
         }
       );
+
+      // DO NOT update stock here for eSewa orders - stock will be updated only on successful payment in PaymentSuccess
 
       // Initiate payment with eSewa
       const paymentResponse = await axios.post(
@@ -133,18 +153,35 @@ const Checkout = () => {
   const handleRemoveFromCart = (itemId) => {
     dispatch(removeFromCart(itemId));
   };
-
   const handleQuantityChange = (itemId, newQuantity) => {
     if (newQuantity < 1) return; // Prevent quantity from being less than 1
+
+    // Find the item to check if it has a maxQuantity constraint
+    const item = cartItems.find((item) => item.id === itemId);
+    if (
+      item &&
+      item.maxQuantity !== undefined &&
+      newQuantity > item.maxQuantity
+    ) {
+      showSuccessAlert(
+        "warning",
+        `Only ${item.maxQuantity} units available in stock.`
+      );
+      newQuantity = item.maxQuantity; // Limit to max available quantity
+    }
+
     dispatch(updateCartItem({ id: itemId, quantity: newQuantity }));
   };
 
   const handleShippingChange = (cost) => {
     setShippingCost(cost); // Update shipping cost based on selection
   };
-
   const totalAmount =
-    cartItems.reduce((total, item) => total + item.price, 0) + shippingCost; // Calculate total amount
+    cartItems.reduce(
+      (total, item) =>
+        total + (item.disPrice || item.mrkPrice || 0) * item.quantity,
+      0
+    ) + shippingCost; // Calculate total amount
 
   const handleEditClick = (field) => {
     setEditingField(field);
@@ -206,7 +243,7 @@ const Checkout = () => {
   };
 
   return (
-    <main className="mt-innerpage mt-checkout-page">
+    <main className=" mt-checkout-page">
       <div className="mt-check-out">
         <div className="container-fluid">
           <div className="row no-gutters">
@@ -266,14 +303,17 @@ const Checkout = () => {
                         </div>
                       </div>
                     ))}
-                  </div>
+                  </div>{" "}
                   <div className="mt-aside__total">
                     <div className="mt-aside__total--charges">
                       <div className="mt-add-charge">
                         <h4>Sub-Total</h4>
                         <p>
                           {cartItems.reduce(
-                            (total, item) => total + item.price,
+                            (total, item) =>
+                              total +
+                              (item.disPrice || item.mrkPrice || 0) *
+                                item.quantity,
                             0
                           )}
                         </p>
@@ -580,7 +620,6 @@ const Checkout = () => {
                               setFormErrors(errors);
                               return;
                             }
-
                             try {
                               const orderResponse = await axios.post(
                                 "http://localhost:3000/orders/create",
@@ -591,10 +630,29 @@ const Checkout = () => {
                                     status: "CASH",
                                   },
                                   user: currentUser._id,
+                                  userInfo: {
+                                    fullname: userData.fullname,
+                                    email: userData.email,
+                                    phoneNumber: userData.phoneNumber,
+                                    address: userData.address,
+                                  },
+                                  shipping: {
+                                    method:
+                                      shippingCost === 30
+                                        ? "standard"
+                                        : shippingCost === 40
+                                        ? "business"
+                                        : "premium",
+                                    cost: shippingCost,
+                                  },
+                                  paymentMethod: "cash",
                                   cart: cartItems.map((item) => ({
                                     id: item.id,
                                     quantity: item.quantity,
+                                    productName: item.productName,
+                                    price: item.price,
                                   })),
+                                  stockUpdated: false, // Will be set to true after stock update
                                 },
                                 {
                                   headers: {
@@ -603,7 +661,7 @@ const Checkout = () => {
                                 }
                               );
 
-                              // Update tag quantities in the database
+                              // Update tag quantities in the database and mark stock as updated
                               await axios.patch(
                                 "http://localhost:3000/api/tag/updateStock",
                                 {
@@ -611,6 +669,7 @@ const Checkout = () => {
                                     id: item.id,
                                     quantity: item.quantity,
                                   })),
+                                  orderId: orderResponse.data.order._id,
                                 },
                                 {
                                   headers: {

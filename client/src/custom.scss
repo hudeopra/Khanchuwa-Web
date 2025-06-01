@@ -282,7 +282,8 @@ textarea {
     margin-bottom: 20px;
   }
 }
-main {
+.mt-check-out .container-fluid {
+  margin: 0 -15px;
 }
 // Homepage starts
 
@@ -1068,7 +1069,7 @@ main {
       flex-wrap: wrap;
     }
     &--item {
-      width: 140px;
+      width: 120px;
       transition: all 0.5s;
       border: 6px solid transparent;
       p {
@@ -1079,6 +1080,9 @@ main {
         margin-bottom: 0;
         text-transform: capitalize;
         font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       &.active {
         border-color: $primary-color;

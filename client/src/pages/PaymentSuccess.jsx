@@ -13,13 +13,12 @@ function PaymentSuccess() {
   } catch (error) {
     decodedData = null;
   }
-
   useEffect(() => {
     if (decodedData) {
       const updateOrderInDB = async () => {
         try {
           // Update the order status in the database
-          await axios.put(
+          const response = await axios.put(
             "http://localhost:3000/orders/update-by-transaction",
             {
               transaction_uuid: decodedData.transaction_uuid,
@@ -29,6 +28,22 @@ function PaymentSuccess() {
               signature: decodedData.signature,
             }
           );
+
+          // If payment was successful, update stock
+          if (decodedData.status === "COMPLETE") {
+            // Find the order by transaction ID to get cart details
+            const orderResponse = await axios.get(
+              `http://localhost:3000/orders/by-transaction/${decodedData.transaction_uuid}`
+            );
+
+            if (orderResponse.data && orderResponse.data.order) {
+              // Update stock for successful payment
+              await axios.patch("http://localhost:3000/api/tag/updateStock", {
+                cart: orderResponse.data.order.cart,
+                orderId: orderResponse.data.order._id,
+              });
+            }
+          }
         } catch (error) {
           console.error("Error updating order in database:", error);
         }
